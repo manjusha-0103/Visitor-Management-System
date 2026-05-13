@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import  {createProxyMiddleware} from 'http-proxy-middleware'
 import {globalErrorHandler} from "./middlewares/globalErrorHandler.js";
+import authRoute from "./routers/authRoutes.js"
 
 const app = express()
 
@@ -19,5 +20,8 @@ app.use(globalErrorHandler);
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
+
+
+app.use('/api/v1/auth',authRoute)
 
 export default app;

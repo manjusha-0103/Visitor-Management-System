@@ -1,8 +1,0 @@
-
-
-const signupValidator = []
-
-
-export{
-    signupValidator
-}
