@@ -5,6 +5,7 @@ import  {createProxyMiddleware} from 'http-proxy-middleware'
 import {globalErrorHandler} from "./middlewares/globalErrorHandler.js";
 import authRoute from "./routers/authRoutes.js"
 import visitorRoutes from "./routers/visitorRoutes.js"
+import employeeRoutes from "./routers/employeeRoutes.js"
 
 const app = express()
 
@@ -25,5 +26,6 @@ app.get("/health", (req, res) => {
 
 app.use('/api/v1/auth',authRoute)
 app.use('/api/v1/visitors',visitorRoutes)
+app.use('/api/v1/employee', employeeRoutes)
 
 export default app;

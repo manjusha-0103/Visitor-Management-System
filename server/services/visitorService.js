@@ -57,7 +57,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="#"
+                <a href="http://localhost:5000/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
                     background:#10b981;
                     color:#fff;
@@ -71,7 +71,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="#"
+                <a href="http://localhost:5000/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
@@ -117,7 +117,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="#"
+                <a href="http://localhost:5000/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
                     background:#10b981;
                     color:#fff;
@@ -131,7 +131,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="#"
+                <a href="http://localhost:5000/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
