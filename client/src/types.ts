@@ -8,6 +8,7 @@ type BaseFieldProps<T extends FieldValues> = {
     control: Control<T>;
     label?: string;
     placeholder?: string;
+    required?: boolean;
     disabled?: boolean;
     rules?: RegisterOptions<T>;
     className?: string; 
