@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import  {createProxyMiddleware} from 'http-proxy-middleware'
 import {globalErrorHandler} from "./middlewares/globalErrorHandler.js";
 import authRoute from "./routers/authRoutes.js"
+import visitorRoutes from "./routers/visitorRoutes.js"
 
 const app = express()
 
@@ -23,5 +24,6 @@ app.get("/health", (req, res) => {
 
 
 app.use('/api/v1/auth',authRoute)
+app.use('/api/v1/visitors',visitorRoutes)
 
 export default app;
