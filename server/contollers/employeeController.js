@@ -15,7 +15,20 @@ const chekIsApprove= asyncHandler(async (req, res) => {
     sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
 })  
 
+
+const preSchedule = asyncHandler(async (req, res) => {
+    const appoinment = await preScheduleService(req.body)
+    if(appoinment){
+        sendResponse(res, 200, appoinment, "Appointment schedule successfully")
+    }
+    else{
+        throw new ApiError(400, "Failed to schedule")
+    }
+    
+})
+
 export{
 
-    chekIsApprove
+    chekIsApprove,
+    preSchedule
 }
