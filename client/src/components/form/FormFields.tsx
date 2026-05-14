@@ -3,6 +3,14 @@ import { Controller, type Control, type FieldValues, type RegisterOptions } from
 import { type LucideIcon } from "lucide-react"
 import type { FieldLabelProp, InputFieldProps, SelectFieldProps } from "@/types";
 import { Input } from "../ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 export function FormLabel({ htmlFor, label, required }: FieldLabelProp) {
   return (
@@ -88,6 +96,7 @@ export function SelectField<T extends FieldValues>({
   placeholder = "Select option",
   options = [],
   rules = {},
+  disabled = false,
 }: SelectFieldProps<T>) {
   return (
     <div className="space-y-2">
@@ -99,26 +108,36 @@ export function SelectField<T extends FieldValues>({
         rules={rules}
         render={({ field, fieldState }) => (
           <>
-            <select
-              {...field}
-              id={name}
-              className={`
-                w-full rounded-lg border px-3 py-2 outline-none
-                focus:ring-2 focus:ring-black
-                ${fieldState.error ? "border-red-500" : "border-gray-300"}
-              `}
+            <Select
+              value={field.value}
+              onValueChange={field.onChange}
+              disabled={disabled}
             >
-              <option value="">{placeholder}</option>
+              <SelectTrigger
+                id={name}
+                className={`
+                  h-11 rounded-xl max-w-xl
+                  ${
+                    fieldState.error
+                      ? "border-red-500 focus:ring-red-500"
+                      : ""
+                  }
+                `}
+              >
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
 
-              {options.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                >
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <SelectContent>
+                {options.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {fieldState.error && (
               <p className="text-sm text-red-500">

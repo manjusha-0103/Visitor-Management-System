@@ -27,7 +27,13 @@ type SelectOption = {
 }
 
 export type SelectFieldProps<T extends FieldValues> = BaseFieldProps<T> & {
-    options: SelectOption[];
+     name: Path<T>;
+  control: Control<T>;
+  label?: string;
+  placeholder?: string;
+  options: SelectOption[];
+  disabled?: boolean;
+  rules?: RegisterOptions<T>;
 }
 
 //input label
