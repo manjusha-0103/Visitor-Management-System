@@ -17,6 +17,7 @@ export function CustomInputField<T extends FieldValues>({
   name,
   control,
   label,
+  required = true,
   placeholder,
   type = "text",
   icon: Icon,
@@ -28,7 +29,7 @@ export function CustomInputField<T extends FieldValues>({
 }: InputFieldProps<T>) {
   return (
     <div className={`space-y-2 ${className}`}>
-      {label && <FormLabel htmlFor={name} label={label} />}
+      {label && <FormLabel htmlFor={name} label={label} required={required}/>}
 
       <Controller
         name={name}
