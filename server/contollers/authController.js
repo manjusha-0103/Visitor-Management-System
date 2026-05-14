@@ -13,7 +13,10 @@ import { userExistbyemailService,
     loginUserService
  } from "../services/auth.service.js";
 
-
+const getMe = asyncHandler(async (req, res) => {
+    // const responseData = await buildUserResponse(req.user)
+    sendResponse(res, 200, req.user, "")
+})
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log(req.body)
@@ -54,6 +57,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
 export{
+    getMe,
     registerUser,
     loginUser
 }
