@@ -23,60 +23,33 @@ export default function VisitorForm() {
         defaultValues: {
             first_name: "",
             last_name: "",
-            phone_number: "",
+            phone: "",
             email: "",
             position: "",
-            company_name: "",
-            has_laptop: false,
-            laptops: [
-                {
-                    laptop_make: "",
-                    laptop_model: "",
-                    laptop_serial_no: "",
-                },
-            ],
-
-            has_vehicle: false,
-            vehicles: [
-                {
-                    vehicle_no: "",
-                },
-            ],
+            company: "",
+            is_laptop: false,
+            make: "",
+            model: "",
+            serial_no: "",
+            is_vehicle: false,
+            vehicle_no: "",
+            employee_id: ""
         }
     });
 
-    const hasLaptop = watch("has_laptop");
-    const hasVehicle = watch("has_vehicle");
-
-    const {
-        fields: laptopFields,
-        append: appendLaptop,
-        remove: removeLaptop,
-    } = useFieldArray({
-        control,
-        name: "laptops",
-    });
-
-    const {
-        fields: vehicleFields,
-        append: appendVehicle,
-        remove: removeVehicle,
-    } = useFieldArray({
-        control,
-        name: "vehicles",
-    });
-
+    const hasLaptop = watch("is_laptop");
+    const hasVehicle = watch("is_vehicle");
 
     const onSubmit = (data: VisitorFormValues) => {
         console.log(data);
-        
+
     }
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="">
             <FieldGroup>
                 <FieldSet>
-                     <FieldLegend>
+                    <FieldLegend>
                         Visitor Information
                     </FieldLegend>
 
@@ -84,7 +57,7 @@ export default function VisitorForm() {
                         Enter visitor details below.
                     </FieldDescription>
                     <FieldGroup className="gap-4">
-                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <CustomInputField<VisitorFormValues>
                                 name="first_name"
                                 label="First Name"
@@ -100,9 +73,9 @@ export default function VisitorForm() {
                             />
                         </div>
 
-                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <CustomInputField<VisitorFormValues>
-                                name="phone_number"
+                                name="phone"
                                 label="Phone Number"
                                 placeholder="+91 9876543210"
                                 control={control}
@@ -119,7 +92,7 @@ export default function VisitorForm() {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <CustomInputField<VisitorFormValues>
-                                name="company_name"
+                                name="company"
                                 label="Company Name"
                                 placeholder="Infosys"
                                 control={control}
@@ -133,28 +106,20 @@ export default function VisitorForm() {
                             />
                         </div>
 
-                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <CustomInputField<VisitorFormValues>
                                 name="host_name"
                                 label="Host Name"
                                 placeholder="Amit Verma"
                                 control={control}
                             />
-
-                            <CustomInputField<VisitorFormValues>
-                                name="host_department"
-                                label="Department"
-                                placeholder="Engineering"
-                                control={control}
-                            />
-                        </div>
-
+                        </div> */}
 
                         <div className="space-y-4 rounded-xl border p-4">
                             <label className="flex items-center gap-3">
                                 <input
                                     type="checkbox"
-                                    {...control.register?.("has_laptop")}
+                                    {...register("is_laptop")}
                                 />
 
                                 <span className="font-medium">
@@ -163,62 +128,33 @@ export default function VisitorForm() {
                             </label>
 
                             {hasLaptop && (
-                                <div className="space-y-5">
-                                    {laptopFields.map((field, index) => (
-                                        <div
-                                            key={field.id}
-                                            className="space-y-4 rounded-lg border p-4"
-                                        >
-                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                                <CustomInputField<VisitorFormValues>
-                                                    name={`laptops.${index}.laptop_make`}
-                                                    label="Laptop Make"
-                                                    placeholder="Dell"
-                                                    control={control}
-                                                />
+                                <div className="space-y-4 rounded-lg border p-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-                                                <CustomInputField<VisitorFormValues>
-                                                    name={`laptops.${index}.laptop_model`}
-                                                    label="Laptop Model"
-                                                    placeholder="Inspiron"
-                                                    control={control}
-                                                />
-                                            </div>
+                                        <CustomInputField<VisitorFormValues>
+                                            name="make"
+                                            label="Laptop Make"
+                                            placeholder="Dell"
+                                            control={control}
+                                            required={false}
+                                        />
 
-                                            <CustomInputField<VisitorFormValues>
-                                                name={`laptops.${index}.laptop_serial_no`}
-                                                label="Serial Number"
-                                                placeholder="SN123456"
-                                                control={control}
-                                            />
+                                        <CustomInputField<VisitorFormValues>
+                                            name="model"
+                                            label="Laptop Model"
+                                            placeholder="Inspiron"
+                                            control={control}
+                                            required={false}
+                                        />
+                                    </div>
 
-                                            {index > 0 && (
-                                                <Button
-                                                    type="button"
-                                                    variant="destructive"
-                                                    onClick={() =>
-                                                        removeLaptop(index)
-                                                    }
-                                                >
-                                                    Remove Laptop
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() =>
-                                            appendLaptop({
-                                                laptop_make: "",
-                                                laptop_model: "",
-                                                laptop_serial_no: "",
-                                            })
-                                        }
-                                    >
-                                        Add Another Laptop
-                                    </Button>
+                                    <CustomInputField<VisitorFormValues>
+                                        name="serial_no"
+                                        label="Serial Number"
+                                        placeholder="SN123456"
+                                        control={control}
+                                        required={false}
+                                    />
                                 </div>
                             )}
                         </div>
@@ -228,7 +164,7 @@ export default function VisitorForm() {
                             <label className="flex items-center gap-3">
                                 <input
                                     type="checkbox"
-                                    {...control.register?.("has_vehicle")}
+                                    {...register("is_vehicle")}
                                 />
 
                                 <span className="font-medium">
@@ -237,49 +173,21 @@ export default function VisitorForm() {
                             </label>
 
                             {hasVehicle && (
-                                <div className="space-y-4">
-                                    {vehicleFields.map((field, index) => (
-                                        <div
-                                            key={field.id}
-                                            className="space-y-4 rounded-lg border p-4"
-                                        >
-                                            <CustomInputField<VisitorFormValues>
-                                                name={`vehicles.${index}.vehicle_no`}
-                                                label="Vehicle Number"
-                                                placeholder="MH12AB1234"
-                                                control={control}
-                                            />
-
-                                            {index > 0 && (
-                                                <Button
-                                                    type="button"
-                                                    variant="destructive"
-                                                    onClick={() =>
-                                                        removeVehicle(index)
-                                                    }
-                                                >
-                                                    Remove Vehicle
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() =>
-                                            appendVehicle({
-                                                vehicle_no: "",
-                                            })
-                                        }
-                                    >
-                                        Add Another Vehicle
-                                    </Button>
+                                <div className="space-y-4 rounded-lg border p-4">
+                                    <CustomInputField<VisitorFormValues>
+                                        name="vehicle_no"
+                                        label="Vehicle Number"
+                                        placeholder="MH12AB1234"
+                                        control={control}
+                                        required={false}
+                                    />
                                 </div>
                             )}
                         </div>
 
-                         <Button
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis, nobis! Aliquid unde necessitatibus veritatis fugit. Maxime, velit? Voluptatum voluptatem atque qui unde in omnis molestiae sapiente quis exercitationem, nam assumenda veritatis nemo cum beatae dolorem earum laudantium cumque enim labore vel ad nulla iste temporibus quos. Eligendi quae molestiae nemo vitae maiores, quod modi voluptate dignissimos expedita harum pariatur totam, impedit assumenda rem quibusdam! Odit quis ullam porro? Excepturi cum temporibus reiciendis, doloremque inventore unde cumque rem autem impedit, explicabo iure nobis quas consequuntur natus mollitia a nostrum alias deleniti minus facilis, eum libero ea voluptatum? Excepturi, culpa aut? Nulla.</p>
+
+                        <Button
                             type="submit"
                             className="btn-signin w-full py-3.5 text-white text-sm font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
 
