@@ -13,7 +13,7 @@ const protect = asyncHandler(async (req, res, next) => {
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
   const users = await sql`
-        SELECT "id", "first_name", "last_name", "last_login", "phone_number", "user_status",  "email", "created_at", "role","updated_at" 
+        SELECT "id", "first_name", "last_name", "last_login", "phone",  "email", "created_at", "role" 
         FROM "Users" 
         WHERE "id" = ${decoded.id}
       `;
@@ -24,10 +24,9 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 
   req.user = users[0];
-
-  if (users[0].user_status !== "active") {
-    throw new ApiError(403, "Account is inactive");
-  }
+  // if (users[0].user_status !== "active") {
+  //   throw new ApiError(403, "Account is inactive");
+  // }
 
   next();
 
