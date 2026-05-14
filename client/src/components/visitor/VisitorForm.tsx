@@ -1,14 +1,78 @@
-import { useFieldArray, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { visitorSchema } from "@/schema";
 import { Button } from "../ui/button";
-import { CustomInputField } from "../form/FormFields";
+import { CustomInputField, SelectField } from "../form/FormFields";
+import { Building2, User, Laptop, Car, ArrowRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { useGetDepartmentsQuery, useGetEmployeesQuery, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
 
 type VisitorFormValues = z.infer<typeof visitorSchema>;
 
+// Mock data - replace with actual API calls
+// const DEPARTMENTS = [
+//     { id: "1", name: "Engineering" },
+//     { id: "2", name: "Human Resources" },
+//     { id: "3", name: "Finance" },
+//     { id: "4", name: "Marketing" },
+//     { id: "5", name: "Operations" },
+//     { id: "6", name: "Sales" },
+// ];
+
+// const EMPLOYEES_BY_DEPARTMENT: Record<string, Array<{ id: string; name: string; position: string }>> = {
+//     "1": [
+//         { id: "e1", name: "Amit Verma", position: "Senior Engineer" },
+//         { id: "e2", name: "Priya Sharma", position: "Tech Lead" },
+//         { id: "e3", name: "Rajesh Kumar", position: "Engineering Manager" },
+//     ],
+//     "2": [
+//         { id: "e4", name: "Sneha Patel", position: "HR Manager" },
+//         { id: "e5", name: "Vikram Singh", position: "Recruiter" },
+//     ],
+//     "3": [
+//         { id: "e6", name: "Anita Desai", position: "Finance Manager" },
+//         { id: "e7", name: "Rahul Mehta", position: "Accountant" },
+//     ],
+//     "4": [
+//         { id: "e8", name: "Kavita Joshi", position: "Marketing Head" },
+//         { id: "e9", name: "Sanjay Gupta", position: "Content Manager" },
+//     ],
+//     "5": [
+//         { id: "e10", name: "Deepak Rao", position: "Operations Manager" },
+//     ],
+//     "6": [
+//         { id: "e11", name: "Neha Kapoor", position: "Sales Director" },
+//         { id: "e12", name: "Arjun Nair", position: "Sales Executive" },
+//     ],
+// };
+
+interface SectionHeaderItem {
+    icon: LucideIcon;
+    heading: string;
+    color: string;
+}
+
+// interface SectionHeaderProp {
+
+// }
+
+function SectionHeader({ icon, heading, color }: SectionHeaderItem) {
+    const Icon = icon;
+    return (
+        <div className="flex items-center gap-3 mb-4">
+            <div className={`p-2 ${color} rounded-lg`}>
+                <Icon className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">{heading}</h3>
+        </div>
+    )
+}
+
 export default function VisitorForm() {
+
     const {
         register,
         handleSubmit,
@@ -16,8 +80,7 @@ export default function VisitorForm() {
         control,
         setValue,
         watch,
-        formState,
-        // formState: { errors, isSubmitSuccessful },
+        formState: { errors, isSubmitting },
     } = useForm<VisitorFormValues>({
         resolver: zodResolver(visitorSchema),
         defaultValues: {
@@ -33,174 +96,309 @@ export default function VisitorForm() {
             serial_no: "",
             is_vehicle: false,
             vehicle_no: "",
-            employee_id: ""
+            employee_id: "",
+            department_id: "",
         }
     });
 
     const hasLaptop = watch("is_laptop");
     const hasVehicle = watch("is_vehicle");
+    const watchedDepartment = watch("department_id");
 
-    const onSubmit = (data: VisitorFormValues) => {
-        console.log(data);
+    const { data: departments = [], isLoading: deptLoading } =
+        useGetDepartmentsQuery();
 
-    }
+    const {
+        data: employees = [],
+        isLoading: empLoading,
+    } = useGetEmployeesQuery(watchedDepartment, {
+        skip: !watchedDepartment,
+    });
+
+    console.log(departments, employees);
+
+
+
+    const [checkInVisitor] = useVisitorCheckInMutation();
+
+
+    const departmentOptions = departments.map((dept) => ({
+        label: dept.name,
+        value: String(dept.id),
+    }));
+
+
+    // const employeeOptions = employees.map((emp) => ({
+    //   label: `${emp.first_name} ${emp.last_name} - ${emp.position}`,
+    //   value: String(emp.id),
+    // }));
+
+    const employeeOptions = employees.map((emp) => ({
+        label: `${emp.first_name} ${emp.last_name} | ${emp.position} | ${emp.email}`,
+        value: String(emp.id),
+    }));
+
+    const onSubmit = async (data: VisitorFormValues) => {
+  try {
+    await checkInVisitor({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      email: data.email,
+      phone: data.phone,
+
+      company: data.company,
+      position: data.position,
+
+      is_laptop: data.is_laptop,
+      make: data.make,
+      model: data.model,
+      serial_no: data.serial_no,
+
+      is_vehicle: data.is_vehicle,
+      vehicle_no: data.vehicle_no,
+
+      employee_id: data.employee_id,
+    }).unwrap();
+
+    reset();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="">
-            <FieldGroup>
-                <FieldSet>
-                    <FieldLegend>
-                        Visitor Information
-                    </FieldLegend>
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto">
+            <div className="space-y-4">
 
-                    <FieldDescription>
-                        Enter visitor details below.
-                    </FieldDescription>
-                    <FieldGroup className="gap-4">
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <CustomInputField<VisitorFormValues>
-                                name="first_name"
-                                label="First Name"
-                                placeholder="Rahul"
-                                control={control}
-                            />
+                {/* Header Section */}
+                <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-[#8b1a30] to-[#6b1223] bg-clip-text text-transparent">
+                        Visitor Registration
+                    </h2>
+                    <p className="text-gray-600">
+                        Please fill in your details to complete the check-in process
+                    </p>
+                </div>
 
-                            <CustomInputField<VisitorFormValues>
-                                name="last_name"
-                                label="Last Name"
-                                placeholder="Sharma"
-                                control={control}
-                            />
+                {/* Whom to Meet Section - Most Important */}
+                <div className="bg-gradient-to-br from-[#8b1a30]/5 to-[#6b1223]/5 rounded-2xl p-6 border-2 border-[#8b1a30]/20">
+                    <SectionHeader icon={User} heading={'Whom to meet'} color={'bg-maroon'} />
+
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                        <SelectField<VisitorFormValues>
+                            name="department_id"
+                            label="Department"
+                            placeholder={
+                                deptLoading
+                                    ? "Loading departments..."
+                                    : "Select Department"
+                            }
+                            control={control}
+                            options={departmentOptions}
+                        />
+
+                        <SelectField<VisitorFormValues>
+                            name="employee_id"
+                            label="Employee"
+                            placeholder={
+                                !watchedDepartment
+                                    ? "Select department first"
+                                    : empLoading
+                                        ? "Loading employees..."
+                                        : "Select Employee"
+                            }
+                            control={control}
+                            options={employeeOptions}
+                            disabled={!watchedDepartment}
+                        />
+
+                    </div>
+                </div>
+
+                {/* Personal Information */}
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <SectionHeader icon={User} heading={'Personal Information'} color={'bg-cyan-700'} />
+                    {/* <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-cyan-700 rounded-lg">
+                            <User className="w-5 h-5 text-white" />
                         </div>
+                        <h3 className="text-xl font-semibold text-gray-800">Personal Information</h3>
+                    </div> */}
 
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <CustomInputField<VisitorFormValues>
-                                name="phone"
-                                label="Phone Number"
-                                placeholder="+91 9876543210"
-                                control={control}
-                            />
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <CustomInputField<VisitorFormValues>
+                            name="first_name"
+                            label="First Name"
+                            placeholder="Rahul"
+                            control={control}
+                        />
 
-                            <CustomInputField<VisitorFormValues>
-                                name="email"
-                                type="email"
-                                label="Email"
-                                placeholder="rahul@gmail.com"
-                                control={control}
-                            />
+                        <CustomInputField<VisitorFormValues>
+                            name="last_name"
+                            label="Last Name"
+                            placeholder="Sharma"
+                            control={control}
+                        />
+                    </div>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <CustomInputField<VisitorFormValues>
+                            name="phone"
+                            label="Phone Number"
+                            placeholder="+91 9876543210"
+                            control={control}
+                        />
+
+                        <CustomInputField<VisitorFormValues>
+                            name="email"
+                            type="email"
+                            label="Email Address"
+                            placeholder="rahul@gmail.com"
+                            control={control}
+                        />
+                    </div>
+                </div>
+
+
+                {/* Company Information */}
+                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                    <SectionHeader icon={Building2} heading={'Company Information'} color={'bg-cyan-700'} />
+                    {/* <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-cyan-700 rounded-lg">
+                            <Building2 className="w-5 h-5 text-white" />
                         </div>
+                        <h3 className="text-xl font-semibold text-gray-800">Company Information</h3>
+                    </div> */}
 
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <CustomInputField<VisitorFormValues>
-                                name="company"
-                                label="Company Name"
-                                placeholder="Infosys"
-                                control={control}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <CustomInputField<VisitorFormValues>
+                            name="company"
+                            label="Company Name"
+                            placeholder="Infosys"
+                            control={control}
+                        />
+
+                        <CustomInputField<VisitorFormValues>
+                            name="position"
+                            label="Position"
+                            placeholder="Software Engineer"
+                            control={control}
+                        />
+                    </div>
+                </div>
+
+                {/* Additional Items Section */}
+                <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Additional Items (Optional)</h3>
+
+                    {/* Laptop Section */}
+                    <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:border-[#8b1a30]/30 transition-all">
+                        <label className="flex items-center gap-4 p-5 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                {...register("is_laptop")}
+                                className="w-5 h-5 text-[#8b1a30] border-gray-300 rounded focus:ring-[#8b1a30] cursor-pointer"
                             />
+                            <div className="flex items-center gap-3 flex-1">
+                                <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                                    <Laptop className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-gray-800 block">Carrying Laptop?</span>
+                                    <span className="text-sm text-gray-500">Check if you're bringing a laptop</span>
+                                </div>
+                            </div>
+                        </label>
 
-                            <CustomInputField<VisitorFormValues>
-                                name="position"
-                                label="Position"
-                                placeholder="Software Engineer"
-                                control={control}
-                            />
-                        </div>
-
-                        {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <CustomInputField<VisitorFormValues>
-                                name="host_name"
-                                label="Host Name"
-                                placeholder="Amit Verma"
-                                control={control}
-                            />
-                        </div> */}
-
-                        <div className="space-y-4 rounded-xl border p-4">
-                            <label className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    {...register("is_laptop")}
-                                />
-
-                                <span className="font-medium">
-                                    Carrying Laptop?
-                                </span>
-                            </label>
-
-                            {hasLaptop && (
-                                <div className="space-y-4 rounded-lg border p-4">
-                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-                                        <CustomInputField<VisitorFormValues>
-                                            name="make"
-                                            label="Laptop Make"
-                                            placeholder="Dell"
-                                            control={control}
-                                            required={false}
-                                        />
-
-                                        <CustomInputField<VisitorFormValues>
-                                            name="model"
-                                            label="Laptop Model"
-                                            placeholder="Inspiron"
-                                            control={control}
-                                            required={false}
-                                        />
-                                    </div>
+                        {hasLaptop && (
+                            <div className="px-5 pb-5 space-y-4 bg-purple-50/50 border-t border-purple-100">
+                                <div className="pt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <CustomInputField<VisitorFormValues>
+                                        name="make"
+                                        label="Laptop Make"
+                                        placeholder="Dell"
+                                        control={control}
+                                        required={false}
+                                    />
 
                                     <CustomInputField<VisitorFormValues>
-                                        name="serial_no"
-                                        label="Serial Number"
-                                        placeholder="SN123456"
+                                        name="model"
+                                        label="Laptop Model"
+                                        placeholder="Inspiron 15"
                                         control={control}
                                         required={false}
                                     />
                                 </div>
-                            )}
-                        </div>
 
-
-                        <div className="space-y-4 rounded-xl border p-4">
-                            <label className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    {...register("is_vehicle")}
+                                <CustomInputField<VisitorFormValues>
+                                    name="serial_no"
+                                    label="Serial Number"
+                                    placeholder="SN123456789"
+                                    control={control}
+                                    required={false}
                                 />
+                            </div>
+                        )}
+                    </div>
 
-                                <span className="font-medium">
-                                    Carrying Vehicle?
-                                </span>
-                            </label>
+                    {/* Vehicle Section */}
+                    <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:border-[#8b1a30]/30 transition-all">
+                        <label className="flex items-center gap-4 p-5 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                {...register("is_vehicle")}
+                                className="w-5 h-5 text-[#8b1a30] border-gray-300 rounded focus:ring-[#8b1a30] cursor-pointer"
+                            />
+                            <div className="flex items-center gap-3 flex-1">
+                                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                    <Car className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-gray-800 block">Bringing Vehicle?</span>
+                                    <span className="text-sm text-gray-500">Check if you need parking</span>
+                                </div>
+                            </div>
+                        </label>
 
-                            {hasVehicle && (
-                                <div className="space-y-4 rounded-lg border p-4">
+                        {hasVehicle && (
+                            <div className="px-5 pb-5 bg-blue-50/50 border-t border-blue-100">
+                                <div className="pt-4">
                                     <CustomInputField<VisitorFormValues>
                                         name="vehicle_no"
-                                        label="Vehicle Number"
+                                        label="Vehicle Registration Number"
                                         placeholder="MH12AB1234"
                                         control={control}
                                         required={false}
                                     />
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis, nobis! Aliquid unde necessitatibus veritatis fugit. Maxime, velit? Voluptatum voluptatem atque qui unde in omnis molestiae sapiente quis exercitationem, nam assumenda veritatis nemo cum beatae dolorem earum laudantium cumque enim labore vel ad nulla iste temporibus quos. Eligendi quae molestiae nemo vitae maiores, quod modi voluptate dignissimos expedita harum pariatur totam, impedit assumenda rem quibusdam! Odit quis ullam porro? Excepturi cum temporibus reiciendis, doloremque inventore unde cumque rem autem impedit, explicabo iure nobis quas consequuntur natus mollitia a nostrum alias deleniti minus facilis, eum libero ea voluptatum? Excepturi, culpa aut? Nulla.</p>
+                {/* Submit Button */}
+                <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 text-white text-base font-semibold rounded-xl transition-all duration-200 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
+                    style={{
+                        background: "linear-gradient(135deg, #8b1a30, #6b1223)",
+                        boxShadow: "0 8px 24px rgba(139,26,48,0.35)",
+                    }}
+                >
+                    <span className="flex items-center justify-center gap-2">
+                        {isSubmitting ? "Submitting..." : "Complete Registration"}
+                        {!isSubmitting && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+                    </span>
+                </Button>
 
-                        <Button
-                            type="submit"
-                            className="btn-signin w-full py-3.5 text-white text-sm font-semibold rounded-[10px] mt-3 tracking-wide cursor-pointer border-none transition-all duration-150"
-
-                            style={{
-                                background: "linear-gradient(135deg, #8b1a30, #6b1223)",
-                                boxShadow: "0 4px 18px rgba(139,26,48,0.32)",
-                            }}
-                        >
-                            Submit visit request
-                        </Button>
-                    </FieldGroup>
-                </FieldSet>
-            </FieldGroup>
+                <p className="text-center text-sm text-gray-500">
+                    By submitting, you agree to our visitor policies and security protocols
+                </p>
+            </div>
         </form>
-    )
+    );
 }
