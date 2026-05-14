@@ -50,19 +50,22 @@ export default function VisitorCheckIn() {
                 className="
                     rounded-3xl
         w-full
-        max-w-md
+        max-w-xl
         bg-white
         shadow-2xl
+        my-auto
         overflow-hidden
                 "
             >
                 <div
                     className="
-            h-[95vh]
+                    max-h-[80vh]
             overflow-y-auto
             overflow-x-hidden
             scroll-smooth
             p-6
+            flex
+            flex-col
             space-y-6
         "
                 >
@@ -214,7 +217,8 @@ export default function VisitorCheckIn() {
                             group
                             relative
                             h-12
-                            w-full
+                            w-96
+                            mx-auto
                             overflow-hidden
                             rounded-xl
                             text-sm

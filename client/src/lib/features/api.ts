@@ -6,7 +6,9 @@ export const api = createApi({
     baseQuery: baseQueryWithToast,
     tagTypes: [
         'Auth', 
-        'Users', 
+        'Users',
+        'Department',
+        'Employee' 
     ],
     endpoints: () => ({})
 })

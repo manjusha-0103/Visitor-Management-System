@@ -160,16 +160,31 @@ const getAllDepartmentsService = async () => {
     return dept
 }
 
-const getEmployeesService = async(dept_id)=>{
+const getEmployeesService = async (dept_id) => {
 
     const emp = await sql`
-        SELECT * FROM "Employee"
-        WHERE "department" = ${dept_id}
-    `
+        SELECT
+            e.id,
+            e.position,
+            e.department,
 
-    return emp
+            u.first_name,
+            u.last_name,
+            u.email,
+            u.phone
 
-}
+        FROM "Employee" e
+
+        JOIN "Users" u
+            ON u.id = e.user_id
+
+        WHERE e.department = ${dept_id}
+
+        ORDER BY u.first_name ASC
+    `;
+
+    return emp;
+};
 
 export{
     checkInService,
