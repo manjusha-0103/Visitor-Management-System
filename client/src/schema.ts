@@ -14,7 +14,6 @@ export const visitorSchema = z.object({
 
     position: z.string().optional(),
     company: z.string().optional(),
-    employee_id: z.string(),
 
     is_laptop: z.boolean(),
     make: z.string(),
@@ -23,4 +22,6 @@ export const visitorSchema = z.object({
    
     is_vehicle: z.boolean(),
     vehicle_no: z.string(),
+    department_id: z.string().min(1, "Department is required"),
+employee_id: z.string().min(1, "Employee is required"),
 });
