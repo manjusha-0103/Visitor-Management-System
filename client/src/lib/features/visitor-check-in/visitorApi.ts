@@ -2,7 +2,7 @@ import { api } from "../api";
 
 export interface Department {
   id: string;
-  department_name: string;
+  name: string;
 }
 
 export interface Employee {
@@ -10,6 +10,10 @@ export interface Employee {
   user_id: string;
   department: string;
   position: string;
+
+  first_name: string;
+  last_name: string;
+  email: string;
 }
 
 export interface CheckInPayload {
