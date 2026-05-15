@@ -3,6 +3,9 @@ import { lazy } from "react";
 import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import ManageTeam from "./components/team/ManageTeam";
+import PreSchedule from "./pages/employee/PreSchedule";
+
 
 const Auth = lazy(() => import("@/pages/Auth"))
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"))
@@ -10,6 +13,7 @@ const AdminLayout = lazy(() => import("@/layouts/AdminLayout"))
 const DashHome = lazy(() => import("@/components/dash/DashHome"));
 
 const VisitorCheckIn = lazy(() => import("@/components/visitor/VisitorCheckIn"));
+
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -42,10 +46,10 @@ const router = createBrowserRouter([
                         index: true,
                         element: <DashHome />
                     },
-                    // {
-                    //     path: "team",
-                    //     element: <ManageTeam />
-                    // },
+                    {
+                        path: "team",
+                        element: <ManageTeam />
+                    },
                     // {
                     //     path: "visitor",
                     //     element: <ManageVisitor />
@@ -76,10 +80,30 @@ const router = createBrowserRouter([
         ]
 
     },
+    {
+        element: <ProtectedRoute allowedRoles={[ROLES.employee.role]} />,
+        children: [
+            {
+                path: '/employee',
+                element: <AdminLayout />,
+                children: [
+                    {
+                        index: true,
+                        element: <PreSchedule />
+                    },
+                ]
+            }
+        ]
+
+    },
 
     //public pages
     {
         path: "visitor-check-in",
+        element: <VisitorCheckIn />
+    },
+    {
+        path: "employee",
         element: <VisitorCheckIn />
     }
 ])

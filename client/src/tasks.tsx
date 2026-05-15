@@ -12,7 +12,7 @@ export const SUPER_ADMIN_TASKS = [
     label: "Users",
     icon: UserRound,
     bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
-    path: "/admin/manage-users",
+    path: "/admin/users",
   },
 
   {
@@ -20,7 +20,7 @@ export const SUPER_ADMIN_TASKS = [
     label: "Appointments",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/admin/manage-stores",
+    path: "/admin/appointments",
   },
 
   {
@@ -28,7 +28,7 @@ export const SUPER_ADMIN_TASKS = [
     label: "Team",
     icon: UsersRound,
     bg: "bg-amber-700 shadow-lg shadow-amber-700/40",
-    path: "/admin/manage-trucks",
+    path: "/admin/team",
   },
 
   {
@@ -54,7 +54,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Users",
     icon: UserRound,
     bg: "bg-amber-700 shadow-lg shadow-amber-700/40",
-    path: "/admin/manage-users",
+    path: "/admin/users",
   },
 
   {
@@ -62,7 +62,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Appointments",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/admin/manage-stores",
+    path: "/admin/appointments",
   },
 
   {
@@ -70,7 +70,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Team",
     icon: UsersRound,
     bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
-    path: "/admin/manage-trucks",
+    path: "/admin/team",
   },
 
   {

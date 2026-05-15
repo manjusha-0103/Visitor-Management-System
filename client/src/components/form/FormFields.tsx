@@ -7,14 +7,16 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
+  SelectGroup,
   SelectValue,
 } from "@/components/ui/select";
 
 
 export function FormLabel({ htmlFor, label, required }: FieldLabelProp) {
   return (
-    <FieldLabel htmlFor={htmlFor}>
+    <FieldLabel htmlFor={htmlFor} className="text-xs">
       {label}
       {required && <span className="text-red-500">*</span>}
     </FieldLabel>
@@ -64,7 +66,7 @@ export function CustomInputField<T extends FieldValues>({
                   ${Icon ? "pl-10" : ""}
                   ${rightElement ? "pr-10" : ""}
                   ${fieldState.error ? "border-red-500" : "border-[#e8e8f0]"}
-                  rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200
+                  rounded-md text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200
                   ${inputClassName}
                 `}
               />
@@ -97,10 +99,11 @@ export function SelectField<T extends FieldValues>({
   options = [],
   rules = {},
   disabled = false,
+  required = true
 }: SelectFieldProps<T>) {
   return (
     <div className="space-y-2">
-      {label && <FormLabel htmlFor={name} label={label} />}
+      {label && <FormLabel htmlFor={name} label={label} required={required}/>}
 
       <Controller
         name={name}
@@ -116,7 +119,7 @@ export function SelectField<T extends FieldValues>({
               <SelectTrigger
                 id={name}
                 className={`
-                  h-11 rounded-xl max-w-xl
+                  h-11 rounded-md w-full
                   ${
                     fieldState.error
                       ? "border-red-500 focus:ring-red-500"
@@ -128,19 +131,26 @@ export function SelectField<T extends FieldValues>({
               </SelectTrigger>
 
               <SelectContent>
-                {options.map((option) => (
+                <SelectGroup>
+                  <SelectLabel>
+                    {label}
+                  </SelectLabel>
+                   {options.map((option) => (
                   <SelectItem
                     key={option.value}
                     value={option.value}
+                    className="rounded-lg"
                   >
                     {option.label}
                   </SelectItem>
                 ))}
+                </SelectGroup>
+               
               </SelectContent>
             </Select>
 
             {fieldState.error && (
-              <p className="text-sm text-red-500">
+              <p className="text-xs text-red-500">
                 {fieldState.error.message}
               </p>
             )}
