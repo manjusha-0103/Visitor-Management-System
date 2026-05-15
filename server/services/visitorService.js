@@ -7,6 +7,7 @@ import { userExistbyemailService } from "./auth.service.js"
 
 const checkInService = async ({first_name, last_name, email, phone, position, is_laptop, company, make, model, serial_no, is_vehicle, vehicle_no, employee_id}) => {
     const [visitorexist] = await userExistbyemailService(email)
+    const date_time = new Date()
     const [employee] = await sql`
         SELECT
             e.id AS employee_id,
@@ -44,8 +45,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
         console.log("visitor",visitor);
         
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time")
-            values(${employee_id}, ${visitor[0].id}, NOW(), NOW() )
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no")
+            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no} )
             RETURNING *
         ` 
 
@@ -57,8 +58,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="http://${process.env.CLIENT_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
-                style="
+                <a href=""
+                style="http://${process.env.CLIENT_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true
                     background:#10b981;
                     color:#fff;
                     text-decoration:none;
@@ -105,8 +106,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
         `
         // console.log(visitor)
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time")
-            values(${employee.employee_id}, ${visitor[0].id}, NOW(), NOW() )
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no")
+            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no})
             RETURNING *
         ` 
         await sendEmail({
