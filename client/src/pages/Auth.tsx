@@ -10,9 +10,8 @@ import { setUser } from '@/lib/features/auth/authSlice';
 import { CREDENTIALS } from '@/contants';
 import { signInSchema } from '@/schema';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import logo from "@/assets/Racca-Logo.avif";
-import { CustomInputField, FormError } from '@/components/form/FormFields';
+import { CustomInputField } from '@/components/form/FormFields';
 
 type SignFormValues = z.infer<typeof signInSchema>;
 type UseMeCred = {
@@ -23,22 +22,20 @@ type UseMeCred = {
     pass: string;
 }
 
-function EyeIcon({ show }: {show: boolean}) {
-    return show ? (
-        <Eye className="text-gray-400" size={20} />
-    ) : (
-        <EyeOff className="text-gray-400" size={20} />
-    );
-}
+// function EyeIcon({ show }: {show: boolean}) {
+//     return show ? (
+//         <Eye className="text-gray-400" size={20} />
+//     ) : (
+//         <EyeOff className="text-gray-400" size={20} />
+//     );
+// }
 
 export default function Auth() {
     const [login, { isLoading, isError, error }] = useSignInMutation()
     const dispatch = useDispatch();
     const {
-        register,
         handleSubmit,
         setValue,
-        watch,
         control,
         formState: { errors }
     } = useForm({
@@ -76,15 +73,15 @@ export default function Auth() {
 
     }
 
-    function handleSignIn() {
-        // console.log(role);
-        if (role === 'super_admin') {
-            navigate('/admin', { replace: true })
-        } else {
-            navigate('/receptionist', { replace: true })
-        }
+    // function handleSignIn() {
+    //     // console.log(role);
+    //     if (role === 'super_admin') {
+    //         navigate('/admin', { replace: true })
+    //     } else {
+    //         navigate('/receptionist', { replace: true })
+    //     }
 
-    }
+    // }
     return (
         <>
 
@@ -174,7 +171,7 @@ export default function Auth() {
         flex
         items-center
         text-gray-400
-        hover:text-[#701a40]
+        hover:text-maroon
       "
     >
       {showPw ? (
@@ -190,7 +187,7 @@ export default function Auth() {
                             <Input
                                 type="email"
                                 placeholder="arjun.j@gmail.com"
-                                {...register("email")}
+                                {"email")}
                                 className={`w-full pl-10 pr-10 h-11 border ${errors.email ? 'border-red-500' : 'border-[#e8e8f0]'}  rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
 
@@ -205,7 +202,7 @@ export default function Auth() {
                             <Input
                                 type={showPw ? "text" : "password"}
                                 placeholder="Password"
-                                {...register("password")}
+                                {"password")}
                                 className={`w-full pl-10 pr-10 h-11 border ${errors.email ? 'border-red-500' : 'border-[#e8e8f0]'} rounded-[10px] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200`}
                             />
                             <button
