@@ -9,7 +9,8 @@ import validate from "../middlewares/validate.js";
 import {
     getMe,
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 } from "../contollers/authController.js";
 
 import {
@@ -22,5 +23,6 @@ const router = express.Router();
 router.get("/me", protect, getMe)
 router.post("/signup", validate, registerValidation, registerUser);
 router.post("/signin", validate, loginValidation, loginUser)
+router.post("/signout", protect, logoutUser);
 
 export default router;
