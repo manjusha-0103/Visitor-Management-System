@@ -17,14 +17,20 @@ const setPassIdService = async (appointment_id, data) => {
 }
 
 const checkOutService = asyncHandler(async (appointment_id) => {
-    // const 
-    // const amp = await sql `
-    //     UPDATE "Appointments" 
-    //     SET "check_out" = ${pass_id}
-    //     WHERE id = ${appointment_id}
-    //     RETURNING *
-    // `
-    // return amp
+    const date_time = new Date();
+
+    const [amp] = await sql`
+        UPDATE "Appointments" 
+        SET "check_out" = ${date_time}
+        WHERE id = ${appointment_id}
+        RETURNING *
+    `;
+
+    if (!amp) {
+        throw new ApiError(404, "Appointment not found");
+    }
+
+    return amp;
     
 })
 

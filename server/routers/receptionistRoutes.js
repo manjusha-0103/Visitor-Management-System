@@ -9,6 +9,6 @@ import { setPassId,
 
 const router = express.Router();
 router.put("/set-pass/:appointment_id",protect, authorize( "receptionist"), setPassId)
-router.put("/chek-out/:appointment_id", protect, authorize( "receptionist"), checkOut)
+router.put("/check-out/:appointment_id", protect, authorize( "receptionist"), checkOut)
 
 export default router;
