@@ -8,14 +8,14 @@ import sendResponse from "../utils/sendResponse.js";
 import { chekIsApproveService,
     preScheduleService
  } from "../services/employeeServices.js";
+import { getIO } from "../config/socket.js";
+
 
 
 const chekIsApprove= asyncHandler(async (req, res) => {
     const is_approve = req.query.is_approve === "true"
     const {appointment_id} = req.params
     const appoinment = await chekIsApproveService(is_approve, appointment_id)
-    // sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
-
     res.send(`'
         <!DOCTYPE html>
         <html lang="en">
@@ -196,6 +196,14 @@ const chekIsApprove= asyncHandler(async (req, res) => {
         </html>
         
     `)
+    const io = getIO();
+
+    io.emit("appointment_updated", {
+        type: is_approve ? "approved" : "denied",
+        data: appoinment
+    });
+    sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
+
 })  
 
 
@@ -203,6 +211,12 @@ const preSchedule = asyncHandler(async (req, res) => {
     const {email} = req.user;
     const appoinment = await preScheduleService(req.body,email)
     if(appoinment){
+        const io = getIO();
+
+        io.emit("appointment_updated", {
+            type: "preschedule_created",
+            data: appoinment
+        });
         sendResponse(res, 200, appoinment, "Appointment schedule successfully")
     }
     else{
