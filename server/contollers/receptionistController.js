@@ -5,7 +5,9 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiError from "../utils/ApiError.js";
 import crypto from 'crypto';
 import sendResponse from "../utils/sendResponse.js";
-import { setPassIdService } from "../services/receptionist.service.js";
+import { setPassIdService,
+    checkOutService
+ } from "../services/receptionist.service.js";
 
 
 const setPassId = asyncHandler(async (req, res) => {
@@ -20,14 +22,16 @@ const setPassId = asyncHandler(async (req, res) => {
 })
 
 const checkOut = asyncHandler(async (req, res) => {
-    const {appointment_id} = req.params
-    
-    const appoitment = await checkOutService(appointment_id)
-    if(appoitment){
-        sendResponse(res, 200, appoitment, "Set Check-out")
-    }else{
-        throw new ApiError(400, "Failed to set")
-    }
+    const { appointment_id } = req.params;
+
+    const appointment = await checkOutService(appointment_id);
+
+    sendResponse(
+        res,
+        200,
+        appointment,
+        "Check-out set successfully"
+    );
 })
 
 export{

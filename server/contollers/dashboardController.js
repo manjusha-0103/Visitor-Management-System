@@ -10,10 +10,32 @@ import { pastAppointmentsService } from "../services/dashboard.service.js";
 const pastAppointments = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const {search = "",
+        is_approve = null,
+        is_preschedule = null,
+        date = null
+    } = req.query;
 
     const appointments = await pastAppointmentsService({
             page,
-            limit
+            limit,search,
+
+        // Convert string -> boolean/null
+        is_approve:
+            is_approve === "true"
+                ? true
+                : is_approve === "false"
+                ? false
+                : null,
+
+        is_preschedule:
+            is_preschedule === "true"
+                ? true
+                : is_preschedule === "false"
+                ? false
+                : null,
+
+        date
     })
     sendResponse(res, 201, appointments, "All appointments")
 })

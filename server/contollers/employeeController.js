@@ -14,7 +14,188 @@ const chekIsApprove= asyncHandler(async (req, res) => {
     const is_approve = req.query.is_approve === "true"
     const {appointment_id} = req.params
     const appoinment = await chekIsApproveService(is_approve, appointment_id)
-    sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
+    // sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
+
+    res.send(`'
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Appointment Status</title>
+
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+            <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+            <style>
+
+            *{
+                margin:0;
+                padding:0;
+                box-sizing:border-box;
+            }
+
+            body{
+                min-height:100vh;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                background:#f7f6f2;
+                font-family:'DM Sans',sans-serif;
+                padding:20px;
+            }
+
+            .card{
+                width:100%;
+                max-width:420px;
+                background:#fff;
+                border-radius:28px;
+                padding:45px 35px;
+                text-align:center;
+                border:1px solid #ebe7df;
+                position:relative;
+                overflow:hidden;
+            }
+
+            .top-line{
+                position:absolute;
+                top:0;
+                left:20px;
+                right:20px;
+                height:4px;
+                border-radius:0 0 10px 10px;
+                background:${is_approve ? "#6ee7b7" : "#fca5a5"};
+            }
+
+            .icon-wrap{
+                width:85px;
+                height:85px;
+                margin:auto;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                margin-bottom:28px;
+
+                background:${is_approve ? "#ecfdf5" : "#fef2f2"};
+                box-shadow:0 0 0 10px ${
+                is_approve ? "#d1fae566" : "#fee2e255"
+                };
+            }
+
+            h1{
+                font-family:'DM Serif Display',serif;
+                font-size:34px;
+                color:#1f2937;
+                line-height:1.2;
+                margin-bottom:16px;
+            }
+
+            p{
+                color:#6b7280;
+                font-size:15px;
+                line-height:1.7;
+            }
+
+            .badge{
+                display:inline-flex;
+                align-items:center;
+                gap:8px;
+                margin-top:30px;
+                padding:10px 20px;
+                border-radius:999px;
+                font-size:13px;
+                font-weight:600;
+                letter-spacing:.05em;
+
+                background:${is_approve ? "#d1fae5" : "#fee2e2"};
+                color:${is_approve ? "#047857" : "#b91c1c"};
+            }
+
+            .dot{
+                width:8px;
+                height:8px;
+                border-radius:50%;
+                background:${is_approve ? "#047857" : "#b91c1c"};
+            }
+
+            .footer{
+                margin-top:35px;
+                padding-top:20px;
+                border-top:1px solid #ece7df;
+                color:#9ca3af;
+                font-size:12px;
+            }
+
+            </style>
+        </head>
+
+        <body>
+
+            <div class="card">
+
+            <div class="top-line"></div>
+
+            <div class="icon-wrap">
+
+                ${
+                is_approve
+                    ? `
+                <svg width="42" height="42" fill="none" stroke="#059669"
+                    stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" viewBox="0 0 24 24">
+
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="8 12 11 15 16 9"/>
+
+                </svg>
+                `
+                    : `
+                <svg width="42" height="42" fill="none" stroke="#dc2626"
+                    stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round" viewBox="0 0 24 24">
+
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+
+                </svg>
+                `
+                }
+
+            </div>
+
+            <h1>
+                Appointment <br/>
+                ${is_approve ? "Approved" : "Denied"}
+            </h1>
+
+            <p>
+                Your response has been recorded successfully.
+                ${
+                is_approve
+                    ? "The visitor has been notified about the approval."
+                    : "The visitor has been notified about the denial."
+                }
+            </p>
+
+            <div class="badge">
+                <span class="dot"></span>
+                ${is_approve ? "APPROVED" : "DENIED"}
+            </div>
+
+            <div class="footer">
+                VisitMi
+            </div>
+
+            </div>
+
+        </body>
+        </html>
+        
+    `)
 })  
 
 
