@@ -19,6 +19,9 @@ export default function PublicRoute() {
     if (user.role === "receptionist") {
       return <Navigate to="/receptionist" replace />
     }
+    if (user.role === "employee") {
+      return <Navigate to="/employee" replace />
+    }
   }
 
   return <Outlet />

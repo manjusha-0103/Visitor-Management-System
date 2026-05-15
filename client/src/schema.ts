@@ -7,21 +7,34 @@ export const signInSchema = z.object({
 })
 
 export const visitorSchema = z.object({
-    first_name: z.string().min(1, "First name is required"),
-    last_name: z.string().min(1, "Last name is required"),
-    phone: z.string().min(10, "Phone number is required"),
-    email: z.string().email("Invalid email").optional().or(z.literal("")),
+  first_name: z.string().min(1, "First name is required"),
 
-    position: z.string().optional(),
-    company: z.string().optional(),
+  last_name: z.string().min(1, "Last name is required"),
 
-    is_laptop: z.boolean(),
-    make: z.string(),
-    model: z.string(),
-    serial_no: z.string(),
-   
-    is_vehicle: z.boolean(),
-    vehicle_no: z.string(),
-    department_id: z.string().min(1, "Department is required"),
-employee_id: z.string().min(1, "Employee is required"),
+  phone: z.string().min(10, "Phone number is required"),
+
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Invalid email"),
+
+  // OPTIONAL
+  position: z.string(),
+
+  // OPTIONAL
+  company: z.string(),
+
+  is_laptop: z.boolean(),
+
+  // OPTIONAL
+  make: z.string().optional(),
+  model: z.string().optional(),
+  serial_no: z.string().optional(),
+
+  is_vehicle: z.boolean().optional(),
+  vehicle_no: z.string().optional(),
+
+  department_id: z.string().min(1, "Department is required"),
+
+  employee_id: z.string().min(1, "Employee is required"),
 });

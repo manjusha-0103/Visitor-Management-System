@@ -26,7 +26,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
     `
     let appointment, visitor
     if(visitorexist){
-        // console.log(visitorexist.id);
+        console.log(visitorexist.id);
         
         visitor = await sql`
             UPDATE "Visitors"
@@ -41,7 +41,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
             WHERE "user_id" = ${visitorexist.id}
             RETURNING *
         `
-        // console.log("visitor",visitor);
+        console.log("visitor",visitor);
         
         appointment = await sql`
             INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time")

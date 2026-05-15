@@ -25,15 +25,29 @@ export interface CheckInPayload {
   position: string;
   company: string;
 
-  is_laptop: boolean;
+  is_laptop?: boolean;
   make?: string;
   model?: string;
   serial_no?: string;
 
-  is_vehicle: boolean;
+  is_vehicle?: boolean;
   vehicle_no?: string;
 
   employee_id: string;
+}
+
+export interface PreScheduleVisitor {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string;
+  position: string;
+  company: string;
+}
+
+export interface PreSchedulePayload {
+  date_time: string;
+  visitors: PreScheduleVisitor[];
 }
 
 export interface ApiResponse<T = unknown> {
@@ -50,7 +64,11 @@ export const visitorApi = api.injectEndpoints({
       query: () => ({
         url: "/api/v1/visitors/departments",
         method: "GET",
+
       }),
+      extraOptions: {
+        skipToast: true
+      },
 
       transformResponse: (response: ApiResponse<Department[]>) =>
         response.data,
@@ -64,11 +82,27 @@ export const visitorApi = api.injectEndpoints({
         url: `/api/v1/visitors/employees/${dept_id}`,
         method: "GET",
       }),
+      extraOptions: {
+        skipToast: true
+      },
 
       transformResponse: (response: ApiResponse<Employee[]>) =>
         response.data,
 
       providesTags: ["Employee"],
+    }),
+
+     preScheduleVisitor: builder.mutation<
+      ApiResponse,
+      PreSchedulePayload
+    >({
+      query: (body) => ({
+        url: "/api/v1/employee/preschedule",
+        method: "POST",
+        body,
+      }),
+
+      invalidatesTags: ["Appointment", "Visitor"],
     }),
 
     // VISITOR CHECK-IN
@@ -82,7 +116,7 @@ export const visitorApi = api.injectEndpoints({
         body,
       }),
 
-      invalidatesTags: ["Users"],
+      invalidatesTags: ["Appointment", 'Visitor'],
     }),
   }),
 });
@@ -91,4 +125,5 @@ export const {
   useGetDepartmentsQuery,
   useGetEmployeesQuery,
   useVisitorCheckInMutation,
+  usePreScheduleVisitorMutation
 } = visitorApi;
