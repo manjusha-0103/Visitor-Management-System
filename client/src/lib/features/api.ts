@@ -8,7 +8,9 @@ export const api = createApi({
         'Auth', 
         'Users',
         'Department',
-        'Employee' 
+        'Employee',
+        'Appointment',
+        'Visitor'
     ],
     endpoints: () => ({})
 })

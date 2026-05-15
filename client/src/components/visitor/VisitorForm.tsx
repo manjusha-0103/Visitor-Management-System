@@ -1,86 +1,227 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+    Building2,
+    User,
+    Laptop,
+    Car,
+    ArrowRight,
+    ArrowLeft,
+    Check,
+    CalendarCheck,
+    Clock,
+    MapPin,
+    Clock3,
+    CalendarIcon
+} from "lucide-react";
+import { format, parseISO } from "date-fns"
 import { visitorSchema } from "@/schema";
 import { Button } from "../ui/button";
-import { CustomInputField, SelectField } from "../form/FormFields";
-import { Building2, User, Laptop, Car, ArrowRight } from "lucide-react";
+import { CustomInputField, FormLabel, SelectField } from "../form/FormFields";
+import { Calendar } from "@/components/ui/calendar"
+import {
+    useGetDepartmentsQuery,
+    useGetEmployeesQuery,
+    useVisitorCheckInMutation,
+} from "@/lib/features/visitor-check-in/visitorApi";
 import type { LucideIcon } from "lucide-react";
-import { useGetDepartmentsQuery, useGetEmployeesQuery, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
+import { useLocation } from "react-router-dom";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { FieldLabel } from "../ui/field";
+
+
 
 type VisitorFormValues = z.infer<typeof visitorSchema>;
-
-// Mock data - replace with actual API calls
-// const DEPARTMENTS = [
-//     { id: "1", name: "Engineering" },
-//     { id: "2", name: "Human Resources" },
-//     { id: "3", name: "Finance" },
-//     { id: "4", name: "Marketing" },
-//     { id: "5", name: "Operations" },
-//     { id: "6", name: "Sales" },
-// ];
-
-// const EMPLOYEES_BY_DEPARTMENT: Record<string, Array<{ id: string; name: string; position: string }>> = {
-//     "1": [
-//         { id: "e1", name: "Amit Verma", position: "Senior Engineer" },
-//         { id: "e2", name: "Priya Sharma", position: "Tech Lead" },
-//         { id: "e3", name: "Rajesh Kumar", position: "Engineering Manager" },
-//     ],
-//     "2": [
-//         { id: "e4", name: "Sneha Patel", position: "HR Manager" },
-//         { id: "e5", name: "Vikram Singh", position: "Recruiter" },
-//     ],
-//     "3": [
-//         { id: "e6", name: "Anita Desai", position: "Finance Manager" },
-//         { id: "e7", name: "Rahul Mehta", position: "Accountant" },
-//     ],
-//     "4": [
-//         { id: "e8", name: "Kavita Joshi", position: "Marketing Head" },
-//         { id: "e9", name: "Sanjay Gupta", position: "Content Manager" },
-//     ],
-//     "5": [
-//         { id: "e10", name: "Deepak Rao", position: "Operations Manager" },
-//     ],
-//     "6": [
-//         { id: "e11", name: "Neha Kapoor", position: "Sales Director" },
-//         { id: "e12", name: "Arjun Nair", position: "Sales Executive" },
-//     ],
-// };
 
 interface SectionHeaderItem {
     icon: LucideIcon;
     heading: string;
     color: string;
+    description?: string;
 }
 
-// interface SectionHeaderProp {
+interface VisitorFormProps {
+    setPhase: React.Dispatch<React.SetStateAction<"qr" | "form" | "done">>;
+}
 
-// }
-
-function SectionHeader({ icon, heading, color }: SectionHeaderItem) {
+// ─── Section header ────────────────────────────────────────────────────────────
+function SectionHeader({ icon, heading, color, description }: SectionHeaderItem) {
     const Icon = icon;
     return (
-        <div className="flex items-center gap-3 mb-4">
-            <div className={`p-2 ${color} rounded-lg`}>
-                <Icon className="w-4 h-4 text-white" />
+        <div className="mb-6 flex items-start gap-4">
+            <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${color} shadow-lg`}>
+                <Icon className="h-5 w-5 text-white" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-800">{heading}</h3>
+            <div>
+                <h3 className="text-lg font-semibold text-gray-900">{heading}</h3>
+                {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+            </div>
         </div>
-    )
+    );
 }
 
-export default function VisitorForm() {
+const steps = [
+    { title: "Whom to Meet", subtitle: "Choose department & employee" },
+    { title: "Personal", subtitle: "Your contact information" },
+    { title: "Company", subtitle: "Organization details" },
+    { title: "Additional", subtitle: "Laptop & vehicle info" },
+];
+
+// ─── Success screen (exported so VisitorCheckIn can render it in "done" phase) ─
+export function SuccessScreen({
+    visitorName,
+    hostName,
+    onReset,
+}: {
+    visitorName: string;
+    hostName: string;
+    onReset: () => void;
+}) {
+    return (
+        <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.94, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+            className="flex flex-col items-center gap-6 py-4 text-center"
+        >
+            {/* Animated check */}
+            <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+                className="flex h-24 w-24 items-center justify-center rounded-full"
+                style={{
+                    background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+                    boxShadow: "0 8px 32px rgba(16,185,129,0.20)",
+                }}
+            >
+                <Check className="h-10 w-10 text-emerald-600" strokeWidth={2.5} />
+            </motion.div>
+
+            {/* Title */}
+            <div className="space-y-1.5">
+                <motion.h2
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="text-2xl font-bold text-gray-900"
+                    style={{ letterSpacing: "-0.02em" }}
+                >
+                    Visit Booked Successfully!
+                </motion.h2>
+                <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.32 }}
+                    className="text-sm text-gray-500 leading-relaxed"
+                >
+                    Your host has been notified and will approve your visit shortly.
+                </motion.p>
+            </div>
+
+            {/* Info cards */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="w-full space-y-2.5"
+            >
+                <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#8b1a30] to-[#6b1223]">
+                        <User className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Visitor</p>
+                        <p className="text-sm font-semibold text-gray-800">{visitorName}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#8b1a30]/10">
+                        <CalendarCheck className="h-4 w-4 text-[#8b1a30]" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Meeting</p>
+                        <p className="text-sm font-semibold text-gray-800">{hostName}</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-left">
+                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                    </div>
+                    <div>
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-amber-500">Status</p>
+                        <p className="text-sm font-semibold text-amber-700">Awaiting host approval</p>
+                    </div>
+                </div>
+            </motion.div>
+
+            {/* Lobby instruction */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 w-full"
+            >
+                <MapPin size={14} className="text-emerald-600 flex-shrink-0" />
+                <p className="text-xs text-emerald-700 text-left">
+                    Please wait in the lobby. The receptionist will guide you once approved.
+                </p>
+            </motion.div>
+
+            {/* New check-in */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="w-full"
+            >
+                <Button
+                    type="button"
+                    onClick={onReset}
+                    variant="outline"
+                    className="w-full rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50"
+                >
+                    New Check-In
+                </Button>
+            </motion.div>
+        </motion.div>
+    );
+}
+
+// ─── Main form ─────────────────────────────────────────────────────────────────
+export default function VisitorForm({ setPhase }: VisitorFormProps) {
+    const [step, setStep] = useState(0);
+    const [date, setDate] = useState<Date>();
+    const [time, setTime] = useState("");
+    const location = useLocation();
 
     const {
         register,
         handleSubmit,
         reset,
         control,
-        setValue,
         watch,
-        formState: { errors, isSubmitting },
+        trigger,
+        setValue,
+        formState: { isSubmitting },
     } = useForm<VisitorFormValues>({
         resolver: zodResolver(visitorSchema),
         defaultValues: {
@@ -98,307 +239,458 @@ export default function VisitorForm() {
             vehicle_no: "",
             employee_id: "",
             department_id: "",
-        }
+        },
     });
 
     const hasLaptop = watch("is_laptop");
     const hasVehicle = watch("is_vehicle");
     const watchedDepartment = watch("department_id");
 
-    const { data: departments = [], isLoading: deptLoading } =
-        useGetDepartmentsQuery();
-
-    const {
-        data: employees = [],
-        isLoading: empLoading,
-    } = useGetEmployeesQuery(watchedDepartment, {
+    const { data: departments = [], isLoading: deptLoading } = useGetDepartmentsQuery();
+    const { data: employees = [], isLoading: empLoading } = useGetEmployeesQuery(watchedDepartment, {
         skip: !watchedDepartment,
     });
-
-    console.log(departments, employees);
-
-
-
     const [checkInVisitor] = useVisitorCheckInMutation();
 
+    const selectedDepartmentData = departments.find((d) => String(d.id) === watchedDepartment);
+    const selectedEmployeeData = employees.find((e) => String(e.id) === watch("employee_id"));
 
-    const departmentOptions = departments.map((dept) => ({
-        label: dept.name,
-        value: String(dept.id),
+    const departmentOptions = departments.map((d) => ({ label: d.name, value: String(d.id) }));
+    const employeeOptions = employees.map((e) => ({
+        label: `${e.first_name} ${e.last_name}`,
+        value: String(e.id),
     }));
 
+    // ── Navigation ────────────────────────────────────────────────────────────
+    const nextStep = async () => {
+        // Step 2 (Company) is fully optional — no validation needed
+        if (step === 2) {
+            setStep((p) => p + 1);
+            return;
+        }
 
-    // const employeeOptions = employees.map((emp) => ({
-    //   label: `${emp.first_name} ${emp.last_name} - ${emp.position}`,
-    //   value: String(emp.id),
-    // }));
+        const fieldMap: Record<number, (keyof VisitorFormValues)[]> = {
+            0: ["department_id", "employee_id"],
+            1: ["first_name", "last_name", "phone", "email"],
+        };
 
-    const employeeOptions = employees.map((emp) => ({
-        label: `${emp.first_name} ${emp.last_name} | ${emp.position} | ${emp.email}`,
-        value: String(emp.id),
-    }));
+        const fields = fieldMap[step];
+        if (fields) {
+            const valid = await trigger(fields);
+            if (!valid) return;
+        }
 
+        setStep((p) => p + 1);
+    };
+
+    const prevStep = () => setStep((p) => Math.max(p - 1, 0));
+
+    // ── Submit — invoked ONLY by the final button's onClick ───────────────────
     const onSubmit = async (data: VisitorFormValues) => {
-  try {
-    await checkInVisitor({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: data.email,
-      phone: data.phone,
+        try {
+            const payload = {
+                first_name: data.first_name,
+                last_name: data.last_name,
+                email: data.email,
+                phone: data.phone,
+                company: data.company,
+                position: data.position,
+                is_laptop: data.is_laptop,
+                ...(data.is_laptop ? {
+                    make: data.make,
+                    model: data.model,
+                    serial_no: data.serial_no,
+                } : {
+                    make: "",
+                    model: "",
+                    serial_no: "",
+                }
+                ),
+                is_vehicle: data.is_vehicle,
+                ...(data.is_vehicle ? { vehicle_no: data.vehicle_no } : { vehicle_no: "" }),
+                employee_id: data.employee_id,
+            };
 
-      company: data.company,
-      position: data.position,
+            await checkInVisitor(payload).unwrap();
 
-      is_laptop: data.is_laptop,
-      make: data.make,
-      model: data.model,
-      serial_no: data.serial_no,
-
-      is_vehicle: data.is_vehicle,
-      vehicle_no: data.vehicle_no,
-
-      employee_id: data.employee_id,
-    }).unwrap();
-
-    reset();
-
-  } catch (error) {
-    console.error(error);
-  }
-};
-
+            reset();
+            setStep(0);
+            setPhase("done");
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-4xl mx-auto">
-            <div className="space-y-4">
+        <div className="mx-auto w-full max-w-4xl">
+            <form
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") e.preventDefault();
+                }}
+            >
+                <AnimatePresence mode="wait">
 
-                {/* Header Section */}
-                <div className="text-center space-y-2">
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-[#8b1a30] to-[#6b1223] bg-clip-text text-transparent">
-                        Visitor Registration
-                    </h2>
-                    <p className="text-gray-600">
-                        Please fill in your details to complete the check-in process
-                    </p>
-                </div>
-
-                {/* Whom to Meet Section - Most Important */}
-                <div className="bg-gradient-to-br from-[#8b1a30]/5 to-[#6b1223]/5 rounded-2xl p-6 border-2 border-[#8b1a30]/20">
-                    <SectionHeader icon={User} heading={'Whom to meet'} color={'bg-maroon'} />
-
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-                        <SelectField<VisitorFormValues>
-                            name="department_id"
-                            label="Department"
-                            placeholder={
-                                deptLoading
-                                    ? "Loading departments..."
-                                    : "Select Department"
-                            }
-                            control={control}
-                            options={departmentOptions}
-                        />
-
-                        <SelectField<VisitorFormValues>
-                            name="employee_id"
-                            label="Employee"
-                            placeholder={
-                                !watchedDepartment
-                                    ? "Select department first"
-                                    : empLoading
-                                        ? "Loading employees..."
-                                        : "Select Employee"
-                            }
-                            control={control}
-                            options={employeeOptions}
-                            disabled={!watchedDepartment}
-                        />
-
-                    </div>
-                </div>
-
-                {/* Personal Information */}
-                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                    <SectionHeader icon={User} heading={'Personal Information'} color={'bg-cyan-700'} />
-                    {/* <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-cyan-700 rounded-lg">
-                            <User className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-gray-800">Personal Information</h3>
-                    </div> */}
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <CustomInputField<VisitorFormValues>
-                            name="first_name"
-                            label="First Name"
-                            placeholder="Rahul"
-                            control={control}
-                        />
-
-                        <CustomInputField<VisitorFormValues>
-                            name="last_name"
-                            label="Last Name"
-                            placeholder="Sharma"
-                            control={control}
-                        />
-                    </div>
-                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <CustomInputField<VisitorFormValues>
-                            name="phone"
-                            label="Phone Number"
-                            placeholder="+91 9876543210"
-                            control={control}
-                        />
-
-                        <CustomInputField<VisitorFormValues>
-                            name="email"
-                            type="email"
-                            label="Email Address"
-                            placeholder="rahul@gmail.com"
-                            control={control}
-                        />
-                    </div>
-                </div>
-
-
-                {/* Company Information */}
-                <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                    <SectionHeader icon={Building2} heading={'Company Information'} color={'bg-cyan-700'} />
-                    {/* <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 bg-cyan-700 rounded-lg">
-                            <Building2 className="w-5 h-5 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-gray-800">Company Information</h3>
-                    </div> */}
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <CustomInputField<VisitorFormValues>
-                            name="company"
-                            label="Company Name"
-                            placeholder="Infosys"
-                            control={control}
-                        />
-
-                        <CustomInputField<VisitorFormValues>
-                            name="position"
-                            label="Position"
-                            placeholder="Software Engineer"
-                            control={control}
-                        />
-                    </div>
-                </div>
-
-                {/* Additional Items Section */}
-                <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Additional Items (Optional)</h3>
-
-                    {/* Laptop Section */}
-                    <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:border-[#8b1a30]/30 transition-all">
-                        <label className="flex items-center gap-4 p-5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                {...register("is_laptop")}
-                                className="w-5 h-5 text-[#8b1a30] border-gray-300 rounded focus:ring-[#8b1a30] cursor-pointer"
+                    {/* STEP 0 — Whom to Meet */}
+                    {step === 0 && (
+                        <motion.div
+                            key="step-0"
+                            initial={{ opacity: 0, x: 40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -40 }}
+                            transition={{ duration: 0.25 }}
+                            className="rounded-3xl border border-[#8b1a30]/10 bg-gradient-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
+                        >
+                            <SectionHeader
+                                icon={User}
+                                heading="Whom to Meet"
+                                description="Select the department and employee you're visiting"
+                                color="bg-gradient-to-br from-[#8b1a30] to-[#6b1223]"
                             />
-                            <div className="flex items-center gap-3 flex-1">
-                                <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                                    <Laptop className="w-5 h-5 text-purple-600" />
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                                <div className="space-y-3">
+                                    <SelectField<VisitorFormValues>
+                                        name="department_id"
+                                        label="Department"
+                                        placeholder={deptLoading ? "Loading departments..." : "Select Department"}
+                                        control={control}
+                                        options={departmentOptions}
+                                    />
+                                    {selectedDepartmentData && (
+                                        <div className="rounded-2xl border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
+                                            <p className="text-xs text-gray-500">Selected Department</p>
+                                            <p className="mt-1 text-sm font-semibold text-gray-900">{selectedDepartmentData.name}</p>
+                                        </div>
+                                    )}
                                 </div>
-                                <div>
-                                    <span className="font-semibold text-gray-800 block">Carrying Laptop?</span>
-                                    <span className="text-sm text-gray-500">Check if you're bringing a laptop</span>
+                                <div className="space-y-3">
+                                    <SelectField<VisitorFormValues>
+                                        name="employee_id"
+                                        label="Employee"
+                                        placeholder={!watchedDepartment ? "Select department first" : empLoading ? "Loading employees..." : "Select Employee"}
+                                        control={control}
+                                        options={employeeOptions}
+                                        disabled={!watchedDepartment}
+                                    />
+                                    {selectedEmployeeData && (
+                                        <div className="rounded-2xl border border-[#8b1a30]/10 bg-white/80 p-4">
+                                            <p className="text-xs text-gray-500">Selected Employee</p>
+                                            <p className="mt-1 text-sm font-semibold text-gray-900">
+                                                {selectedEmployeeData.first_name} {selectedEmployeeData.last_name}
+                                            </p>
+                                            <p className="mt-1 text-xs text-gray-600">{selectedEmployeeData.position}</p>
+                                            <p className="text-xs text-gray-500">{selectedEmployeeData.email}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
-                        </label>
+                            {
+                                location.pathname === '/employee' && (
+                                    <div className="mt-4 flex gap-2 items-center">
+                                        <div className="space-y-2 basis-1/2">
+                                            <FormLabel htmlFor="visit-date" label="Visit Date" required={true} />
 
-                        {hasLaptop && (
-                            <div className="px-5 pb-5 space-y-4 bg-purple-50/50 border-t border-purple-100">
-                                <div className="pt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <CustomInputField<VisitorFormValues>
-                                        name="make"
-                                        label="Laptop Make"
-                                        placeholder="Dell"
-                                        control={control}
-                                        required={false}
-                                    />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        className="
+                        h-10 w-full justify-start rounded-md
+                        border-gray-200 bg-white text-left font-normal
+                        hover:bg-gray-50
+                    "
+                                                    >
+                                                        <CalendarIcon className="mr-2 h-4 w-4 text-[#8b1a30]" />
 
-                                    <CustomInputField<VisitorFormValues>
-                                        name="model"
-                                        label="Laptop Model"
-                                        placeholder="Inspiron 15"
-                                        control={control}
-                                        required={false}
-                                    />
-                                </div>
+                                                        {date ? (
+                                                            format(date, "PPP")
+                                                        ) : (
+                                                            <span className="text-gray-400">
+                                                                Select visit date
+                                                            </span>
+                                                        )}
+                                                    </Button>
+                                                </PopoverTrigger>
 
-                                <CustomInputField<VisitorFormValues>
-                                    name="serial_no"
-                                    label="Serial Number"
-                                    placeholder="SN123456789"
-                                    control={control}
-                                    required={false}
+                                                <PopoverContent
+                                                    className="w-auto rounded-2xl border-gray-200 p-0"
+                                                    align="start"
+                                                >
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={date}
+                                                        onSelect={setDate}
+                                                        // initialFocus
+                                                        disabled={(date) => {
+                                                            const today = new Date();
+                                                            today.setHours(0, 0, 0, 0);
+
+                                                            return date < today;
+                                                        }}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                        </div>
+
+                                        {/* Time Picker */}
+                                        <div className="space-y-2 basis-1/2">
+                                            <FormLabel htmlFor="visit-time" label="Visit Time" required={true} />
+
+                                            <Select value={time} onValueChange={setTime}>
+                                                <SelectTrigger
+                                                    className="
+                    h-10 rounded-md border-gray-200 w-full
+                    focus:ring-[#8b1a30] mb-0
+                "
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock3 className="h-4 w-4 text-[#8b1a30]" />
+
+                                                        <SelectValue placeholder="Select time" />
+                                                    </div>
+                                                </SelectTrigger>
+
+                                                <SelectContent className="rounded-xl max-h-60">
+                                                    {Array.from({ length: 48 }).map((_, index) => {
+                                                        const hour = Math.floor(index / 2);
+                                                        const minute = index % 2 === 0 ? "00" : "30";
+
+                                                        const time24 = `${String(hour).padStart(2, "0")}:${minute}`;
+
+                                                        const hour12 =
+                                                            hour === 0
+                                                                ? 12
+                                                                : hour > 12
+                                                                    ? hour - 12
+                                                                    : hour;
+
+                                                        const ampm = hour >= 12 ? "PM" : "AM";
+
+                                                        return (
+                                                            <SelectItem key={time24} value={time24}>
+                                                                {`${String(hour12).padStart(2, "0")}:${minute} ${ampm}`}
+                                                            </SelectItem>
+                                                        );
+                                                    })}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
+                        </motion.div>
+                    )}
+
+                    {/* STEP 1 — Personal */}
+                    {step === 1 && (
+                        <motion.div
+                            key="step-1"
+                            initial={{ opacity: 0, x: 40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -40 }}
+                            transition={{ duration: 0.25 }}
+                            className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm"
+                        >
+                            <SectionHeader
+                                icon={User}
+                                heading="Personal Information"
+                                description="Enter your personal contact details"
+                                color="bg-cyan-700"
+                            />
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <CustomInputField<VisitorFormValues> name="first_name" label="First Name" placeholder="Rahul" control={control} />
+                                <CustomInputField<VisitorFormValues> name="last_name" label="Last Name" placeholder="Sharma" control={control} />
+                            </div>
+                            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <CustomInputField<VisitorFormValues> name="phone" label="Phone Number" placeholder="+91 9876543210" control={control} />
+                                <CustomInputField<VisitorFormValues> name="email" type="email" label="Email Address" placeholder="rahul@gmail.com" control={control} />
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* STEP 2 — Company (optional) */}
+                    {step === 2 && (
+                        <motion.div
+                            key="step-2"
+                            initial={{ opacity: 0, x: 40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -40 }}
+                            transition={{ duration: 0.25 }}
+                            className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm"
+                        >
+                            <SectionHeader
+                                icon={Building2}
+                                heading="Company Information"
+                                description="Tell us about your organization"
+                                color="bg-indigo-700"
+                            />
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <CustomInputField<VisitorFormValues> name="company" label="Company Name" placeholder="Infosys" control={control} required={false} />
+                                <CustomInputField<VisitorFormValues> name="position" label="Position" placeholder="Software Engineer" control={control} required={false} />
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* STEP 3 — Additional */}
+                    {step === 3 && (
+                        <motion.div
+                            key="step-3"
+                            initial={{ opacity: 0, x: 40 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -40 }}
+                            transition={{ duration: 0.25 }}
+                            className="space-y-5"
+                        >
+                            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                                <SectionHeader
+                                    icon={Laptop}
+                                    heading="Additional Details"
+                                    description="Optional security & parking information"
+                                    color="bg-purple-700"
                                 />
-                            </div>
-                        )}
-                    </div>
 
-                    {/* Vehicle Section */}
-                    <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden hover:border-[#8b1a30]/30 transition-all">
-                        <label className="flex items-center gap-4 p-5 cursor-pointer group">
-                            <input
-                                type="checkbox"
-                                {...register("is_vehicle")}
-                                className="w-5 h-5 text-[#8b1a30] border-gray-300 rounded focus:ring-[#8b1a30] cursor-pointer"
-                            />
-                            <div className="flex items-center gap-3 flex-1">
-                                <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
-                                    <Car className="w-5 h-5 text-blue-600" />
+                                {/* Laptop toggle */}
+                                <div className="overflow-hidden rounded-2xl border-2 border-gray-200 transition-all hover:border-purple-300">
+                                    <label className="group flex cursor-pointer items-center gap-4 px-5 py-4">
+                                        <input
+                                            type="checkbox"
+                                            {...register("is_laptop")}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                setValue("is_laptop", checked);
+                                                if (!checked) { setValue("make", ""); setValue("model", ""); setValue("serial_no", ""); }
+                                            }}
+                                            className="h-4 w-4 rounded border-gray-300 text-[#8b1a30]"
+                                        />
+                                        <div className="flex flex-1 items-center gap-3">
+                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-100 transition-colors group-hover:bg-purple-200">
+                                                <Laptop className="h-5 w-5 text-purple-700" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">Carrying a Laptop?</p>
+                                                <p className="text-xs text-gray-500">Security will register your device</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <AnimatePresence>
+                                        {hasLaptop && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="border-t border-purple-100 bg-purple-50/60"
+                                            >
+                                                <div className="space-y-4 p-5">
+                                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                                        <CustomInputField<VisitorFormValues> name="make" label="Laptop Make" placeholder="Dell" control={control} required={false} />
+                                                        <CustomInputField<VisitorFormValues> name="model" label="Laptop Model" placeholder="Inspiron 15" control={control} required={false} />
+                                                    </div>
+                                                    <CustomInputField<VisitorFormValues> name="serial_no" label="Serial Number" placeholder="SN123456789" control={control} required={false} />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
-                                <div>
-                                    <span className="font-semibold text-gray-800 block">Bringing Vehicle?</span>
-                                    <span className="text-sm text-gray-500">Check if you need parking</span>
-                                </div>
-                            </div>
-                        </label>
 
-                        {hasVehicle && (
-                            <div className="px-5 pb-5 bg-blue-50/50 border-t border-blue-100">
-                                <div className="pt-4">
-                                    <CustomInputField<VisitorFormValues>
-                                        name="vehicle_no"
-                                        label="Vehicle Registration Number"
-                                        placeholder="MH12AB1234"
-                                        control={control}
-                                        required={false}
-                                    />
+                                {/* Vehicle toggle */}
+                                <div className="mt-5 overflow-hidden rounded-2xl border-2 border-gray-200 transition-all hover:border-blue-300">
+                                    <label className="group flex cursor-pointer items-center gap-4 px-5 py-4">
+                                        <input
+                                            type="checkbox"
+                                            {...register("is_vehicle")}
+                                            onChange={(e) => {
+                                                const checked = e.target.checked;
+                                                setValue("is_vehicle", checked);
+                                                if (!checked) setValue("vehicle_no", "");
+                                            }}
+                                            className="h-4 w-4 rounded border-gray-300 text-[#8b1a30]"
+                                        />
+                                        <div className="flex flex-1 items-center gap-3">
+                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 transition-colors group-hover:bg-blue-200">
+                                                <Car className="h-5 w-5 text-blue-700" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-semibold text-gray-900">Bringing a Vehicle?</p>
+                                                <p className="text-xs text-gray-500">Register for parking access</p>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <AnimatePresence>
+                                        {hasVehicle && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                className="border-t border-blue-100 bg-blue-50/60"
+                                            >
+                                                <div className="p-5">
+                                                    <CustomInputField<VisitorFormValues> name="vehicle_no" label="Vehicle Registration Number" placeholder="MH12AB1234" control={control} required={false} />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </motion.div>
+                    )}
+
+                </AnimatePresence>
+
+                {/* ── Navigation bar ───────────────────────────────────────────── */}
+                <div className="mt-8 flex items-center justify-between">
+                    {step === 0 ? (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setPhase("qr")}
+                            className="h-10 rounded-md text-sm border-gray-300 px-5 text-gray-700 hover:bg-gray-50"
+                        >
+                            Scan QR Instead
+                        </Button>
+                    ) : (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={prevStep}
+                            className="h-12 w-12 rounded-full border-gray-300"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    )}
+
+                    {step !== steps.length - 1 ? (
+                        /* ✅ type="button" — cannot trigger form submission */
+                        <Button
+                            type="button"
+                            onClick={nextStep}
+                            className="h-12 w-12 rounded-full text-white shadow-lg transition-all hover:scale-[1.02]"
+                            style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
+                        >
+                            <ArrowRight className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        /*
+                          ✅ type="button" + onClick={handleSubmit(onSubmit)}
+                          This is the ONLY path that ever calls onSubmit.
+                          No other step can reach it.
+                        */
+                        <Button
+                            type="button"
+                            disabled={isSubmitting}
+                            onClick={handleSubmit(onSubmit)}
+                            className="h-11 rounded-xl px-6 text-white shadow-xl transition-all hover:scale-[1.02] disabled:opacity-60"
+                            style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
+                        >
+                            {isSubmitting ? "Submitting..." : "Complete Registration"}
+                            {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                        </Button>
+                    )}
                 </div>
 
-                {/* Submit Button */}
-                <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 text-white text-base font-semibold rounded-xl transition-all duration-200 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
-                    style={{
-                        background: "linear-gradient(135deg, #8b1a30, #6b1223)",
-                        boxShadow: "0 8px 24px rgba(139,26,48,0.35)",
-                    }}
-                >
-                    <span className="flex items-center justify-center gap-2">
-                        {isSubmitting ? "Submitting..." : "Complete Registration"}
-                        {!isSubmitting && <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
-                    </span>
-                </Button>
-
-                <p className="text-center text-sm text-gray-500">
-                    By submitting, you agree to our visitor policies and security protocols
+                <p className="mt-5 text-center text-xs text-gray-500">
+                    By continuing, you agree to visitor security policies and check-in protocols.
                 </p>
-            </div>
-        </form>
+            </form>
+        </div>
     );
 }

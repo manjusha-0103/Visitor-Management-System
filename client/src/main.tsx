@@ -13,7 +13,11 @@ import router from './router.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" 
+      style={{
+        maxWidth: '90%',
+        margin: 'auto'
+      }}/>
       <Suspense fallback={<LoadingSpinner/>}>
       <AuthLoader>
         <RouterProvider router={router}/>
