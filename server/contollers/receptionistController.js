@@ -9,12 +9,19 @@ import { setPassIdService,
     checkOutService
  } from "../services/receptionist.service.js";
 
+import { getIO } from "../config/socket.js";
+
 
 const setPassId = asyncHandler(async (req, res) => {
     const {appointment_id} = req.params
     
     const appoitment = await setPassIdService(appointment_id, req.body)
     if(appoitment){
+         const io = getIO();
+         io.emit("appointment_updated", {
+            type: "pass_id_set",
+            data: appoitment
+        });
         sendResponse(res, 200, appoitment, "Set PassID")
     }else{
         throw new ApiError(400, "Failed to set")
@@ -25,6 +32,14 @@ const checkOut = asyncHandler(async (req, res) => {
     const { appointment_id } = req.params;
 
     const appointment = await checkOutService(appointment_id);
+    if(appointment){
+         const io = getIO();
+
+        io.emit("appointment_updated", {
+            type: "checked_out",
+            data: appoitment
+        });
+    }
 
     sendResponse(
         res,

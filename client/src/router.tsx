@@ -5,6 +5,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import ManageTeam from "./components/team/ManageTeam";
 import PreSchedule from "./pages/employee/PreSchedule";
+import ManageAppointment from "./pages/appointment/ManageAppointment";
 
 
 const Auth = lazy(() => import("@/pages/Auth"))
@@ -50,10 +51,10 @@ const router = createBrowserRouter([
                         path: "team",
                         element: <ManageTeam />
                     },
-                    // {
-                    //     path: "visitor",
-                    //     element: <ManageVisitor />
-                    // },
+                    {
+                        path: "appointments",
+                        element: <ManageAppointment />
+                    },
                 ]
             }
         ]
@@ -71,10 +72,10 @@ const router = createBrowserRouter([
                         index: true,
                         element: <DashHome />
                     },
-                    // {
-                    //     path: "team",
-                    //     element: <ManageTeam />
-                    // },
+                    {
+                        path: "appointments",
+                        element: <ManageAppointment />
+                    },
                 ]
             }
         ]
