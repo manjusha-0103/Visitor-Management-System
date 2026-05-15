@@ -2,9 +2,13 @@ import express from "express";
 import {protect} from "../middlewares/authmiddleware.js";
 import { authorize } from "../middlewares/authoriseRoleMiddleware.js";
 import validate from "../middlewares/validate.js";
+import { setPassId,
+    checkOut
+ } from "../contollers/receptionistController.js";
 
 
 const router = express.Router();
-// router.get("/past",protect, authorize('super_admin', "receptionist"), pastAppointments)
+router.put("/set-pass/:appointment_id",protect, authorize( "receptionist"), setPassId)
+router.put("/chek-out/:appointment_id", protect, authorize( "receptionist"), checkOut)
 
 export default router;

@@ -55,9 +55,21 @@ const loginUser = asyncHandler(async (req, res) => {
     sendResponse(res, 200, user, `Welcome back, ${user.first_name}`)
 })
 
+const logoutUser = asyncHandler(async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        path: "/",
+    });
+
+    sendResponse(res, 200, {}, "User logged out successfully");
+});
+
 
 export{
     getMe,
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 }
