@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs"
 import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
+import { userExistbyemailService } from "./auth.service.js"
 
 const chekIsApproveService = async (is_approve, appointment_id) => {
     console.log(is_approve, appointment_id)
@@ -15,8 +16,11 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
     return amp
 }
 
-const preScheduleService = async ({employee_email, visitors, date_time}) => {
-    let amp  = []
+const preScheduleService = async ({ employee_email, visitors, date_time }) => {
+
+    let amp = [];
+    let vs = [];
+
     const [employee] = await sql`
         SELECT
             e.id AS employee_id,
@@ -33,39 +37,106 @@ const preScheduleService = async ({employee_email, visitors, date_time}) => {
         JOIN "Users" u
             ON u.id = e.user_id
         WHERE u.email = ${employee_email}
-    `
-    let visitorexist;
-    for(let v of visitors){
-        visitorexist = await userExistbyemailService(v.email)
-        if(visitorexist.length){
-            let [ampp] = await sql`
-                INSERT INTO "Appointments" ("employee_id", "visitor_id", "is_preschedule", "date_time")
-                values(${employee.employee_id}, ${visitorexist[0].id}, 'true', ${date_time} )
-                RETURNING *
-            `
-            amp.append(ampp)
+    `;
 
-        }
-        else{
-            visitor = await sql`
-                INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id")
-                VALUES (${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${position}, ${company}, ${user[0].id})
-                RETURNING *
-            `
+    if (!employee) {
+        throw new ApiError(404, "Employee not found");
+    }
+
+    for (let v of visitors) {
+
+        const visitorexist = await userExistbyemailService(v.email);
+
+        console.log(visitorexist);
+
+        // Existing visitor
+        if (visitorexist.length) {
+
+            let [existingVisitor] = await sql`
+                SELECT * FROM "Visitors"
+                WHERE "user_id" = ${visitorexist[0].id}
+            `;
+
+
             let [ampp] = await sql`
-                INSERT INTO "Appointments" ("employee_id", "visitor_id", "is_preschedule", "date_time")
-                values(${employee.employee_id}, ${visitorexist[0].id}, 'true', ${date_time} )
+                INSERT INTO "Appointments"
+                ("employee_id", "visitor_id", "is_preschedule", "date_time", "is_approve")
+                VALUES (
+                    ${employee.employee_id},
+                    ${existingVisitor.id},
+                    ${true},
+                    ${date_time},
+                    'true'
+                )
                 RETURNING *
-            `
-            amp.append(ampp)
-        }   
+            `;
+
+            amp.push(ampp);
+
+            vs.push(existingVisitor);
+
+        } else {
+
+            // Create user
+            const [user] = await sql`
+                INSERT INTO "Users"
+                ("email", "first_name", "last_name", "role", "phone")
+                VALUES (
+                    ${v.email},
+                    ${v.first_name},
+                    ${v.last_name},
+                    ${'visitor'},
+                    ${v.phone}
+                )
+                RETURNING
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "role",
+                    "phone"
+            `;
+
+            // Create visitor
+            const [visitor] = await sql`
+                INSERT INTO "Visitors"
+                ("position", "company", "user_id")
+                VALUES (
+                    ${v.position},
+                    ${v.company},
+                    ${user.id}
+                )
+                RETURNING *
+            `;
+
+            // Create appointment
+            let [ampp] = await sql`
+                INSERT INTO "Appointments"
+                ("employee_id", "visitor_id", "is_preschedule", "date_time","is_approve")
+                VALUES (
+                    ${employee.employee_id},
+                    ${visitor.id},
+                    ${true},
+                    ${date_time},
+                    'true'
+                )
+                RETURNING *
+            `;
+
+            amp.push(ampp);
+
+            // FIXED HERE
+            vs.push(visitor);
+        }
     }
 
     return {
-        amp, employee, visitors
-    }
-}
-
+        amp,
+        employee,
+        vs
+    };
+};
 export{
-    chekIsApproveService
+    chekIsApproveService,
+    preScheduleService
 }
