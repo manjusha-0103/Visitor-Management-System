@@ -23,6 +23,8 @@ type ToastError =
 export function showErrorToast(
     error: ToastError
 ) {
+    console.log(error);
+    
     let message = "Something went wrong";
     let description = "";
 

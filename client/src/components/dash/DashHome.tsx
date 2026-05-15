@@ -7,7 +7,10 @@ export default function DashHome() {
     const user = useSelector(selectUser);
     const isadmin = user?.role === 'super_admin';
   return (
-    <div className="min-h-screen bg-linear-to-br from-maroon to-maroon-dark p-6">
+    <div className="min-h-screen  p-6"
+    style={{
+          background: 'linear-gradient(90deg, rgb(112, 26, 64) 0%, rgb(84, 11, 40) 100%)'
+    }}>
       <div className="text-center mb-10">
         <p className="text-white/70 text-lg lg:text-xl mt-2 leading-6 tracking-tight">
           {

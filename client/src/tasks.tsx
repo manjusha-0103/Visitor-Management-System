@@ -54,7 +54,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Users",
     icon: UserRound,
     bg: "bg-amber-700 shadow-lg shadow-amber-700/40",
-    path: "/admin/users",
+    path: "/receptionist/users",
   },
 
   {
@@ -62,7 +62,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Appointments",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/admin/appointments",
+    path: "/receptionist/appointments",
   },
 
   {
@@ -70,7 +70,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Team",
     icon: UsersRound,
     bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
-    path: "/admin/team",
+    path: "/receptionist/team",
   },
 
   {
@@ -78,6 +78,6 @@ export const RECEPTIONIST_TASKS = [
     label: "Analytics",
     icon: ChartNoAxesCombined,
     bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40",
-    path: "/admin/analytics",
+    path: "/receptionist/analytics",
   },
 ] as const;

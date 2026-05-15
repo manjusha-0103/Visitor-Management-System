@@ -1,6 +1,6 @@
 export const CREDENTIALS = [
     { role: "Super Admin", badge: "super_admin", badgeClass: "super_admin", email: "manjusha.racca@gmail.com", pass: "Password123" },
-    { role: "Receptionist", badge: "receptionist", badgeClass: "receptionist", email: "mgkcode@gmail.com", pass: "Pass@12345" },
+    { role: "Receptionist", badge: "receptionist", badgeClass: "receptionist", email: "rashmika@gmail.com", pass: "Password123" },
     { role: "Employee", badge: "employee", badgeClass: "employee", email: "mgkcode@gmail.com", pass: "Password123" },
 ] as const;
 

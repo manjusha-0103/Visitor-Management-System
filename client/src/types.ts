@@ -72,3 +72,54 @@ export interface AuthInitialState {
     isAuthChecked: boolean,
     loading: boolean,
 }
+
+
+//Appointment table
+export interface AppointmentRow {
+  // ── Appointment ─────────────────────────────
+  appointment_id: string;
+  appointment_created_at: string;
+
+  check_in: string | null;
+  check_out: string | null;
+
+  date_time: string;
+
+  is_preschedule: boolean;
+  is_approve: boolean;
+
+  pass_id: string | null;
+
+  // ── Employee ───────────────────────────────
+  employee_id: string;
+  employee_position: string | null;
+  department: string | null;
+
+  // ── Employee User ──────────────────────────
+  employee_first_name: string;
+  employee_last_name: string;
+
+  employee_email: string;
+  employee_phone: string;
+
+  // ── Visitor ────────────────────────────────
+  visitor_id: string;
+  visitor_position: string | null;
+
+  company: string | null;
+
+  is_laptop: boolean;
+  laptop_make: string | null;
+  laptop_model: string | null;
+  laptop_serial_no: string | null;
+
+  is_vehicle: boolean;
+  vehicle_no: string | null;
+
+  // ── Visitor User ───────────────────────────
+  visitor_first_name: string;
+  visitor_last_name: string;
+
+  visitor_email: string;
+  visitor_phone: string;
+}
