@@ -31,19 +31,18 @@ type UseMeCred = {
 // }
 
 export default function Auth() {
-    const [login, { isLoading, isError, error }] = useSignInMutation()
+    const [login, { isLoading }] = useSignInMutation()
     const dispatch = useDispatch();
     const {
         handleSubmit,
         setValue,
         control,
-        formState: { errors }
     } = useForm({
         resolver: zodResolver(signInSchema),
         defaultValues: { email: "", password: "" }
     })
     const navigate = useNavigate();
-    const [role, setRole] = useState("");
+    // const [role, setRole] = useState("");
 
     // console.log(watch("email"), watch("password"));
 
@@ -52,7 +51,7 @@ export default function Auth() {
     const handleUse = (cred: UseMeCred) => {
         setValue("email", cred.email);
         setValue("password", cred.pass);
-        setRole(cred.badge)
+        // setRole(cred.badge)
     };
 
     async function onSubmit(data: SignFormValues) {
@@ -73,15 +72,7 @@ export default function Auth() {
 
     }
 
-    // function handleSignIn() {
-    //     // console.log(role);
-    //     if (role === 'super_admin') {
-    //         navigate('/admin', { replace: true })
-    //     } else {
-    //         navigate('/receptionist', { replace: true })
-    //     }
-
-    // }
+    // funtyp
     return (
         <>
 

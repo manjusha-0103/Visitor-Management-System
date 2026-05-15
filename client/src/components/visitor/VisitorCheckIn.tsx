@@ -151,8 +151,7 @@ export default function VisitorCheckIn() {
                                         justify-center rounded-3xl border
                                         border-dashed border-[#8b1a30]/20
                                         bg-linear-to-br
-                                        from-[#faf6f8] to-white
-                                    "
+                                        from-[#faf6f8] to-white"
                                 >
                                     {/* QR corners */}
                                     {[
