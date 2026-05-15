@@ -335,8 +335,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-3xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
-                        >
+                            className="rounded-3xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
                             <SectionHeader
                                 icon={User}
                                 heading="Whom to Meet"
