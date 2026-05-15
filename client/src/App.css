@@ -1,3 +1,12 @@
+
+.app-container {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+  min-height: calc(100dvh - var(--hf-height)) !important;
+  width: 100%;
+  max-width: var(--max-width, 1440px);
+  margin: 0 auto;
+}
+
 /* Remove scrollbar arrows/buttons */
 ::-webkit-scrollbar-button {
   display: none;

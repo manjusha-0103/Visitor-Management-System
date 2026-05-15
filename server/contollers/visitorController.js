@@ -10,6 +10,8 @@ import { checkInService,
     getAllDepartmentsService ,
     getEmployeesService
 } from "../services/visitorService.js";
+import { getIO } from "../config/socket.js";
+
 
 const checkIn = asyncHandler(async (req, res) => {
     const appointment = await checkInService(req.body)
@@ -17,6 +19,13 @@ const checkIn = asyncHandler(async (req, res) => {
     console.log(appointment)
 
     if (appointment) {
+        const io = getIO();
+
+         io.emit("appointment_updated", {
+            type: "walkin_created",
+            data: appointment
+        });
+        
         sendResponse(
             res,
             200,

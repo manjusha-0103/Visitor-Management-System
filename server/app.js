@@ -8,6 +8,8 @@ import visitorRoutes from "./routers/visitorRoutes.js"
 import employeeRoutes from "./routers/employeeRoutes.js"
 import dashboardRoutes from "./routers/dashboardRoutes.js"
 import receptionistRoutes from "./routers/receptionistRoutes.js"
+import appointmentRoutes from "./routers/appointmentRoutes.js"
+
 
 const app = express()
 
@@ -30,6 +32,10 @@ app.use('/api/v1/auth',authRoute)
 app.use('/api/v1/visitors',visitorRoutes)
 app.use('/api/v1/employee', employeeRoutes)
 app.use('/api/v1/dashboard',dashboardRoutes)
+app.use('/api/v1/appointments',appointmentRoutes)
 app.use('/api/v1/receptionist', receptionistRoutes)
+
+
+app.use(globalErrorHandler);
 
 export default app;
