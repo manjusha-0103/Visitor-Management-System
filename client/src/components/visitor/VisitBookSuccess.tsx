@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { BadgeCheck, Check, ArrowRight } from "lucide-react";
+import { BadgeCheck, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface VisitBookSuccessProps {
