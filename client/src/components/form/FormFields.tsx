@@ -1,6 +1,5 @@
 import { FieldLabel } from "../ui/field";
-import { Controller, type Control, type FieldValues, type RegisterOptions } from "react-hook-form";
-import { type LucideIcon } from "lucide-react"
+import { Controller, type FieldValues } from "react-hook-form";
 import type { FieldLabelProp, InputFieldProps, SelectFieldProps } from "@/types";
 import { Input } from "../ui/input";
 import {
