@@ -102,7 +102,7 @@ export const visitorApi = api.injectEndpoints({
         body,
       }),
 
-      invalidatesTags: ["Appointment", "Visitor"],
+      invalidatesTags: ["Appointments", "Visitor"],
     }),
 
     // VISITOR CHECK-IN
@@ -116,7 +116,7 @@ export const visitorApi = api.injectEndpoints({
         body,
       }),
 
-      invalidatesTags: ["Appointment", 'Visitor'],
+      invalidatesTags: ["Appointments", 'Visitor'],
     }),
   }),
 });
