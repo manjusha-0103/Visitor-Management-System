@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { LogOut, Bell } from "lucide-react";
+import { Link } from "react-router-dom";
+import { LogOut } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -16,27 +16,27 @@ import {
 } from "@/components/ui/avatar";
 import { selectUser } from "@/lib/features/auth/authSlice";
 import { useSelector } from "react-redux";
-import { useSignOutMutation } from "@/lib/features/auth/authApi";
+// import { useSignOutMutation } from "@/lib/features/auth/authApi";
 import { ROLES } from "@/contants";
 // import { useGetAlertsQuery } from "@/lib/features/alerts/alertApi";
 
 export default function Header() {
   const user = useSelector(selectUser);
   console.log("Authenticated user", user);
-  const [signOut] = useSignOutMutation();
-  const navigate = useNavigate();
+  // const [signOut] = useSignOutMutation();
+  // const navigate = useNavigate();
 
-    const handleLogout = async () => {
-    console.log('logout');
+  //   const handleLogout = async () => {
+  //   console.log('logout');
 
-    try {
-      await signOut().unwrap();
-      navigate('/')
-    } catch (err) {
-      console.error("Error while logging out: ", err);
+  //   try {
+  //     await signOut().unwrap();
+  //     navigate('/')
+  //   } catch (err) {
+  //     console.error("Error while logging out: ", err);
 
-    }
-  }
+  //   }
+  // }
 
   return (
     <div className="bg-zinc-100 sticky top-0 z-50">

@@ -1,17 +1,13 @@
 import { Button } from "@/components/ui/button";
 import {
     CustomInputField,
-    SelectField,
 } from "@/components/form/FormFields";
 
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
-    useGetDepartmentsQuery,
-    useGetEmployeesQuery,
     usePreScheduleVisitorMutation,
-    useVisitorCheckInMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
 
 import { visitorSchema } from "@/schema";
@@ -65,7 +61,6 @@ function VisitorCard({
     index,
     field,
     control,
-    watch,
     remove,
     fieldsLength,
 }: any) {
@@ -197,7 +192,7 @@ export default function PreSchedule() {
         control,
         handleSubmit,
         watch,
-        formState: {isSubmitting, errors}
+        formState: {isSubmitting}
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -219,7 +214,7 @@ export default function PreSchedule() {
         name: "visitors",
     });
 
-    const [preScheduleVisitor, { isLoading }] =
+    const [preScheduleVisitor] =
   usePreScheduleVisitorMutation();
 
 const onSubmit = async (data: FormValues) => {

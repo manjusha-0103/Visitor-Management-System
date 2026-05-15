@@ -3,7 +3,6 @@ import {
     ArrowRight,
     Building2,
     Lock,
-    ShieldCheck,
 } from "lucide-react";
 import VisitorForm from "./VisitorForm";
 import { Button } from "../ui/button";
@@ -16,7 +15,7 @@ export default function VisitorCheckIn() {
         <section
             className="
                 relative flex min-h-screen items-center justify-center overflow-hidden
-                bg-gradient-to-br from-[#5e1028] via-[#7a1737] to-[#3f0b1a]
+                bg-linear-to-br from-[#5e1028] via-[#7a1737] to-[#3f0b1a]
                 px-4 py-8
             "
         >
@@ -45,7 +44,7 @@ export default function VisitorCheckIn() {
                         <div
                             className="
                                 flex h-10 w-10 items-center justify-center rounded-lg
-                                bg-gradient-to-br from-[#8b1a30] to-[#6b1223]
+                                bg-linear-to-br from-[#8b1a30] to-[#6b1223]
                                 text-white shadow-lg
                             "
                         >
@@ -151,8 +150,8 @@ export default function VisitorCheckIn() {
                                         relative flex h-30 w-30 items-center
                                         justify-center rounded-3xl border
                                         border-dashed border-[#8b1a30]/20
-                                        bg-gradient-to-br
-                                        from-[#faf6f8] to-[#fff]
+                                        bg-linear-to-br
+                                        from-[#faf6f8] to-white
                                     "
                                 >
                                     {/* QR corners */}

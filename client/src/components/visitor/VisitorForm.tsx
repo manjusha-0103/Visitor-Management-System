@@ -17,7 +17,7 @@ import {
     Clock3,
     CalendarIcon
 } from "lucide-react";
-import { format, parseISO } from "date-fns"
+import { format } from "date-fns"
 import { visitorSchema } from "@/schema";
 import { Button } from "../ui/button";
 import { CustomInputField, FormLabel, SelectField } from "../form/FormFields";
@@ -42,9 +42,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { FieldLabel } from "../ui/field";
-
-
 
 type VisitorFormValues = z.infer<typeof visitorSchema>;
 
@@ -143,7 +140,7 @@ export function SuccessScreen({
                 className="w-full space-y-2.5"
             >
                 <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#8b1a30] to-[#6b1223]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#8b1a30] to-[#6b1223]">
                         <User className="h-4 w-4 text-white" />
                     </div>
                     <div>
@@ -153,7 +150,7 @@ export function SuccessScreen({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-[#8b1a30]/10">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#8b1a30]/10">
                         <CalendarCheck className="h-4 w-4 text-[#8b1a30]" />
                     </div>
                     <div>
@@ -163,7 +160,7 @@ export function SuccessScreen({
                 </div>
 
                 <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100">
                         <Clock className="h-4 w-4 text-amber-600" />
                     </div>
                     <div>
@@ -180,7 +177,7 @@ export function SuccessScreen({
                 transition={{ delay: 0.55 }}
                 className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 w-full"
             >
-                <MapPin size={14} className="text-emerald-600 flex-shrink-0" />
+                <MapPin size={14} className="text-emerald-600 shrink-0" />
                 <p className="text-xs text-emerald-700 text-left">
                     Please wait in the lobby. The receptionist will guide you once approved.
                 </p>
@@ -338,7 +335,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-3xl border border-[#8b1a30]/10 bg-gradient-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
+                            className="rounded-3xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
                         >
                             <SectionHeader
                                 icon={User}
