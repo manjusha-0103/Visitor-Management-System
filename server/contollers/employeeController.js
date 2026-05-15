@@ -19,7 +19,8 @@ const chekIsApprove= asyncHandler(async (req, res) => {
 
 
 const preSchedule = asyncHandler(async (req, res) => {
-    const appoinment = await preScheduleService(req.body)
+    const {email} = req.user;
+    const appoinment = await preScheduleService(req.body,email)
     if(appoinment){
         sendResponse(res, 200, appoinment, "Appointment schedule successfully")
     }
