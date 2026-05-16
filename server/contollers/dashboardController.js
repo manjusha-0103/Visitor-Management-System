@@ -41,7 +41,10 @@ const pastAppointments = asyncHandler(async (req, res) => {
 })
 
 
+
+
 export{
     pastAppointments,
-    pastAppointmentsService
+    pastAppointmentsService,
+    
 }

@@ -60,13 +60,15 @@ const preScheduleService = async ({ visitors, date_time }, email) => {
 
             let [ampp] = await sql`
                 INSERT INTO "Appointments"
-                ("employee_id", "visitor_id", "is_preschedule", "date_time", "is_approve")
+                ("employee_id", "visitor_id", "is_preschedule", "date_time", "is_approve", "visitor_company", "visitor_position")
                 VALUES (
                     ${employee.employee_id},
                     ${existingVisitor.id},
                     ${true},
                     ${date_time},
-                    'true'
+                    'true',
+                    ${v.company},
+                    ${v.position}
                 )
                 RETURNING *
             `;
@@ -112,13 +114,15 @@ const preScheduleService = async ({ visitors, date_time }, email) => {
             // Create appointment
             let [ampp] = await sql`
                 INSERT INTO "Appointments"
-                ("employee_id", "visitor_id", "is_preschedule", "date_time","is_approve")
+                ("employee_id", "visitor_id", "is_preschedule", "date_time","is_approve", "visitor_company", "visitor_position")
                 VALUES (
                     ${employee.employee_id},
                     ${visitor.id},
                     ${true},
                     ${date_time},
-                    'true'
+                    'true',
+                    ${v.company},
+                    ${v.position}
                 )
                 RETURNING *
             `;
