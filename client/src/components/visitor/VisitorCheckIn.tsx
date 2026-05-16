@@ -7,6 +7,10 @@ import {
 import VisitorForm from "./VisitorForm";
 import { Button } from "../ui/button";
 import VisitBookSuccess from "./VisitBookSuccess";
+import CheckInQRCode from "./CheckInQRCode";
+
+const CHECK_IN_URL =
+  (import.meta as any).env?.VITE_CHECKIN_URL ?? window.location.href;
 
 export default function VisitorCheckIn() {
     const [phase, setPhase] = useState<"qr" | "form" | "done">("qr");
@@ -37,10 +41,10 @@ export default function VisitorCheckIn() {
                 <div
                     className="
                         flex items-center justify-between
-                        border-b border-gray-100 px-6 py-4
+                        border-b border-gray-100 px-6 py-3
                     "
                 >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                         <div
                             className="
                                 flex h-10 w-10 items-center justify-center rounded-lg
@@ -70,9 +74,9 @@ export default function VisitorCheckIn() {
                 </div>
 
                 {/* Content */}
-                <div className="max-h-[90vh] overflow-y-auto p-6">
+                <div className="max-h-[90vh] overflow-y-auto p-4">
                     {phase === "qr" && (
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {/* Hero */}
                             <div className="text-center">
                                 {/* <div
@@ -144,7 +148,7 @@ export default function VisitorCheckIn() {
                             </div>
 
                             {/* QR Section */}
-                            <div className="flex flex-col items-center">
+                            {/* <div className="flex flex-col items-center">
                                 <div
                                     className="
                                         relative flex h-30 w-30 items-center
@@ -153,7 +157,7 @@ export default function VisitorCheckIn() {
                                         bg-linear-to-br
                                         from-[#faf6f8] to-white"
                                 >
-                                    {/* QR corners */}
+                                   
                                     {[
                                         "top-4 left-4 border-t-2 border-l-2 rounded-tl-xl",
                                         "top-4 right-4 border-t-2 border-r-2 rounded-tr-xl",
@@ -234,12 +238,10 @@ export default function VisitorCheckIn() {
                                 <p className="mt-4 text-xs font-medium text-gray-700">
                                     Fast Scan/Touchless Check in
                                 </p>
+                            </div> */}
 
-                                {/* <p className="mt-1 text-xs text-gray-400">
-                                    Fast touchless visitor registration
-                                </p> */}
-                            </div>
-
+ {/* ── Real QR code ── */}
+              <CheckInQRCode checkInUrl={CHECK_IN_URL} />
                             {/* Footer */}
                             <div
                                 className="
