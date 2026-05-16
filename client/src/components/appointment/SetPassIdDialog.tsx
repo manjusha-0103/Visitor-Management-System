@@ -41,12 +41,15 @@ export default function SetPassIdDialog({
   const {
     control,
     handleSubmit,
+    watch,
     reset,
   } = useForm<FormValues>({
     defaultValues: {
       pass_id: "",
     },
   });
+
+  const passId = watch("pass_id");
 
   const [
     setPassIdMutation,
@@ -144,16 +147,16 @@ export default function SetPassIdDialog({
             name="pass_id"
             control={control}
             label="Pass ID"
-            placeholder="P-0011"
+            placeholder="8787828"
             required
             rules={{
               required:
                 "Pass ID is required",
-              pattern: {
-                value: /^P-\d{4}$/,
-                message:
-                  "Pass ID must be like P-0011, starts with P-, and 4 digit number.",
-              },
+              // pattern: {
+              //   value: /^P-\d{4}$/,
+              //   message:
+              //     "Pass ID must be like P-0011, starts with P-, and 4 digit number.",
+              // },
             }}
             inputClassName="bg-white"
             rightElement={
@@ -178,7 +181,7 @@ export default function SetPassIdDialog({
             <Button
               type="submit"
               className="bg-maroon hover:bg-maroon-dark"
-              disabled={isLoading}
+              disabled={isLoading || !passId.trim()}
             >
               {isLoading && (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
