@@ -8,7 +8,7 @@ export const api = createApi({
         'Auth', 
         'Users',
         'Department',
-        'Employee',
+        'Employees',
         'Appointments',
         'Visitor'
     ],

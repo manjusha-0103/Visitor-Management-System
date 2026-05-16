@@ -26,7 +26,7 @@ export default function ManageAppointment() {
   const isReceptionist =
     user?.role === "receptionist";
 
-    const [
+  const [
     openAppointmentSheet,
     setOpenAppointmentSheet,
   ] = useState(false);
@@ -65,7 +65,7 @@ export default function ManageAppointment() {
     <section className="space-y-5 mb-10">
 
       <AdminSubHeader
-        showBack={false}
+        showBack={isReceptionist ? false : true}
         to={"/admin"}
         heading="Manage Appointment"
         subh={"View, filter and add appointments"}
@@ -81,7 +81,7 @@ export default function ManageAppointment() {
       <Tabs defaultValue="walkin" className="mt-6 px-4 lg:px-10">
         {/* Tabs + Button Row */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          
+
           <TabsList>
             <TabsTrigger value="walkin" className="
       text-[#701a40]
@@ -138,12 +138,12 @@ export default function ManageAppointment() {
 
         {/* PRE-SCHEDULED */}
         <TabsContent value="prescheduled">
-            <AppointmentTable type="prescheduled" />
+          <AppointmentTable type="prescheduled" />
         </TabsContent>
 
         {/* PAST */}
         <TabsContent value="past">
-            <AppointmentTable type="past" />
+          <AppointmentTable type="past" />
         </TabsContent>
 
       </Tabs>
