@@ -8,7 +8,8 @@ import ApiError from "../utils/ApiError.js";
 import crypto from 'crypto';
 import { checkInService, 
     getAllDepartmentsService ,
-    getEmployeesService
+    getEmployeesService,
+    visitorInfoService
 } from "../services/visitorService.js";
 import { getIO } from "../config/socket.js";
 
@@ -52,8 +53,15 @@ const getEmployees = asyncHandler(async (req, res) => {
     sendResponse(res, 201, employees, "ALL Employees")
 })
 
+const visitorInfo = asyncHandler(async (req, res) => {
+    const {appointment_id} = req.params
+    const info = await visitorInfoService(appointment_id)
+    sendResponse(res, 201, info, "Visitor info")
+})
+
 export{
     checkIn,
     getAllDepartments,
-    getEmployees
+    getEmployees,
+    visitorInfo
 }

@@ -45,8 +45,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
         console.log("visitor",visitor);
         
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no")
-            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no} )
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_posotion")
+            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position} )
             RETURNING *
         ` 
 
@@ -106,8 +106,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
         `
         // console.log(visitor)
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no")
-            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no})
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", , "visitor_company", "visitor_posotion")
+            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position})
             RETURNING *
         ` 
         await sendEmail({
@@ -187,8 +187,49 @@ const getEmployeesService = async (dept_id) => {
     return emp;
 };
 
+const visitorInfoService = async (appointment_id) => {
+    const visitor = await sql`
+        SELECT 
+            a.id AS appointment_id,
+            a.created_at AS appointment_created_at,
+            a.check_in,
+            a.check_out,
+            a.date_time,
+            a.is_preschedule,
+            a.is_approve,
+
+            v.id AS visitor_id,
+            a.visitor_position,
+            a.visitor_company,
+            a.is_laptop,
+            a.make,
+            a.model,
+            a.serial_no,
+            a.is_vehicle,
+            a.vehicle_no,
+            a.pass_id,
+
+            u.first_name AS visitor_first_name,
+            u.last_name AS visitor_last_name,
+            u.email AS visitor_email,
+            u.phone AS visitor_phone
+
+        FROM "Appointments" a
+        JOIN "Visitors" v
+            ON v.id = a.visitor_id
+
+        JOIN "Users" u
+            ON u.id = v.user_id
+        
+        WHERE a.id = ${appointment_id}
+    `
+
+    return visitor
+}
+
 export{
     checkInService,
     getAllDepartmentsService,
-    getEmployeesService
+    getEmployeesService,
+    visitorInfoService
 }
