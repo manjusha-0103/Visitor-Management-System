@@ -16,53 +16,116 @@ interface AppointmentResponse {
   };
 }
 
+export interface GetAppointmentsParams {
+  type: "walkin" | "prescheduled" | "past";
+
+  page?: number;
+  limit?: number;
+
+  // filters
+  search?: string;
+  is_approve?: boolean | null;
+  is_preschedule?: boolean | null;
+  date?: string | null;
+}
+
 export const appointmentApi = api.injectEndpoints({
   endpoints: (builder) => ({
 
     // ─────────────────────────────────────
-    // WALK-IN
+    // GET APPOINTMENTS
     // ─────────────────────────────────────
-    getWalkInAppointments: builder.query<
+    getAppointments: builder.query<
       AppointmentResponse,
-      { page?: number; limit?: number }
+      GetAppointmentsParams
     >({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `api/v1/appointments/walk-in?page=${page}&limit=${limit}`,
-        method: "GET",
-      }),
+      query: ({
+        type,
+        page = 1,
+        limit = 10,
+        search = "",
+        is_approve = null,
+        is_preschedule = null,
+        date = null,
+      }) => {
+
+        const params = new URLSearchParams();
+
+        // required
+        params.set("type", type);
+        params.set("page", String(page));
+        params.set("limit", String(limit));
+
+        // optional
+        if (search) {
+          params.set("search", search);
+        }
+
+        if (is_approve !== null) {
+          params.set("is_approve", String(is_approve));
+        }
+
+        if (is_preschedule !== null) {
+          params.set("is_preschedule", String(is_preschedule));
+        }
+
+        if (date) {
+          params.set("date", date);
+        }
+
+        return {
+          url: `/api/v1/appointments/appointments?${params.toString()}`,
+          method: "GET",
+        };
+      },
 
       providesTags: ["Appointments"],
     }),
+
+    // ─────────────────────────────────────
+    // WALK-IN
+    // ─────────────────────────────────────
+    // getWalkInAppointments: builder.query<
+    //   AppointmentResponse,
+    //   { page?: number; limit?: number }
+    // >({
+    //   query: ({ page = 1, limit = 10 }) => ({
+    //     url: `api/v1/appointments/walk-in?page=${page}&limit=${limit}`,
+    //     method: "GET",
+    //   }),
+
+    //   providesTags: ["Appointments"],
+    // }),
 
     // ─────────────────────────────────────
     // PRE-SCHEDULED
     // ─────────────────────────────────────
-    getPreScheduledAppointments: builder.query<
-      AppointmentResponse,
-      { page?: number; limit?: number }
-    >({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `api/v1/appointments/pre-scheduled?page=${page}&limit=${limit}`,
-        method: "GET",
-      }),
+    // getPreScheduledAppointments: builder.query<
+    //   AppointmentResponse,
+    //   { page?: number; limit?: number }
+    // >({
+    //   query: ({ page = 1, limit = 10 }) => ({
+    //     url: `api/v1/appointments/pre-scheduled?page=${page}&limit=${limit}`,
+    //     method: "GET",
+    //   }),
 
-      providesTags: ["Appointments"],
-    }),
+    //   providesTags: ["Appointments"],
+    // }),
 
     // ─────────────────────────────────────
     // PAST
     // ─────────────────────────────────────
-    getPastAppointments: builder.query<
-      AppointmentResponse,
-      { page?: number; limit?: number }
-    >({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `api/v1/appointments/past?page=${page}&limit=${limit}`,
-        method: "GET",
-      }),
+    // getPastAppointments: builder.query<
+    //   AppointmentResponse,
+    //   { page?: number; limit?: number }
+    // >({
+    //   query: ({ page = 1, limit = 10 }) => ({
+    //     url: `api/v1/appointments/past?page=${page}&limit=${limit}`,
+    //     method: "GET",
+    //   }),
 
-      providesTags: ["Appointments"],
-    }),
+    //   providesTags: ["Appointments"],
+    // }),
 
     // ─────────────────────────────────────
     // SET PASS
@@ -93,9 +156,10 @@ export const appointmentApi = api.injectEndpoints({
 });
 
 export const {
-  useGetWalkInAppointmentsQuery,
-  useGetPreScheduledAppointmentsQuery,
-  useGetPastAppointmentsQuery,
+  useGetAppointmentsQuery,
+  // useGetWalkInAppointmentsQuery,
+  // useGetPreScheduledAppointmentsQuery,
+  // useGetPastAppointmentsQuery,
   useSetPassIdMutation,
   useCheckOutMutation,
 } = appointmentApi;

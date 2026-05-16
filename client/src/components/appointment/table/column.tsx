@@ -1,24 +1,23 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MoreHorizontal,
-  Eye,
+  X,
+  Check,
   LogOut,
   BadgeCheck,
   Car,
   Laptop,
   Clock,
+  Loader2
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { AppointmentRow } from '@/types';
 import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
+import SetPassIdDialog from "../SetPassIdDialog";
+import { useState } from "react";
+import { useCheckOutMutation } from "@/lib/features/appointment/appointmentApi";
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -47,68 +46,191 @@ function ApproveBadge({ is_approve, check_out }: { is_approve: boolean; check_ou
 }
 
 // ── Actions cell ──────────────────────────────────────────────────────────────
-function ActionsCell({ row, table }: { row: any; table: any }) {
+// function ActionsCell({ row, table }: { row: any; table: any }) {
+//   const appt: AppointmentRow = row.original;
+//   const user = useSelector(selectUser);
+//   const isReceptionist = user?.role === "receptionist";
+
+//   const { onView, onCheckOut, onSetPass } = table.options.meta || {};
+
+//   return (
+//     <div className="flex items-center gap-2 justify-end">
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <Button variant="ghost" size="icon" className="h-8 w-8">
+//             <MoreHorizontal size={16} />
+//           </Button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent align="end" className="bg-white border shadow-md w-44">
+//           {/* <DropdownMenuItem
+//             className="gap-2 text-sm cursor-pointer"
+//             onClick={() => onView?.(appt)}
+//           >
+//             <Eye size={14} /> View details
+//           </DropdownMenuItem> */}
+
+//           {/* {isReceptionist && !appt.is_approve && !appt.check_out && (
+//             <>
+//               <DropdownMenuItem
+//                 className="text-green-600"
+//                 onClick={() => onApprove?.(appt.appointment_id)}
+//               >
+//                 <BadgeCheck size={14} /> Approve
+//               </DropdownMenuItem>
+
+//               <DropdownMenuItem
+//                 className="text-red-600"
+//                 onClick={() => onReject?.(appt.appointment_id)}
+//               >
+//                 <X size={14} /> Reject
+//               </DropdownMenuItem>
+//             </>
+//           )} */}
+
+//           {isReceptionist && appt.is_approve && !appt.check_out && (
+//             <>
+//               {!appt.pass_id && (
+//                 <DropdownMenuItem
+//                   className="gap-2 text-sm cursor-pointer text-blue-600"
+//                   onClick={() => onSetPass?.(appt)}
+//                 >
+//                   <BadgeCheck size={14} /> Set pass ID
+//                 </DropdownMenuItem>
+//               )}
+//               <DropdownMenuItem
+//                 className="gap-2 text-sm cursor-pointer text-gray-600"
+//                 onClick={() => onCheckOut?.(appt.appointment_id)}
+//               >
+//                 <LogOut size={14} /> Check out
+//               </DropdownMenuItem>
+//             </>
+//           )}
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+//     </div>
+//   );
+// }
+
+function ActionsCell({
+  row,
+  table,
+}: {
+  row: any;
+  table: any;
+}) {
   const appt: AppointmentRow = row.original;
   const user = useSelector(selectUser);
-  const isReceptionist = user?.role === "receptionist";
+  const isReceptionist =
+    user?.role === "receptionist";
+  const {
+    onApprove,
+    onReject,
+  } = table.options.meta || {};
 
-  const { onView, onCheckOut, onSetPass } = table.options.meta || {};
+   const [
+    checkOutVisitor,
+    { isLoading: isCheckingOut },
+  ] = useCheckOutMutation();
+
+  const [openPassDialog, setOpenPassDialog] =
+    useState(false);
+
+     const handleCheckOut = async () => {
+    try {
+      await checkOutVisitor(
+        appt.appointment_id
+      ).unwrap();
+    } catch (error) {
+      console.error(
+        "Checkout failed",
+        error
+      );
+    }
+  };
 
   return (
-    <div className="flex items-center gap-2 justify-end">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal size={16} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="bg-white border shadow-md w-44">
-          <DropdownMenuItem
-            className="gap-2 text-sm cursor-pointer"
-            onClick={() => onView?.(appt)}
-          >
-            <Eye size={14} /> View details
-          </DropdownMenuItem>
+    <>
+      <SetPassIdDialog
+        open={openPassDialog}
+        onOpenChange={setOpenPassDialog}
+        appointment={appt}
+      />
+      <div className="flex items-center justify-end gap-2 flex-wrap">
 
-          {/* {isReceptionist && !appt.is_approve && !appt.check_out && (
+        {/* Pending */}
+        {isReceptionist &&
+          !appt.is_approve &&
+          !appt.check_out && (
             <>
-              <DropdownMenuItem
-                className="text-green-600"
-                onClick={() => onApprove?.(appt.appointment_id)}
-              >
-                <BadgeCheck size={14} /> Approve
-              </DropdownMenuItem>
+              <Button
+                size="sm"
 
-              <DropdownMenuItem
-                className="text-red-600"
-                onClick={() => onReject?.(appt.appointment_id)}
+                className="bg-green-600 hover:bg-green-700 text-white rounded-full w-8 h-8"
+                onClick={() =>
+                  onApprove?.(appt.appointment_id)
+                }
               >
-                <X size={14} /> Reject
-              </DropdownMenuItem>
-            </>
-          )} */}
+                <Check size={16} />
+              </Button>
 
-          {isReceptionist && appt.is_approve && !appt.check_out && (
-            <>
-              {!appt.pass_id && (
-                <DropdownMenuItem
-                  className="gap-2 text-sm cursor-pointer text-blue-600"
-                  onClick={() => onSetPass?.(appt)}
-                >
-                  <BadgeCheck size={14} /> Set pass ID
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                className="gap-2 text-sm cursor-pointer text-gray-600"
-                onClick={() => onCheckOut?.(appt.appointment_id)}
+              <Button
+                size="sm"
+                variant="destructive"
+                className=" rounded-full w-8 h-8"
+                onClick={() =>
+                  onReject?.(appt.appointment_id)
+                }
               >
-                <LogOut size={14} /> Check out
-              </DropdownMenuItem>
+                <X size={16} />
+              </Button>
             </>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+
+        {/* Approved */}
+        {isReceptionist &&
+          appt.is_approve &&
+          !appt.check_out && (
+            <>
+              {!appt.pass_id && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
+                  onClick={() =>
+                    setOpenPassDialog(true)
+                  }
+                >
+                  <BadgeCheck size={12} />
+                  Pass ID
+                </Button>
+              )}
+
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-8 text-xs"
+                onClick={
+                  handleCheckOut
+                }
+                disabled={
+                  isCheckingOut
+                }
+              >
+                {isCheckingOut ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <LogOut size={12} />
+                )}
+
+                {isCheckingOut
+                  ? "Checking out..."
+                  : "Check Out"}
+              </Button>
+            </>
+          )}
+      </div>
+    </>
+
   );
 }
 
@@ -187,12 +309,16 @@ export const walkInColumns = [
     accessorKey: "check_in",
     header: "Check-in",
     cell: ({ row }: any) => {
-      const t = fmtTime(row.original.check_in);
+      const t = row.original.check_in;
       return t ? (
-        <div className="flex items-center gap-1.5">
-          <Clock size={13} className="text-gray-400" />
-          <span className="text-sm">{t}</span>
+         <div className="-space-y-0.5">
+          <p className="text-sm">{format(parseISO(t), "dd MMM yyyy")}</p>
+          <p className="flex items-center gap-1 text-xs text-gray-400"><Clock size={13} className="text-gray-400" />{format(parseISO(t), "hh:mm a")}</p>
         </div>
+        // <div className="flex items-center gap-1.5">
+        //   <Clock size={13} className="text-gray-400" />
+        //   <span className="text-sm">{t}</span>
+        // </div>
       ) : (
         <span className="text-gray-300 text-sm">—</span>
       );
@@ -362,17 +488,17 @@ export const pastColumns = [
       return String(row.original.is_preschedule) === value;
     },
   },
-  {
-    id: "actions",
-    cell: ({ row, table }: any) => (
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8"
-        onClick={() => table.options.meta?.onView?.(row.original)}
-      >
-        <Eye size={15} />
-      </Button>
-    ),
-  },
+  // {
+  //   id: "actions",
+  //   cell: ({ row, table }: any) => (
+  //     <Button
+  //       variant="ghost"
+  //       size="icon"
+  //       className="h-8 w-8"
+  //       onClick={() => table.options.meta?.onView?.(row.original)}
+  //     >
+  //       <Eye size={15} />
+  //     </Button>
+  //   ),
+  // },
 ];
