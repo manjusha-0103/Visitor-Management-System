@@ -1,15 +1,12 @@
-import { useMemo } from "react";
+// import { useMemo } from "react";
 import { teamColumns } from "./table/column";
 import { TeamDataTable } from "./table/data-table";
-import type { TeamMember } from "./dummy-team";
-
+import type { Employee } from "@/lib/features/employee/employeeApi";
+import type { Department } from "@/lib/features/visitor-check-in/visitorApi";
+import { useMemo } from "react";
 interface TeamTableProps {
-  members: TeamMember[];
-  setEditMember: (m: TeamMember | null) => void;
-  setEditOpen: (open: boolean) => void;
-  setViewMember: (m: TeamMember | null) => void;
-  setViewOpen: (open: boolean) => void;
-  onDelete: (id: string) => void;
+  members: Employee[];
+  departments: Department[];
   setPage: (p: number) => void;
   columnFilters: any[];
   setColumnFilters: (f: any) => void;
@@ -18,20 +15,31 @@ interface TeamTableProps {
   onPrevious: () => void;
   onNext: () => void;
   isFetching?: boolean;
+  setEditMember: (employee: Employee | null) => void;
+setEditOpen: (open: boolean) => void;
+setSheetMode: (mode: "add" | "edit") => void;
 }
 
 export default function TeamTable({
   members,
-  setEditMember, setEditOpen,
-  setViewMember, setViewOpen,
-  onDelete,
+  departments,
+   setEditMember,
+    setEditOpen,
+    setSheetMode,
   setPage, columnFilters, setColumnFilters,
   totalPages, page, onPrevious, onNext, isFetching,
 }: TeamTableProps) {
-  const meta = useMemo(
-    () => ({ setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete }),
-    [setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete]
-  );
+  const meta = useMemo(() => ({
+    departments,
+     setEditMember,
+    setEditOpen,
+    setSheetMode
+  }), [departments, setEditMember,
+    setEditOpen,setSheetMode])
+  // const meta = useMemo(
+  //   () => ({ setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete }),
+  //   [setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete]
+  // );
 
   return (
     <section className="mt-6 px-4 lg:px-10">

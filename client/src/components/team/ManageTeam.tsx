@@ -1,117 +1,136 @@
-// import { useState, useEffect, useMemo } from "react";
-// // import { useSelector } from "react-redux";
-// import AdminSubHeader from "@/components/AdminSubHeader";
-// // import CommonFilter from "@/components/CommonFilter";
-// import TeamTable from "./TeamTable";
+import { useState, useEffect, useMemo } from "react";
+// import { useSelector } from "react-redux";
+import AdminSubHeader from "@/components/AdminSubHeader";
+// import CommonFilter from "@/components/CommonFilter";
+import TeamTable from "./TeamTable";
 // import { DUMMY_TEAM } from "@/components/team/dummy-team";
 // import type { TeamMember } from "@/components/team/dummy-team";
-// // import { selectUser } from "@/lib/features/auth/authSlice";
+import { useGetAllEmployeesQuery, type Employee } from "@/lib/features/employee/employeeApi";
+import { useGetDepartmentsQuery } from "@/lib/features/visitor-check-in/visitorApi";
+import TeamFilters from "./TeamFilter";
+import EmployeeForm from "./EmployeeForm";
+// import { selectUser } from "@/lib/features/auth/authSlice";
 
-// const LIMIT = 10;
+type ColumnFilter = {
+    id: string;
+    value: string;
+};
+const LIMIT = 10;
 
-// export default function ManageTeam() {
-//   // const user = useSelector(selectUser);
+export default function ManageTeam() {
+    // const user = useSelector(selectUser);
+    //   const [allMembers, setAllMembers] = useState<TeamMember[]>(DUMMY_TEAM);
+    const [page, setPage] = useState(1);
+    const [searchInput, setSearchInput] = useState("")
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    const [employeeSheetOpen, setEmployeeSheetOpen] = useState(false);
 
-//   // ── Data (swap for RTK Query when API is ready) ───────────────────────────
-//   const [allMembers, setAllMembers] = useState<TeamMember[]>(DUMMY_TEAM);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
-//   // ── Pagination ────────────────────────────────────────────────────────────
-//   const [page, setPage] = useState(1);
+    const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
+    const [
+        columnFilters,
+        setColumnFilters,
+    ] = useState<ColumnFilter[]>([]);
 
-//   // ── Search ────────────────────────────────────────────────────────────────
-//   const [searchInput, setSearchInput]     = useState("");
-//   const [debouncedSearch, setDebouncedSearch] = useState("");
+    // ── Department Filter ─────────────────────
+    const departmentFilter = useMemo(() => {
+        const filter = columnFilters.find(
+            (f) => f.id === "department_name"
+        );
 
-//   useEffect(() => {
-//     const handler = setTimeout(() => {
-//       setDebouncedSearch(searchInput);
-//       setPage(1);
-//     }, 400);
-//     return () => clearTimeout(handler);
-//   }, [searchInput]);
+        return filter?.value || "";
+    }, [columnFilters]);
 
-//   // ── Column filters ────────────────────────────────────────────────────────
-//   const [columnFilters, setColumnFilters] = useState<any[]>([]);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchInput);
+            setPage(1);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchInput]);
 
-//   // ── Modal state ───────────────────────────────────────────────────────────
-//   const [editMember, setEditMember] = useState<TeamMember | null>(null);
-//   const [editOpen, setEditOpen]     = useState(false);
-//   const [viewMember, setViewMember] = useState<TeamMember | null>(null);
-//   const [viewOpen, setViewOpen]     = useState(false);
+    const {
+        data,
+        isLoading,
+        isFetching,
+    } = useGetAllEmployeesQuery({
+        page,
+        limit: LIMIT,
+        search: debouncedSearch,
+        department: departmentFilter,
+    });
 
-//   // ── Client-side search ────────────────────────────────────────────────────
-//   const filtered = useMemo(() => {
-//     const q = debouncedSearch.toLowerCase();
-//     return allMembers.filter(
-//       (m) =>
-//         !q ||
-//         m.full_name.toLowerCase().includes(q) ||
-//         m.email.toLowerCase().includes(q) ||
-//         m.phone.includes(q) ||
-//         m.position.toLowerCase().includes(q) ||
-//         m.department_name.toLowerCase().includes(q)
-//     );
-//   }, [allMembers, debouncedSearch]);
+    const { data: departments } = useGetDepartmentsQuery();
 
-//   // ── Pagination slice ──────────────────────────────────────────────────────
-//   const totalPages = Math.max(1, Math.ceil(filtered.length / LIMIT));
-//   const paginated  = useMemo(
-//     () => filtered.slice((page - 1) * LIMIT, page * LIMIT),
-//     [filtered, page]
-//   );
 
-//   const handlePrevious = () => setPage((p) => Math.max(p - 1, 1));
-//   const handleNext     = () => setPage((p) => (p < totalPages ? p + 1 : p));
 
-//   // const handleClear = () => {
-//   //   setSearchInput("");
-//   //   setDebouncedSearch("");
-//   //   setPage(1);
-//   // };
+    const employees = useMemo(() => data?.data?.data || [], [data])
+    const totalPages = useMemo(() => data?.data?.pagination?.totalPages || 1, [data])
+    const currentPage = useMemo(() => data?.data?.pagination?.page || 1, [data])
+    // const brands = useMemo(() => departmentData?.data || [], [departmentData])
 
-//   // ── Delete (local for now) ────────────────────────────────────────────────
-//   const handleDelete = (id: string) => {
-//     setAllMembers((prev) => prev.filter((m) => m.id !== id));
-//   };
+    // const employees = data?.data || [];
+    // const totalPages =
+    //   data?.pagination?.totalPages || 1;
 
-//   return (
-//     <section className="mb-10">
-//       <AdminSubHeader
-//       showBack={true}
-//         to="/admin"
-//         heading="Manage Team"
-//         subh="View all employees — their department, position, and visitor activity"
-//       />
 
-//       {/* TODO: Add ManageTeamForm sheet here when form is ready */}
+    const handleClear = () => {
+        setSearchInput("");
+        setDebouncedSearch("");
+        setPage(1);
+    };
 
-//       {/* Search bar + Add button */}
-//       {/* <CommonFilter
-//         setEditWho={setEditMember}
-//         setEditOpen={setEditOpen}
-//         searchInput={searchInput}
-//         setSearchInput={setSearchInput}
-//         handleClear={handleClear}
-//         buttonText="Add Employee"
-//         placeholder="Search by name, email, position, department..."
-//       /> */}
+    const handlePrevious = () => setPage(prev => Math.max(prev - 1, 1))
+    const handleNext = () => setPage(prev => prev < totalPages ? prev + 1 : prev)
 
-//       {/* Table */}
-//       <TeamTable
-//         members={paginated}
-//         setEditMember={setEditMember}
-//         setEditOpen={setEditOpen}
-//         setViewMember={setViewMember}
-//         setViewOpen={setViewOpen}
-//         onDelete={handleDelete}
-//         setPage={setPage}
-//         columnFilters={columnFilters}
-//         setColumnFilters={setColumnFilters}
-//         totalPages={totalPages}
-//         page={page}
-//         onPrevious={handlePrevious}
-//         onNext={handleNext}
-//       />
-//     </section>
-//   );
-// }
+    const handleAddEmployee = () => {
+        setSheetMode("add");
+        setSelectedEmployee(null);
+        setEmployeeSheetOpen(true);
+    };
+
+    return (
+        <section className="mb-10">
+            <AdminSubHeader
+                showBack={true}
+                to="/admin"
+                heading="Manage Team"
+                subh="View all employees — their department, position, and visitor activity"
+            />
+
+            <TeamFilters
+                searchInput={searchInput}
+                setSearchInput={setSearchInput}
+                handleClear={handleClear}
+                onCreate={handleAddEmployee}
+            />
+
+            {/* Table */}
+            <TeamTable
+                members={employees}
+                departments={departments || []}
+                setPage={setPage}
+                columnFilters={columnFilters}
+                setColumnFilters={setColumnFilters}
+                totalPages={totalPages}
+                page={currentPage}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                isFetching={isFetching || isLoading}
+                setEditMember={setSelectedEmployee}
+                setEditOpen={setEmployeeSheetOpen}
+                setSheetMode={setSheetMode}
+            />
+
+
+            <EmployeeForm
+  open={employeeSheetOpen}
+  onClose={setEmployeeSheetOpen}
+  employee={selectedEmployee}
+  departments={departments || []}
+  mode={sheetMode}
+/>
+        </section>
+    );
+}
