@@ -70,12 +70,13 @@ const router = createBrowserRouter([
                 children: [
                     {
                         index: true,
-                        element: <DashHome />
-                    },
-                    {
-                        path: "appointments",
                         element: <ManageAppointment />
+                        // element: <DashHome />
                     },
+                    // {
+                    //     path: "appointments",
+                    //     element: <ManageAppointment />
+                    // },
                 ]
             }
         ]
