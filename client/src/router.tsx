@@ -12,7 +12,8 @@ const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage"))
 const ManageAppointment = lazy(() => import("@/pages/appointment/ManageAppointment"))
 const VisitorCheckIn = lazy(() => import("@/components/visitor/VisitorCheckIn"));
 const PreSchedule = lazy(() => import("@/pages/employee/PreSchedule"))
-// const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
+const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
+const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -45,10 +46,14 @@ const router = createBrowserRouter([
                         index: true,
                         element: <DashHome />
                     },
-                    // {
-                    //     path: "team",
-                    //     element: <ManageTeam />
-                    // },
+                    {
+                        path: "users",
+                        element: <ManageUsers />
+                    },
+                    {
+                        path: "team",
+                        element: <ManageTeam />
+                    },
                     {
                         path: "appointments",
                         element: <ManageAppointment />

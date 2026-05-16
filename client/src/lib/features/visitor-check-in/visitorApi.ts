@@ -89,7 +89,7 @@ export const visitorApi = api.injectEndpoints({
       transformResponse: (response: ApiResponse<Employee[]>) =>
         response.data,
 
-      providesTags: ["Employee"],
+      providesTags: ["Employees"],
     }),
 
      preScheduleVisitor: builder.mutation<
