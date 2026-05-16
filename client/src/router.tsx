@@ -3,18 +3,16 @@ import { lazy } from "react";
 import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
-import ManageTeam from "./components/team/ManageTeam";
-import PreSchedule from "./pages/employee/PreSchedule";
-import ManageAppointment from "./pages/appointment/ManageAppointment";
-
 
 const Auth = lazy(() => import("@/pages/Auth"))
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"))
 const AdminLayout = lazy(() => import("@/layouts/AdminLayout"))
 const DashHome = lazy(() => import("@/components/dash/DashHome"));
-
+const AnalyticsPage = lazy(() => import("@/pages/analytics/AnalyticsPage"))
+const ManageAppointment = lazy(() => import("@/pages/appointment/ManageAppointment"))
 const VisitorCheckIn = lazy(() => import("@/components/visitor/VisitorCheckIn"));
-
+const PreSchedule = lazy(() => import("@/pages/employee/PreSchedule"))
+const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -54,6 +52,10 @@ const router = createBrowserRouter([
                     {
                         path: "appointments",
                         element: <ManageAppointment />
+                    },
+                    {
+                        path: "analytics",
+                        element: <AnalyticsPage />
                     },
                 ]
             }
