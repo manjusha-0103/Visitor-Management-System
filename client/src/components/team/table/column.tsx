@@ -3,46 +3,24 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  MoreHorizontal,
   Pencil,
-  Eye,
-  CalendarClock,
   Clock,
-  AlertCircle,
 } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { getNameInitials } from "@/lib/utils/helperFunctions";
-// import DeleteModal from "@/components/DeleteModal";
-import type { TeamMember } from "../dummy-team";
-import { DEPARTMENTS } from "../dummy-team";
+import type { Employee } from "@/lib/features/employee/employeeApi";
 
-// ── Avatar colour cycling (same pattern as drivers) ───────────────────────────
-const AVATAR_COLORS = [
-  "bg-violet-500",
-  "bg-cyan-600",
-  "bg-amber-600",
-  "bg-rose-500",
-  "bg-green-600",
-  "bg-sky-600",
-  "bg-indigo-500",
-  "bg-teal-600",
-];
-function avatarColor(name: string): string {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length];
-}
+
 
 // ── Actions cell ──────────────────────────────────────────────────────────────
 function ActionsCell({ row, table }: { row: any; table: any }) {
-  const member: TeamMember = row.original;
-  const { setEditMember, setEditOpen, setViewMember, setViewOpen } =
+  const member: Employee = row.original;
+  const { setEditMember, setEditOpen, setSheetMode } =
     table.options.meta || {};
 
   return (
@@ -52,6 +30,7 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
         size="xs"
         className="hover:bg-maroon hover:text-white cursor-pointer"
         onClick={() => {
+          setSheetMode?.("edit")
           setEditMember?.(member);
           setEditOpen?.(true);
         }}
@@ -66,7 +45,7 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
         isLoading={false}
       /> */}
 
-      <DropdownMenu>
+      {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <MoreHorizontal size={16} />
@@ -92,7 +71,7 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
             <CalendarClock size={14} /> Visit history
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>
+      </DropdownMenu> */}
     </div>
   );
 }
@@ -106,13 +85,20 @@ export const teamColumns = [
     accessorKey: "full_name",
     header: "Employee",
     cell: ({ row }: any) => {
-      const member: TeamMember = row.original;
+      const member: Employee = row.original;
       return (
         <div className="flex items-center gap-3">
           <div
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-sm font-semibold text-white shrink-0 ${avatarColor(member.full_name)}`}
+            className={"w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white"}
           >
-            {getNameInitials(member.first_name, member.last_name)}
+            {getNameInitials(
+              member.full_name.split(
+                " "
+              )[0] || "",
+              member.full_name.split(
+                " "
+              )[1] || ""
+            )}
           </div>
           <div className="-space-y-0.5">
             <p className="font-medium text-sm">{member.full_name}</p>
@@ -128,7 +114,7 @@ export const teamColumns = [
     accessorKey: "position",
     header: "Position",
     cell: ({ row }: any) => {
-      const member: TeamMember = row.original;
+      const member: Employee = row.original;
       return (
         <div className="-space-y-0.5">
           <p className="text-sm font-medium">{member.position}</p>
@@ -140,89 +126,132 @@ export const teamColumns = [
 
   // ── Department (with filter) ───────────────────────────────────────────────
   {
-    accessorKey: "department_name",
-    header: ({ column }: any) => {
-      const current = (column.getFilterValue() as string) || "all";
-      return (
-        <div className="flex items-center gap-2">
-          <span>Department</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-6 min-w-20 text-[10px]">
-                {current === "all" ? "All depts" : current}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 bg-white border shadow-md">
-              <DropdownMenuRadioGroup
-                value={current}
-                onValueChange={(v) => column.setFilterValue(v === "all" ? undefined : v)}
+  accessorKey: "department_name",
+
+  header: ({ column, table }: any) => {
+    const current =
+      (column.getFilterValue() as string) ||
+      "all";
+
+    const departments =
+      table.options.meta?.departments ||
+      [];
+
+    return (
+      <div className="flex items-center gap-2">
+        <span>Department</span>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 min-w-20 text-[10px]"
+            >
+              {current === "all"
+                ? "All depts"
+                : current}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-44 bg-white border shadow-md">
+            <DropdownMenuRadioGroup
+              value={current}
+              onValueChange={(v) =>
+                column.setFilterValue(
+                  v === "all"
+                    ? undefined
+                    : v
+                )
+              }
+            >
+              <DropdownMenuRadioItem
+                value="all"
+                className="text-xs"
               >
-                <DropdownMenuRadioItem value="all" className="text-xs">
-                  All departments
-                </DropdownMenuRadioItem>
-                {DEPARTMENTS.map((d) => (
-                  <DropdownMenuRadioItem key={d.id} value={d.name} className="text-xs">
+                All departments
+              </DropdownMenuRadioItem>
+
+              {departments.map(
+                (d: any) => (
+                  <DropdownMenuRadioItem
+                    key={d.id}
+                    value={d.name}
+                    className="text-xs"
+                  >
                     {d.name}
                   </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
-    },
-    cell: ({ row }: any) => {
-      const member: TeamMember = row.original;
-      return (
-        <Badge className="bg-gray-100 text-gray-700 border-0 text-xs font-medium">
-          {member.department_name}
-        </Badge>
-      );
-    },
-    filterFn: (row: any, _id: string, value: string) => {
-      if (!value) return true;
-      return row.original.department_name === value;
-    },
+                )
+              )}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
   },
+
+  cell: ({ row }: any) => {
+    const member = row.original;
+
+    return (
+      <Badge className="bg-gray-100 text-gray-700 border-0 text-xs font-medium">
+        {member.department_name}
+      </Badge>
+    );
+  },
+
+  filterFn: (
+    row: any,
+    _id: string,
+    value: string
+  ) => {
+    if (!value) return true;
+
+    return (
+      row.original.department_name ===
+      value
+    );
+  },
+},
 
   // ── Visits received ────────────────────────────────────────────────────────
-  {
-    accessorKey: "total_visits_received",
-    header: "Visits",
-    cell: ({ row }: any) => {
-      const member: TeamMember = row.original;
-      return (
-        <div className="-space-y-0.5">
-          <p className="text-sm font-medium">{member.total_visits_received} total</p>
-          <p className="text-xs text-gray-400">{member.visits_this_month} this month</p>
-        </div>
-      );
-    },
-  },
+  // {
+  //   accessorKey: "total_visits_received",
+  //   header: "Visits",
+  //   cell: ({ row }: any) => {
+  //     const member: Employee = row.original;
+  //     return (
+  //       <div className="-space-y-0.5">
+  //         <p className="text-sm font-medium">{member.total_visits_received} total</p>
+  //         <p className="text-xs text-gray-400">{member.visits_this_month} this month</p>
+  //       </div>
+  //     );
+  //   },
+  // },
 
   // ── Pending approvals ──────────────────────────────────────────────────────
-  {
-    accessorKey: "pending_approvals",
-    header: "Pending",
-    cell: ({ row }: any) => {
-      const count: number = row.original.pending_approvals;
-      if (count === 0)
-        return <span className="text-gray-300 text-sm">—</span>;
-      return (
-        <div className="flex items-center gap-1.5">
-          <AlertCircle size={13} className="text-amber-500 shrink-0" />
-          <span className="text-sm font-medium text-amber-700">{count} pending</span>
-        </div>
-      );
-    },
-  },
+  // {
+  //   accessorKey: "pending_approvals",
+  //   header: "Pending",
+  //   cell: ({ row }: any) => {
+  //     const count: number = row.original.pending_approvals;
+  //     if (count === 0)
+  //       return <span className="text-gray-300 text-sm">—</span>;
+  //     return (
+  //       <div className="flex items-center gap-1.5">
+  //         <AlertCircle size={13} className="text-amber-500 shrink-0" />
+  //         <span className="text-sm font-medium text-amber-700">{count} pending</span>
+  //       </div>
+  //     );
+  //   },
+  // },
 
   // ── Since (joined) ─────────────────────────────────────────────────────────
   {
     accessorKey: "created_at",
     header: "Since",
     cell: ({ row }: any) => {
-      const { created_at } = row.original as TeamMember;
+      const { created_at } = row.original as Employee;
       return (
         <span className="text-sm text-gray-500">
           {created_at ? format(parseISO(created_at), "MMM yyyy") : "—"}
@@ -236,7 +265,7 @@ export const teamColumns = [
     accessorKey: "last_login",
     header: "Last active",
     cell: ({ row }: any) => {
-      const { last_login } = row.original as TeamMember;
+      const { last_login } = row.original as Employee;
       if (!last_login)
         return <span className="text-gray-300 text-xs">Never logged in</span>;
       return (

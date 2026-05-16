@@ -124,3 +124,4 @@ export interface AppointmentRow {
   visitor_email: string;
   visitor_phone: string;
 }
+
