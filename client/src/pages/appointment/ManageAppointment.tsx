@@ -83,15 +83,30 @@ export default function ManageAppointment() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           
           <TabsList>
-            <TabsTrigger value="walkin">
+            <TabsTrigger value="walkin" className="
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
               Walk-in
             </TabsTrigger>
 
-            <TabsTrigger value="prescheduled">
+            <TabsTrigger value="prescheduled" className="
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
               Pre Scheduled
             </TabsTrigger>
 
-            <TabsTrigger value="past">
+            <TabsTrigger value="past" className="
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
               Past
             </TabsTrigger>
           </TabsList>

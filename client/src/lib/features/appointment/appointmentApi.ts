@@ -152,6 +152,28 @@ export const appointmentApi = api.injectEndpoints({
       invalidatesTags: ["Appointments"],
     }),
 
+    // ─────────────────────────────────────
+    // APPROVE APPOINTMENT
+    // ─────────────────────────────────────
+
+    approveAppointment: builder.mutation<
+      any,
+      {
+        appointment_id: string;
+        is_approve: boolean;
+      }
+    >({
+      query: ({
+        appointment_id,
+        is_approve,
+      }) => ({
+        url: `/api/v1/employee/is-approve/${appointment_id}?is_approve=${is_approve}`,
+        method: "GET",
+      }),
+
+      invalidatesTags: ["Appointments"],
+    }),
+
   }),
 });
 
@@ -161,5 +183,6 @@ export const {
   // useGetPreScheduledAppointmentsQuery,
   // useGetPastAppointmentsQuery,
   useSetPassIdMutation,
+  useApproveAppointmentMutation,
   useCheckOutMutation,
 } = appointmentApi;

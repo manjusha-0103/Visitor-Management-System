@@ -16,8 +16,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
 import SetPassIdDialog from "../SetPassIdDialog";
 import { useState } from "react";
-import { useCheckOutMutation } from "@/lib/features/appointment/appointmentApi";
-
+import { useApproveAppointmentMutation, useCheckOutMutation } from "@/lib/features/appointment/appointmentApi";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -45,97 +44,26 @@ function ApproveBadge({ is_approve, check_out }: { is_approve: boolean; check_ou
   return <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Pending</Badge>;
 }
 
-// ── Actions cell ──────────────────────────────────────────────────────────────
-// function ActionsCell({ row, table }: { row: any; table: any }) {
-//   const appt: AppointmentRow = row.original;
-//   const user = useSelector(selectUser);
-//   const isReceptionist = user?.role === "receptionist";
-
-//   const { onView, onCheckOut, onSetPass } = table.options.meta || {};
-
-//   return (
-//     <div className="flex items-center gap-2 justify-end">
-//       <DropdownMenu>
-//         <DropdownMenuTrigger asChild>
-//           <Button variant="ghost" size="icon" className="h-8 w-8">
-//             <MoreHorizontal size={16} />
-//           </Button>
-//         </DropdownMenuTrigger>
-//         <DropdownMenuContent align="end" className="bg-white border shadow-md w-44">
-//           {/* <DropdownMenuItem
-//             className="gap-2 text-sm cursor-pointer"
-//             onClick={() => onView?.(appt)}
-//           >
-//             <Eye size={14} /> View details
-//           </DropdownMenuItem> */}
-
-//           {/* {isReceptionist && !appt.is_approve && !appt.check_out && (
-//             <>
-//               <DropdownMenuItem
-//                 className="text-green-600"
-//                 onClick={() => onApprove?.(appt.appointment_id)}
-//               >
-//                 <BadgeCheck size={14} /> Approve
-//               </DropdownMenuItem>
-
-//               <DropdownMenuItem
-//                 className="text-red-600"
-//                 onClick={() => onReject?.(appt.appointment_id)}
-//               >
-//                 <X size={14} /> Reject
-//               </DropdownMenuItem>
-//             </>
-//           )} */}
-
-//           {isReceptionist && appt.is_approve && !appt.check_out && (
-//             <>
-//               {!appt.pass_id && (
-//                 <DropdownMenuItem
-//                   className="gap-2 text-sm cursor-pointer text-blue-600"
-//                   onClick={() => onSetPass?.(appt)}
-//                 >
-//                   <BadgeCheck size={14} /> Set pass ID
-//                 </DropdownMenuItem>
-//               )}
-//               <DropdownMenuItem
-//                 className="gap-2 text-sm cursor-pointer text-gray-600"
-//                 onClick={() => onCheckOut?.(appt.appointment_id)}
-//               >
-//                 <LogOut size={14} /> Check out
-//               </DropdownMenuItem>
-//             </>
-//           )}
-//         </DropdownMenuContent>
-//       </DropdownMenu>
-//     </div>
-//   );
-// }
 
 function ActionsCell({
   row,
-  table,
 }: {
   row: any;
-  table: any;
 }) {
   const appt: AppointmentRow = row.original;
   const user = useSelector(selectUser);
   const isReceptionist =
     user?.role === "receptionist";
-  const {
-    onApprove,
-    onReject,
-  } = table.options.meta || {};
+  const [actionType, setActionType] = useState<
+    "approve" | "reject" | null
+  >(null);
+  const [openPassDialog, setOpenPassDialog] = useState(false);
 
-   const [
-    checkOutVisitor,
-    { isLoading: isCheckingOut },
-  ] = useCheckOutMutation();
+  const [checkOutVisitor, { isLoading: isCheckingOut }] = useCheckOutMutation();
+  const [approveAppointment, { isLoading: isApproving }] = useApproveAppointmentMutation();
 
-  const [openPassDialog, setOpenPassDialog] =
-    useState(false);
 
-     const handleCheckOut = async () => {
+  const handleCheckOut = async () => {
     try {
       await checkOutVisitor(
         appt.appointment_id
@@ -145,6 +73,38 @@ function ActionsCell({
         "Checkout failed",
         error
       );
+    }
+  };
+
+  const handleApprove = async () => {
+    try {
+      setActionType("approve");
+
+      await approveAppointment({
+        appointment_id: appt.appointment_id,
+        is_approve: true,
+      }).unwrap();
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionType(null);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setActionType("reject");
+
+      await approveAppointment({
+        appointment_id: appt.appointment_id,
+        is_approve: false,
+      }).unwrap();
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionType(null);
     }
   };
 
@@ -164,24 +124,29 @@ function ActionsCell({
             <>
               <Button
                 size="sm"
-
                 className="bg-green-600 hover:bg-green-700 text-white rounded-full w-8 h-8"
-                onClick={() =>
-                  onApprove?.(appt.appointment_id)
-                }
+                onClick={handleApprove}
+                disabled={isApproving}
               >
-                <Check size={16} />
+                {isApproving && actionType === "approve" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
               </Button>
 
               <Button
                 size="sm"
                 variant="destructive"
-                className=" rounded-full w-8 h-8"
-                onClick={() =>
-                  onReject?.(appt.appointment_id)
-                }
+                className="rounded-full w-8 h-8"
+                onClick={handleReject}
+                disabled={isApproving}
               >
-                <X size={16} />
+                {isApproving && actionType === "reject" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <X size={16} />
+                )}
               </Button>
             </>
           )}
@@ -213,7 +178,7 @@ function ActionsCell({
                   handleCheckOut
                 }
                 disabled={
-                  isCheckingOut
+                  isCheckingOut || !appt.pass_id
                 }
               >
                 {isCheckingOut ? (
@@ -311,7 +276,7 @@ export const walkInColumns = [
     cell: ({ row }: any) => {
       const t = row.original.check_in;
       return t ? (
-         <div className="-space-y-0.5">
+        <div className="-space-y-0.5">
           <p className="text-sm">{format(parseISO(t), "dd MMM yyyy")}</p>
           <p className="flex items-center gap-1 text-xs text-gray-400"><Clock size={13} className="text-gray-400" />{format(parseISO(t), "hh:mm a")}</p>
         </div>
@@ -358,7 +323,7 @@ export const walkInColumns = [
   },
   {
     id: "actions",
-    cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
+    cell: ({ row }: any) => <ActionsCell row={row} />,
   },
 ];
 
@@ -423,7 +388,7 @@ export const preScheduleColumns = [
   },
   {
     id: "actions",
-    cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
+    cell: ({ row }: any) => <ActionsCell row={row} />,
   },
 ];
 
