@@ -49,6 +49,7 @@ export type AllowedRoles = string[];
 
 //admin sub heading
 export type AdminSubHeadingProp = {
+    showBack: boolean;
     to: string;
     heading: string;
     subh: string;
