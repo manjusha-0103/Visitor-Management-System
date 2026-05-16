@@ -22,7 +22,7 @@ const setPassId = asyncHandler(async (req, res) => {
             type: "pass_id_set",
             data: appoitment
         });
-        sendResponse(res, 200, appoitment, "Set PassID")
+        sendResponse(res, 200, appoitment, "Pass ID is set to the appointment.")
     }else{
         throw new ApiError(400, "Failed to set")
     }
