@@ -1,7 +1,7 @@
 import AdminSubHeader from "@/components/AdminSubHeader";
 import UserFilters from "@/components/user/UserFilter";
 import UsersTable from "@/components/user/UserTable";
-import { useGetAllUsersQuery, type User } from "@/lib/features/users/usersApi";
+import { useGetAllUsersQuery } from "@/lib/features/users/usersApi";
 import { useEffect, useMemo, useState } from "react";
 // import type { User } from "@/components/manage-users/users-table/columns";
 
