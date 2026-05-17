@@ -58,7 +58,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
+                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
                     background:#10b981;
                     color:#fff;
@@ -72,7 +72,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
+                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
@@ -118,7 +118,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
+                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
                     background:#10b981;
                     color:#fff;
@@ -132,7 +132,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
+                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
