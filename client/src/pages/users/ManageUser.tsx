@@ -17,15 +17,10 @@ export default function ManageUsers() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
-   const [userSheetOpen, setUserSheetOpen] = useState(false);
-      const [selectedUser, setSelectedUser] = useState<User | null>(null);
-      const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
+   // const [userSheetOpen, setUserSheetOpen] = useState(false);
+   //    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+   //    const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
 
-  // ── Optional modal state (uncomment when sheets are ready) ───────────────
-  // const [editUser, setEditUser] = useState<User | null>(null);
-  // const [editOpen, setEditOpen] = useState(false);
-  // const [viewUser, setViewUser] = useState<User | null>(null);
-  // const [viewOpen, setViewOpen] = useState(false);
 
   // ── Extract role filter to pass to API ────────────────────────────────────
   const roleFilter = useMemo(
@@ -68,11 +63,11 @@ export default function ManageUsers() {
   const handleNext     = () => setPage((p) => (p < totalPages ? p + 1 : p));
 
 
-   const handleAddUser = () => {
-        setSheetMode("add");
-        setSelectedUser(null);
-        setUserSheetOpen(true);
-    };
+   // const handleAddUser = () => {
+   //      setSheetMode("add");
+   //      setSelectedUser(null);
+   //      setUserSheetOpen(true);
+   //  };
 
   return (
     <section className="mb-10">
@@ -101,9 +96,9 @@ export default function ManageUsers() {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFetching={isFetching || isLoading}
-        setEditMember={setSelectedUser}
+        {/* setEditMember={setSelectedUser}
         setEditOpen={setUserSheetOpen}
-        setSheetMode={setSheetMode}
+        setSheetMode={setSheetMode} */}
       />
     </section>
   );
