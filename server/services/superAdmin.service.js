@@ -245,8 +245,116 @@ const addEmployeeService = async ({
         emp
     }
 }
+
+const addDepartmentService = async ({name}) => {
+    console.log(name);
+    
+    const dept = await sql`
+        INSERT INTO "Departments" ("name")
+        VALUES (${name})
+        RETURNING *
+    `
+    return dept
+}
+
+const updateEmployeeService = async (
+    id,
+    {
+        first_name,
+        last_name,
+        email,
+        phone,
+        company,
+        department,
+        position,
+        role
+    }
+) => {
+
+    // Check user exists
+    const [existingUser] = await sql`
+        SELECT *
+        FROM "Employee"
+        WHERE "id" = ${id}
+    `;
+
+    if(!existingUser){
+        throw new ApiError(404, "Employee not found");
+    }
+
+    // Update Employee table
+    const [updatedEmployee] = await sql`
+        UPDATE "Employee"
+        SET
+            "company" = ${company},
+            "department" = ${department},
+            "position" = ${position}
+          
+        WHERE "id" = ${id}
+        RETURNING *
+    `;
+
+    // Update Users table
+    const [updatedUser] = await sql`
+        UPDATE "Users"
+        SET
+            "first_name" = ${first_name},
+            "last_name" = ${last_name},
+            "email" = ${email},
+            "phone" = ${phone},
+            "role" = ${role}
+        WHERE "id" = ${updatedEmployee.user_id}
+        RETURNING
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "role"
+    `;
+
+    
+
+    return {
+        user: updatedUser,
+        employee: updatedEmployee
+    };
+};
+
+const updateUserService = async(id,{first_name, last_name, email, phone, role}) =>{
+    const [existingUser] = await sql`
+        SELECT *
+        FROM "Users"
+        WHERE "id" = ${id}
+    `;
+
+    if(!existingUser){
+        throw new ApiError(404, "User not found");
+    }
+    const [user] = await sql`
+        UPDATE "Users"
+        SET
+            "first_name" = ${first_name},
+            "last_name" = ${last_name},
+            "email" = ${email},
+            "phone" = ${phone},
+            "role" = ${role}
+        WHERE "id" = ${id}
+        RETURNING
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "phone",
+            "role"
+    `;
+    return user
+}
 export{
     getALLEmployeesservice,
     getAllUserService,
-    addEmployeeService
+    addEmployeeService,
+    addDepartmentService,
+    updateEmployeeService,
+    updateUserService
 }
