@@ -96,9 +96,9 @@ export default function ManageUsers() {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFetching={isFetching || isLoading}
-        {/* setEditMember={setSelectedUser}
-        setEditOpen={setUserSheetOpen}
-        setSheetMode={setSheetMode} */}
+        //setEditMember={setSelectedUser}
+        //setEditOpen={setUserSheetOpen}
+        //setSheetMode={setSheetMode} 
       />
     </section>
   );
