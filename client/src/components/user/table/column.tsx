@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { 
     // MoreHorizontal, Pencil, Eye, 
-    // Pencil,
+    Pencil,
     Clock } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { getNameInitials } from "@/lib/utils/helperFunctions";
 // import DeleteModal from "@/components/DeleteModal";
 
 // ── Types (matching API response) ─────────────────────────────────────────────
-export type UserRole = "super_admin" | "receptionist" | "employee" | "visitor";
+export type UserRole = "super_admin" | "receptionist" | "visitor";
 
 export interface User {
   id: string;
@@ -31,77 +31,77 @@ export interface User {
 }
 
 // ── Avatar colour cycling ─────────────────────────────────────────────────────
-const AVATAR_COLORS: Record<UserRole, string> = {
-  super_admin:  "bg-maroon text-white",
-  receptionist: "bg-violet-500 text-white",
-  employee:     "bg-amber-600 text-white",
-  visitor:      "bg-cyan-600 text-white",
-};
+// const AVATAR_COLORS: Record<UserRole, string> = {
+//   super_admin:  "bg-maroon text-white",
+//   receptionist: "bg-violet-500 text-white",
+//   employee:     "bg-amber-600 text-white",
+//   visitor:      "bg-cyan-600 text-white",
+// };
 
 // ── Role badge styles ─────────────────────────────────────────────────────────
 const ROLE_STYLES: Record<UserRole, string> = {
   super_admin:  "bg-[#fbeaf0] text-[#701a40]",
   receptionist: "bg-violet-100 text-violet-700",
-  employee:     "bg-amber-100 text-amber-700",
+  // employee:     "bg-amber-100 text-amber-700",
   visitor:      "bg-cyan-100 text-cyan-700",
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
   super_admin:  "Super Admin",
   receptionist: "Receptionist",
-  employee:     "Employee",
+  // employee:     "Employee",
   visitor:      "Visitor",
 };
 
 // ── Actions cell ──────────────────────────────────────────────────────────────
-// function ActionsCell({ row, table }: { row: any; table: any }) {
-//   const user: User = row.original;
-//   const { setEditMember, setEditOpen, setSheetMode } =
-//     table.options.meta || {};
+function ActionsCell({ row, table }: { row: any; table: any }) {
+  const user: User = row.original;
+  const { setEditMember, setEditOpen, setSheetMode } =
+    table.options.meta || {};
 
-//   return (
-//     <div className="flex items-center gap-2 justify-end">
-//       <Button
-//         variant="outline"
-//         size="xs"
-//         className="hover:bg-maroon hover:text-white cursor-pointer"
-//         onClick={() => {
-//           setSheetMode?.("edit")
-//           setEditMember?.(user);
-//           setEditOpen?.(true);
-//         }}
-//       >
-//         <Pencil size={14} />
-//       </Button>
+  return (
+    <div className="flex items-center gap-2 justify-end">
+      <Button
+        variant="outline"
+        size="xs"
+        className="hover:bg-maroon hover:text-white cursor-pointer"
+        onClick={() => {
+          setSheetMode?.("edit")
+          setEditMember?.(user);
+          setEditOpen?.(true);
+        }}
+      >
+        <Pencil size={14} />
+      </Button>
 
-//       {/* <DeleteModal
-//         who={user.full_name}
-//         m1active="All data associated with this user will be removed"
-//         onConfirm={() => onDelete?.(user.id)}
-//         isLoading={false}
-//       /> */}
+      {/* <DeleteModal
+        who={user.full_name}
+        m1active="All data associated with this user will be removed"
+        onConfirm={() => onDelete?.(user.id)}
+        isLoading={false}
+      /> */}
 
-//       {/* <DropdownMenu>
-//         <DropdownMenuTrigger asChild>
-//           <Button variant="ghost" size="icon" className="h-8 w-8">
-//             <MoreHorizontal size={16} />
-//           </Button>
-//         </DropdownMenuTrigger>
-//         <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
-//           <DropdownMenuItem
-//             className="gap-2 text-sm cursor-pointer"
-//             onClick={() => {
-//               setViewUser?.(user);
-//               setViewOpen?.(true);
-//             }}
-//           >
-//             <Eye size={14} /> View profile
-//           </DropdownMenuItem>
-//         </DropdownMenuContent>
-//       </DropdownMenu> */}
-//     </div>
-//   );
-// }
+      {/* <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreHorizontal size={16} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="bg-white border shadow-md w-40">
+          <DropdownMenuItem
+            className="gap-2 text-sm cursor-pointer"
+            onClick={() => {
+              setViewUser?.(user);
+              setViewOpen?.(true);
+            }}
+          >
+            <Eye size={14} /> View profile
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu> */}
+    </div>
+  );
+}
 
 // ════════════════════════════════════════════════════════════════════════════
 // COLUMNS
@@ -113,11 +113,11 @@ export const userColumns = [
     header: "User",
     cell: ({ row }: any) => {
       const user: User = row.original;
-      const avatarCls = AVATAR_COLORS[user.role] ?? "bg-gray-400 text-white";
+      // const avatarCls = AVATAR_COLORS[user.role] ?? "bg-gray-400 text-white";
       return (
         <div className="flex items-center gap-3">
           <div
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${avatarCls}`}
+            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white`}
           >
             {getNameInitials(user.first_name, user.last_name)}
           </div>
@@ -170,9 +170,9 @@ export const userColumns = [
                 <DropdownMenuRadioItem value="receptionist" className="text-xs">
                   Receptionist
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="employee" className="text-xs">
+                {/* <DropdownMenuRadioItem value="employee" className="text-xs">
                   Employee
-                </DropdownMenuRadioItem>
+                </DropdownMenuRadioItem> */}
                 <DropdownMenuRadioItem value="visitor" className="text-xs">
                   Visitor
                 </DropdownMenuRadioItem>
@@ -265,8 +265,8 @@ export const userColumns = [
   },
 
   // ── Actions ───────────────────────────────────────────────────────────────
-  // {
-  //   id: "actions",
-  //   cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
-  // },
+  {
+    id: "actions",
+    cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
+  },
 ];

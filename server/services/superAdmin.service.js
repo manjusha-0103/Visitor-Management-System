@@ -127,7 +127,12 @@ const getAllUserService = async ({
         FROM "Users"
 
         WHERE 
-            (
+         role IN (
+        'super_admin',
+        'receptionist',
+        'visitor'
+    )
+        AND (
                 ${search || ''} = ''
 
                 OR email ILIKE ${'%' + search + '%'}
@@ -197,7 +202,7 @@ const addEmployeeService = async ({
 
     const userExist = await userExistbyemailService(email)
 
-    if(userExist.length){
+    if (userExist.length) {
         throw new ApiError(409, "Employee already exists")
     }
 
@@ -246,9 +251,9 @@ const addEmployeeService = async ({
     }
 }
 
-const addDepartmentService = async ({name}) => {
+const addDepartmentService = async ({ name }) => {
     console.log(name);
-    
+
     const dept = await sql`
         INSERT INTO "Departments" ("name")
         VALUES (${name})
@@ -278,7 +283,7 @@ const updateEmployeeService = async (
         WHERE "id" = ${id}
     `;
 
-    if(!existingUser){
+    if (!existingUser) {
         throw new ApiError(404, "Employee not found");
     }
 
@@ -313,7 +318,7 @@ const updateEmployeeService = async (
             "role"
     `;
 
-    
+
 
     return {
         user: updatedUser,
@@ -321,14 +326,14 @@ const updateEmployeeService = async (
     };
 };
 
-const updateUserService = async(id,{first_name, last_name, email, phone, role}) =>{
+const updateUserService = async (id, { first_name, last_name, email, phone, role }) => {
     const [existingUser] = await sql`
         SELECT *
         FROM "Users"
         WHERE "id" = ${id}
     `;
 
-    if(!existingUser){
+    if (!existingUser) {
         throw new ApiError(404, "User not found");
     }
     const [user] = await sql`
@@ -350,7 +355,7 @@ const updateUserService = async(id,{first_name, last_name, email, phone, role}) 
     `;
     return user
 }
-export{
+export {
     getALLEmployeesservice,
     getAllUserService,
     addEmployeeService,

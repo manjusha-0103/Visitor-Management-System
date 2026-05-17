@@ -36,12 +36,45 @@ function fmtTime(iso: string | null) {
 }
 
 // ── Approve badge ─────────────────────────────────────────────────────────────
-function ApproveBadge({ is_approve, check_out }: { is_approve: boolean; check_out: string | null }) {
-  if (check_out)
-    return <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">Checked out</Badge>;
-  if (is_approve)
-    return <Badge className="bg-green-100 text-green-700 border-0 text-xs">Approved</Badge>;
-  return <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">Pending</Badge>;
+function ApproveBadge({
+  is_approve,
+  is_rejected,
+  check_out,
+}: {
+  is_approve: boolean;
+  is_rejected: boolean;
+  check_out: string | null;
+}) {
+
+  if (check_out) {
+    return (
+      <Badge className="bg-gray-100 text-gray-500 border-0 text-xs">
+        Checked out
+      </Badge>
+    );
+  }
+
+  if (is_approve) {
+    return (
+      <Badge className="bg-green-100 text-green-700 border-0 text-xs">
+        Approved
+      </Badge>
+    );
+  }
+
+  if (is_rejected) {
+    return (
+      <Badge className="bg-red-100 text-red-700 border-0 text-xs">
+        Rejected
+      </Badge>
+    );
+  }
+
+  return (
+    <Badge className="bg-amber-100 text-amber-700 border-0 text-xs">
+      Pending
+    </Badge>
+  );
 }
 
 
@@ -119,8 +152,9 @@ function ActionsCell({
 
         {/* Pending */}
         {isReceptionist &&
-          !appt.is_approve &&
-          !appt.check_out && (
+ !appt.is_approve &&
+ !appt.is_rejected &&
+ !appt.check_out && (
             <>
               <Button
                 size="sm"
@@ -153,8 +187,8 @@ function ActionsCell({
 
         {/* Approved */}
         {isReceptionist &&
-          appt.is_approve &&
-          !appt.check_out && (
+ appt.is_approve &&
+ !appt.check_out && (
             <>
               {!appt.pass_id && (
                 <Button
@@ -193,6 +227,12 @@ function ActionsCell({
               </Button>
             </>
           )}
+
+          {appt.is_rejected && (
+  <Badge className="bg-red-100 text-red-700">
+    Rejected
+  </Badge>
+)}
       </div>
     </>
 
@@ -310,7 +350,11 @@ export const walkInColumns = [
     accessorKey: "is_approve",
     header: "Status",
     cell: ({ row }: any) => (
-      <ApproveBadge is_approve={row.original.is_approve} check_out={row.original.check_out} />
+      <ApproveBadge
+  is_approve={row.original.is_approve}
+  is_rejected={row.original.is_rejected}
+  check_out={row.original.check_out}
+/>
     ),
     filterFn: (row: any, _: string, value: string) => {
       if (!value || value === "all") return true;
@@ -375,16 +419,39 @@ export const preScheduleColumns = [
     accessorKey: "is_approve",
     header: "Status",
     cell: ({ row }: any) => (
-      <ApproveBadge is_approve={row.original.is_approve} check_out={row.original.check_out} />
+      <ApproveBadge
+  is_approve={row.original.is_approve}
+  is_rejected={row.original.is_rejected}
+  check_out={row.original.check_out}
+/>
     ),
-    filterFn: (row: any, _: string, value: string) => {
-      if (!value || value === "all") return true;
-      const a: AppointmentRow = row.original;
-      if (value === "checked_out") return !!a.check_out;
-      if (value === "approved") return a.is_approve && !a.check_out;
-      if (value === "pending") return !a.is_approve && !a.check_out;
-      return true;
-    },
+   filterFn: (row: any, _: string, value: string) => {
+  if (!value || value === "all") return true;
+
+  const a: AppointmentRow = row.original;
+
+  if (value === "checked_out") {
+    return !!a.check_out;
+  }
+
+  if (value === "approved") {
+    return a.is_approve && !a.check_out;
+  }
+
+  if (value === "rejected") {
+    return a.is_rejected;
+  }
+
+  if (value === "pending") {
+    return (
+      !a.is_approve &&
+      !a.is_rejected &&
+      !a.check_out
+    );
+  }
+
+  return true;
+},
   },
   {
     id: "actions",
