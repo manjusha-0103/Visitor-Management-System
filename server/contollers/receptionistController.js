@@ -10,6 +10,8 @@ import { setPassIdService,
  } from "../services/receptionist.service.js";
 
 import { getIO } from "../config/socket.js";
+import { chekIsApproveService } from "../services/employeeServices.js";
+import { send } from "process";
 
 
 const setPassId = asyncHandler(async (req, res) => {
@@ -49,7 +51,20 @@ const checkOut = asyncHandler(async (req, res) => {
     );
 })
 
+const checkIsApprove = asyncHandler(async (req, res) => {
+
+    const is_approve = req.body.is_approve //=== "true"
+    console.log("is_approve", req.body.is_approve);
+    
+    const {appointment_id} = req.params
+    const appoinment = await chekIsApproveService(is_approve, appointment_id)
+    const msg = is_approve? "Appointment approved successfully": "Appointment denied successfully"
+    if(appoinment){sendResponse(res, 200, appoinment, msg)}
+    else{throw new ApiError(400, "Bad request")}
+})
+
 export{
     setPassId,
-    checkOut
+    checkOut,
+    checkIsApprove
 }
