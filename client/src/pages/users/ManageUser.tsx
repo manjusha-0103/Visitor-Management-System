@@ -1,7 +1,7 @@
 import AdminSubHeader from "@/components/AdminSubHeader";
 import UserFilters from "@/components/user/UserFilter";
 import UsersTable from "@/components/user/UserTable";
-import { useGetAllUsersQuery } from "@/lib/features/users/usersApi";
+import { useGetAllUsersQuery, type User } from "@/lib/features/users/usersApi";
 import { useEffect, useMemo, useState } from "react";
 // import type { User } from "@/components/manage-users/users-table/columns";
 
@@ -17,6 +17,9 @@ export default function ManageUsers() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+   const [userSheetOpen, setUserSheetOpen] = useState(false);
+      const [selectedUser, setSelectedUser] = useState<User | null>(null);
+      const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
 
   // ── Optional modal state (uncomment when sheets are ready) ───────────────
   // const [editUser, setEditUser] = useState<User | null>(null);
@@ -64,6 +67,13 @@ export default function ManageUsers() {
   const handlePrevious = () => setPage((p) => Math.max(p - 1, 1));
   const handleNext     = () => setPage((p) => (p < totalPages ? p + 1 : p));
 
+
+   const handleAddUser = () => {
+        setSheetMode("add");
+        setSelectedUser(null);
+        setUserSheetOpen(true);
+    };
+
   return (
     <section className="mb-10">
       <AdminSubHeader
@@ -91,11 +101,9 @@ export default function ManageUsers() {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFetching={isFetching || isLoading}
-        // Uncomment when sheets are ready:
-        // setEditUser={setEditUser}
-        // setEditOpen={setEditOpen}
-        // setViewUser={setViewUser}
-        // setViewOpen={setViewOpen}
+        setEditMember={setSelectedUser}
+        setEditOpen={setUserSheetOpen}
+        setSheetMode={setSheetMode}
       />
     </section>
   );

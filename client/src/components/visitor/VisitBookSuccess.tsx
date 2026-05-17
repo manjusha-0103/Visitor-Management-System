@@ -1,5 +1,6 @@
-import { BadgeCheck, ArrowRight } from "lucide-react";
+import { BadgeCheck, ArrowRight, Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 interface VisitBookSuccessProps {
     setPhase: React.Dispatch<
@@ -11,24 +12,24 @@ export default function VisitBookSuccess({
     setPhase,
 }: VisitBookSuccessProps) {
 
-    // const [countdown, setCountdown] = useState(5);
+    const [countdown, setCountdown] = useState(5);
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     const interval = setInterval(() => {
-    //         setCountdown((prev) => prev - 1);
-    //     }, 1000);
+        const interval = setInterval(() => {
+            setCountdown((prev) => prev - 1);
+        }, 1000);
 
-    //     const timeout = setTimeout(() => {
-    //         setPhase("qr");
-    //     }, 5000);
+        const timeout = setTimeout(() => {
+            setPhase("qr");
+        }, 5000);
 
-    //     return () => {
-    //         clearInterval(interval);
-    //         clearTimeout(timeout);
-    //     };
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+        };
 
-    // }, [setPhase]);
+    }, [setPhase]);
 
     return (
         <motion.section
@@ -93,7 +94,7 @@ export default function VisitBookSuccess({
             </motion.div>
 
             {/* Status Card */}
-            {/* <motion.div
+            <motion.div
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
@@ -122,7 +123,7 @@ export default function VisitBookSuccess({
                         </p>
                     </div>
                 </div>
-            </motion.div> */}
+            </motion.div>
 
             <motion.button
                 initial={{ opacity: 0 }}
