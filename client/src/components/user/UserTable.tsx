@@ -13,9 +13,9 @@ interface UsersTableProps {
   onPrevious: () => void;
   onNext: () => void;
   isFetching?: boolean;
-  setEditMember: (employee: User | null) => void;
-  setEditOpen: (open: boolean) => void;
-  setSheetMode: (mode: "add" | "edit") => void;
+  // setEditMember: (employee: User | null) => void;
+  // setEditOpen: (open: boolean) => void;
+  // setSheetMode: (mode: "add" | "edit") => void;
 }
 
 export default function UsersTable({
@@ -28,27 +28,27 @@ export default function UsersTable({
   onPrevious,
   onNext,
   isFetching,
-  setEditMember,
-    setEditOpen,
-    setSheetMode,
+  // setEditMember,
+  //   setEditOpen,
+  //   setSheetMode,
 }: UsersTableProps) {
-  const meta = useMemo(
-    () => ({
-      setEditMember,
-    setEditOpen,
-    setSheetMode,
-    }),
-    [setEditMember,
-    setEditOpen,
-    setSheetMode]
-  );
+  // const meta = useMemo(
+  //   () => ({
+  //     setEditMember,
+  //   setEditOpen,
+  //   setSheetMode,
+  //   }),
+  //   [setEditMember,
+  //   setEditOpen,
+  //   setSheetMode]
+  // );
 
   return (
     <section className="mt-6 px-4 lg:px-10">
       <UsersDataTable
         columns={userColumns}
         data={users}
-        meta={meta}
+        {/* meta={meta} */}
         setPage={setPage}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
