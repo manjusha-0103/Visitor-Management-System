@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { 
     // MoreHorizontal, Pencil, Eye, 
+    // Pencil,
     Clock } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { getNameInitials } from "@/lib/utils/helperFunctions";
@@ -55,7 +56,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 // ── Actions cell ──────────────────────────────────────────────────────────────
 // function ActionsCell({ row, table }: { row: any; table: any }) {
 //   const user: User = row.original;
-//   const { setEditUser, setEditOpen, setViewUser, setViewOpen, onDelete } =
+//   const { setEditMember, setEditOpen, setSheetMode } =
 //     table.options.meta || {};
 
 //   return (
@@ -65,7 +66,8 @@ const ROLE_LABELS: Record<UserRole, string> = {
 //         size="xs"
 //         className="hover:bg-maroon hover:text-white cursor-pointer"
 //         onClick={() => {
-//           setEditUser?.(user);
+//           setSheetMode?.("edit")
+//           setEditMember?.(user);
 //           setEditOpen?.(true);
 //         }}
 //       >
@@ -79,7 +81,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 //         isLoading={false}
 //       /> */}
 
-//       <DropdownMenu>
+//       {/* <DropdownMenu>
 //         <DropdownMenuTrigger asChild>
 //           <Button variant="ghost" size="icon" className="h-8 w-8">
 //             <MoreHorizontal size={16} />
@@ -96,7 +98,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 //             <Eye size={14} /> View profile
 //           </DropdownMenuItem>
 //         </DropdownMenuContent>
-//       </DropdownMenu>
+//       </DropdownMenu> */}
 //     </div>
 //   );
 // }
@@ -263,8 +265,8 @@ export const userColumns = [
   },
 
   // ── Actions ───────────────────────────────────────────────────────────────
-//   {
-//     id: "actions",
-//     cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
-//   },
+  // {
+  //   id: "actions",
+  //   cell: ({ row, table }: any) => <ActionsCell row={row} table={table} />,
+  // },
 ];

@@ -96,7 +96,7 @@ export const employeeApi = api.injectEndpoints({
 
     updateEmployee: builder.mutation({
       query: ({ employee_id, ...body }) => ({
-        url: `/api/v1/super-admin/update/${employee_id}`,
+        url: `/api/v1/super-admin/update-employee/${employee_id}`,
         method: "PUT",
         body,
       }),
