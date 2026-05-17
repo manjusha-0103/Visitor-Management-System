@@ -58,8 +58,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
-                style="
+                <a href=""
+                style="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true
                     background:#10b981;
                     color:#fff;
                     text-decoration:none;
@@ -72,7 +72,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
+                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
@@ -106,7 +106,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
         `
         // console.log(visitor)
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position")
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", , "visitor_company", "visitor_position")
             values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position})
             RETURNING *
         ` 
@@ -118,7 +118,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
+                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
                     background:#10b981;
                     color:#fff;
@@ -132,7 +132,7 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 Approve
                 </a>
 
-                <a href="${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
+                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=false"
                 style="
                     background:#ef4444;
                     color:#fff;
