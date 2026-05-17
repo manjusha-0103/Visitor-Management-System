@@ -241,6 +241,7 @@ export const getAppointmentsService = async ({
       a.date_time,
       a.is_preschedule,
       a.is_approve,
+      a.is_rejected,
       a.pass_id,
 
       -- Employee
