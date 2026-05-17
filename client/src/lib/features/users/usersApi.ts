@@ -74,9 +74,20 @@ export const usersApi = api.injectEndpoints({
         skipToast: true,
       },
     }),
+
+    updateUser: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/api/v1/super-admin/update-user/${id}`,
+        method: "PUT",
+        body,
+      }),
+
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
 export const {
   useGetAllUsersQuery,
+  useUpdateUserMutation
 } = usersApi;
