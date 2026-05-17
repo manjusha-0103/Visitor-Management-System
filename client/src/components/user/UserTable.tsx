@@ -48,7 +48,6 @@ export default function UsersTable({
       <UsersDataTable
         columns={userColumns}
         data={users}
-        {/* meta={meta} */}
         setPage={setPage}
         columnFilters={columnFilters}
         setColumnFilters={setColumnFilters}
