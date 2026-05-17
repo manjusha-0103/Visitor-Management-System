@@ -88,6 +88,7 @@ export interface AppointmentRow {
 
   is_preschedule: boolean;
   is_approve: boolean;
+  is_rejected: boolean;
 
   pass_id: string | null;
 

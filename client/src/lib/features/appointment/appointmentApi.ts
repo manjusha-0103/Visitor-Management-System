@@ -167,8 +167,12 @@ export const appointmentApi = api.injectEndpoints({
         appointment_id,
         is_approve,
       }) => ({
-        url: `/api/v1/employee/is-approve/${appointment_id}?is_approve=${is_approve}`,
-        method: "GET",
+        url: `/api/v1/receptionist/is-approve/${appointment_id}`,
+        method: "PUT",
+
+        body: {
+          is_approve,
+        },
       }),
 
       invalidatesTags: ["Appointments"],

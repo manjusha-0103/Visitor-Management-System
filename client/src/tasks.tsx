@@ -1,7 +1,7 @@
 import {
   CalendarClock,
   ChartNoAxesCombined,
-  Settings,
+  // Settings,
   UserRound,
   UsersRound,
 } from "lucide-react";
@@ -39,13 +39,13 @@ export const SUPER_ADMIN_TASKS = [
     path: "/admin/analytics",
   },
 
-  {
-    key: "settings",
-    label: "Settings",
-    icon: Settings,
-    bg: "bg-green-500 shadow-lg shadow-green-500/40",
-    path: "/admin/settings",
-  },
+  // {
+  //   key: "settings",
+  //   label: "Settings",
+  //   icon: Settings,
+  //   bg: "bg-green-500 shadow-lg shadow-green-500/40",
+  //   path: "/admin/settings",
+  // },
 ] as const;
 
 export const RECEPTIONIST_TASKS = [
