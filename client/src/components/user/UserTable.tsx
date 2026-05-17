@@ -13,12 +13,9 @@ interface UsersTableProps {
   onPrevious: () => void;
   onNext: () => void;
   isFetching?: boolean;
-  // optional — wire up when you have edit/view sheets
-  setEditUser?: (u: User | null) => void;
-  setEditOpen?: (open: boolean) => void;
-  setViewUser?: (u: User | null) => void;
-  setViewOpen?: (open: boolean) => void;
-  onDelete?: (id: string) => void;
+  setEditMember: (employee: User | null) => void;
+  setEditOpen: (open: boolean) => void;
+  setSheetMode: (mode: "add" | "edit") => void;
 }
 
 export default function UsersTable({
@@ -31,21 +28,19 @@ export default function UsersTable({
   onPrevious,
   onNext,
   isFetching,
-  setEditUser,
-  setEditOpen,
-  setViewUser,
-  setViewOpen,
-  onDelete,
+  setEditMember,
+    setEditOpen,
+    setSheetMode,
 }: UsersTableProps) {
   const meta = useMemo(
     () => ({
-      setEditUser,
-      setEditOpen,
-      setViewUser,
-      setViewOpen,
-      onDelete,
+      setEditMember,
+    setEditOpen,
+    setSheetMode,
     }),
-    [setEditUser, setEditOpen, setViewUser, setViewOpen, onDelete]
+    [setEditMember,
+    setEditOpen,
+    setSheetMode]
   );
 
   return (
