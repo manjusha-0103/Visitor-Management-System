@@ -58,8 +58,8 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 <p>${first_name} ${last_name}(${company}) wants to meet</p>
                 <div style="text-align:center; margin-top:25px;">
 
-                <a href=""
-                style="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true
+                <a href="http://${process.env.BACKEND_DEV_URL}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
+                style="
                     background:#10b981;
                     color:#fff;
                     text-decoration:none;
