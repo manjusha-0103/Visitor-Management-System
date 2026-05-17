@@ -1,7 +1,8 @@
 import AdminSubHeader from "@/components/AdminSubHeader";
 import UserFilters from "@/components/user/UserFilter";
+import UserForm from "@/components/user/UserForm";
 import UsersTable from "@/components/user/UserTable";
-import { useGetAllUsersQuery } from "@/lib/features/users/usersApi";
+import { useGetAllUsersQuery, type User } from "@/lib/features/users/usersApi";
 import { useEffect, useMemo, useState } from "react";
 // import type { User } from "@/components/manage-users/users-table/columns";
 
@@ -17,9 +18,10 @@ export default function ManageUsers() {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
-   // const [userSheetOpen, setUserSheetOpen] = useState(false);
-   //    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-   //    const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
+  const [userSheetOpen, setUserSheetOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [sheetMode, setSheetMode] = useState<"edit">("edit");
+  // const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
 
 
   // ── Extract role filter to pass to API ────────────────────────────────────
@@ -96,9 +98,17 @@ export default function ManageUsers() {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFetching={isFetching || isLoading}
-        //setEditMember={setSelectedUser}
-        //setEditOpen={setUserSheetOpen}
-        //setSheetMode={setSheetMode} 
+        setEditMember={setSelectedUser}
+        setEditOpen={setUserSheetOpen}
+        setSheetMode={setSheetMode} 
+      />
+
+
+      <UserForm
+        open={userSheetOpen}
+        onClose={setUserSheetOpen}
+        user={selectedUser}
+        mode={sheetMode}
       />
     </section>
   );

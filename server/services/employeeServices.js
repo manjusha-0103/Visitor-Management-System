@@ -8,7 +8,9 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
     console.log(is_approve, appointment_id)
     const amp = await sql`
         UPDATE "Appointments"
-        SET "is_approve" = ${is_approve}
+        SET 
+            "is_approve" = ${is_approve},
+            "is_rejected" = ${!is_approve}
         WHERE "id" = ${appointment_id}
         RETURNING *
     `

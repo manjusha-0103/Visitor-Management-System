@@ -76,8 +76,8 @@ export const usersApi = api.injectEndpoints({
     }),
 
     updateUser: builder.mutation({
-      query: ({ id, ...body }) => ({
-        url: `/api/v1/super-admin/update-user/${id}`,
+      query: ({ user_id, ...body }) => ({
+        url: `/api/v1/super-admin/update-user/${user_id}`,
         method: "PUT",
         body,
       }),
