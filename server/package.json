@@ -23,10 +23,12 @@
     "express-validator": "^7.3.2",
     "http-proxy-middleware": "^4.0.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
     "pg": "^8.20.0",
     "pg-pool": "^3.13.0",
     "postgres": "^3.4.9",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "xlsx": "^0.18.5"
   }
 }
