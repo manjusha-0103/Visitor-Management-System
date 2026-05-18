@@ -11,6 +11,6 @@ const router = express.Router();
 
 
 router.get("/is-approve/:appointment_id", chekIsApprove)
-router.post("/preschedule", protect, authorize('employee'), preSchedule)
+router.post("/preschedule", preSchedule)
 export default router;
 
