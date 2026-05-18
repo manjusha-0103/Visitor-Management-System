@@ -8,19 +8,19 @@ import {
 
 export const SUPER_ADMIN_TASKS = [
   {
-    key: "users",
-    label: "Users",
+    key: "visitor",
+    label: "Visitors",
     icon: UserRound,
     bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
     path: "/admin/users",
   },
 
   {
-    key: "appointments",
-    label: "Appointments",
+    key: "check-in",
+    label: "Check In",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/admin/appointments",
+    path: "/admin/check-in",
   },
 
   {

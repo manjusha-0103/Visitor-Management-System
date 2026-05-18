@@ -197,12 +197,12 @@ const chekIsApprove= asyncHandler(async (req, res) => {
         
     `)
     
-    // const io = getIO();
+    const io = getIO();
 
-    // io.emit("appointment_updated", {
-    //     type: is_approve ? "approved" : "denied",
-    //     data: appoinment
-    // });
+    io.emit("appointment_updated", {
+        type: is_approve ? "approved" : "denied",
+        data: appoinment
+    });
     // sendResponse(res, 200, appoinment, is_approve?"Approved Meet":"Deny Meet")
 
 })  

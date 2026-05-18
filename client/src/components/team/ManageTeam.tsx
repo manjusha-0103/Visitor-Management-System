@@ -1,15 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-// import { useSelector } from "react-redux";
 import AdminSubHeader from "@/components/AdminSubHeader";
-// import CommonFilter from "@/components/CommonFilter";
 import TeamTable from "./TeamTable";
-// import { DUMMY_TEAM } from "@/components/team/dummy-team";
-// import type { TeamMember } from "@/components/team/dummy-team";
 import { useGetAllEmployeesQuery, type Employee } from "@/lib/features/employee/employeeApi";
 import { useGetDepartmentsQuery } from "@/lib/features/visitor-check-in/visitorApi";
 import TeamFilters from "./TeamFilter";
 import EmployeeForm from "./EmployeeForm";
-// import { selectUser } from "@/lib/features/auth/authSlice";
+import {type Department} from "@/lib/features/visitor-check-in/visitorApi"
+import DepartmentForm from "./DepartmentForm";
 
 type ColumnFilter = {
     id: string;
@@ -18,16 +15,17 @@ type ColumnFilter = {
 const LIMIT = 10;
 
 export default function ManageTeam() {
-    // const user = useSelector(selectUser);
-    //   const [allMembers, setAllMembers] = useState<TeamMember[]>(DUMMY_TEAM);
     const [page, setPage] = useState(1);
     const [searchInput, setSearchInput] = useState("")
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [employeeSheetOpen, setEmployeeSheetOpen] = useState(false);
-
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-
     const [sheetMode, setSheetMode] = useState<"add" | "edit">("add");
+
+    const [departmentSheetOpen, setDepartmentSheetOpen] = useState(false);
+    const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
+    const [sheetMode2, setSheetMode2] = useState<"add" | "edit">("add");
+
     const [
         columnFilters,
         setColumnFilters,
@@ -68,13 +66,7 @@ export default function ManageTeam() {
     const employees = useMemo(() => data?.data?.data || [], [data])
     const totalPages = useMemo(() => data?.data?.pagination?.totalPages || 1, [data])
     const currentPage = useMemo(() => data?.data?.pagination?.page || 1, [data])
-    // const brands = useMemo(() => departmentData?.data || [], [departmentData])
-
-    // const employees = data?.data || [];
-    // const totalPages =
-    //   data?.pagination?.totalPages || 1;
-
-
+  
     const handleClear = () => {
         setSearchInput("");
         setDebouncedSearch("");
@@ -88,6 +80,11 @@ export default function ManageTeam() {
         setSheetMode("add");
         setSelectedEmployee(null);
         setEmployeeSheetOpen(true);
+    };
+    const handleAddDepartment = () => {
+        setSheetMode2("add");
+        setSelectedDepartment(null);
+        setDepartmentSheetOpen(true);
     };
 
     return (
@@ -104,6 +101,7 @@ export default function ManageTeam() {
                 setSearchInput={setSearchInput}
                 handleClear={handleClear}
                 onCreate={handleAddEmployee}
+                onAddDept={handleAddDepartment}
             />
 
             {/* Table */}
@@ -121,16 +119,26 @@ export default function ManageTeam() {
                 setEditMember={setSelectedEmployee}
                 setEditOpen={setEmployeeSheetOpen}
                 setSheetMode={setSheetMode}
+                // setEditMember2={setSelectedDepartment}
+                // setEditOpen2={setDepartmentSheetOpen}
+                // setSheetMode2={setSheetMode2}
             />
 
 
             <EmployeeForm
-  open={employeeSheetOpen}
-  onClose={setEmployeeSheetOpen}
-  employee={selectedEmployee}
-  departments={departments || []}
-  mode={sheetMode}
-/>
+                open={employeeSheetOpen}
+                onClose={setEmployeeSheetOpen}
+                employee={selectedEmployee}
+                departments={departments || []}
+                mode={sheetMode}
+            />
+            <DepartmentForm
+                open={departmentSheetOpen}
+                onClose={setDepartmentSheetOpen}
+                employee={selectedDepartment}
+                departments={departments || []}
+                mode={sheetMode2}
+            />
         </section>
     );
 }

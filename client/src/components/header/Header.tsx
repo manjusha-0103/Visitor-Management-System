@@ -79,7 +79,7 @@ export default function Header() {
               <div className="flex items-center gap-2">
                 <span className="hidden sm:block text-sm font-semibold text-white tracking-wide">
                   {user ?
-                    `${user.first_name} ${user.last_name} - (${ROLES[user.role].text})`
+                    `${user.first_name} ${user.last_name} (${ROLES[user.role].text})`
                     :
                     "Admin Manager"
                   }

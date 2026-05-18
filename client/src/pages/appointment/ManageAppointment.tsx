@@ -112,7 +112,7 @@ export default function ManageAppointment() {
           </TabsList>
 
           {/* Receptionist Only */}
-          {isReceptionist && (
+          {/* {isReceptionist && ( */}
             <Button
               className="bg-maroon hover:bg-maroon-dark"
               onClick={() =>
@@ -124,7 +124,7 @@ export default function ManageAppointment() {
               <Plus className="w-4 h-4" />
               Create Appointment
             </Button>
-          )}
+          {/* )} */}
         </div>
         {/* <TabsList>
           <TabsTrigger value="walkin">Walk-in</TabsTrigger>
