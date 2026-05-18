@@ -6,7 +6,7 @@ import { userExistbyemailService } from "./auth.service.js"
 
 const chekIsApproveService = async (is_approve, appointment_id) => {
     console.log(is_approve, appointment_id)
-    const amp = await sql`
+    const [amp] = await sql`
         UPDATE "Appointments"
         SET 
             "is_approve" = ${is_approve},
@@ -14,8 +14,22 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
         WHERE "id" = ${appointment_id}
         RETURNING *
     `
+    console.log(amp);
+    
+    const [visitor] = await sql`
+        SELECT 
+            CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+            u.email,
+            u.phone,
+            v.company,
+            v.position
+        FROM "Users" u
+        JOIN "Visitors" v
+            ON v.user_id = u.id
+        WHERE  v.id = ${amp.visitor_id}
+    `
 
-    return amp
+    return {amp, visitor}
 }
 
 const preScheduleService = async ({ visitors, date_time }, email) => {
@@ -142,7 +156,25 @@ const preScheduleService = async ({ visitors, date_time }, email) => {
         vs
     };
 };
+
+const employeeEsistService = async (email) => {
+    const [emp] = await sql`
+        SELECT * FROM "Users"
+        WHERE email = ${email} AND role = 'employee'
+    `
+    return emp
+}
+
+const allSuperAdminService = async () => {
+    const super_admin = await sql`
+        SELECT * FROM "Users"
+        WHERE role = 'super_admin'
+    `
+    return super_admin
+}
 export{
     chekIsApproveService,
-    preScheduleService
+    preScheduleService,
+    allSuperAdminService,
+    employeeEsistService
 }
