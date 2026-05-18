@@ -15,10 +15,10 @@ import { CustomInputField } from '@/components/form/FormFields';
 
 type SignFormValues = z.infer<typeof signInSchema>;
 type UseMeCred = {
-    role: string; 
-    badge: string; 
-    badgeClass: string; 
-    email: string; 
+    role: string;
+    badge: string;
+    badgeClass: string;
+    email: string;
     pass: string;
 }
 
@@ -75,11 +75,18 @@ export default function Auth() {
     // funtyp
     return (
         <>
-
-
             {/* Root */}
             <div
                 className="w-full min-h-screen bg-linear-to-br from-maroon to-maroon-dark flex flex-col items-center justify-center bg-maroon relative overflow-hidden px-4 py-6"
+                style={{
+                    background: `
+    radial-gradient(
+      circle at 50% 0%,
+      var(--color-maroon) 0%,
+      var(--color-maroon-dark) 100%
+    )
+  `
+                }}
 
             >
                 {/* Background orbs */}
@@ -123,7 +130,7 @@ export default function Auth() {
                     className="bg-white rounded-2xl w-full max-w-105 animate-fade-up p-6 lg:p-8"
 
                 >
-                    <img src={logo} width={120} height={120} className='text-center mx-auto mb-2'/>
+                    <img src={logo} width={120} height={120} className='text-center mx-auto mb-2' />
                     {/* Heading */}
                     {/* <h1
                         className="text-xl font-semibold text-[#1a1a2e] text-center mb-1.5"
@@ -136,43 +143,43 @@ export default function Auth() {
                     </p>
 
                     <form onSubmit={handleSubmit(onSubmit)} className='space-y-2'>
-                            {/* Username */}
-                            <CustomInputField<SignFormValues>
-                                name="email"
-                                label="Email"
-                                type='email'
-                                placeholder="arjun.j@gmail.com"
-                                control={control}
-                                 icon={UserRound}
-                            />
+                        {/* Username */}
+                        <CustomInputField<SignFormValues>
+                            name="email"
+                            label="Email"
+                            type='email'
+                            placeholder="arjun.j@gmail.com"
+                            control={control}
+                            icon={UserRound}
+                        />
 
 
-                            <CustomInputField<SignFormValues>
-                                name="password"
-                                label="Password"
-                                type={showPw ? "text" : "password"}
-                                placeholder="Password"
-                                control={control}
-                                icon={Lock}
-  rightElement={
-    <button
-      type="button"
-      onClick={() => setShowPw((v) => !v)}
-      className="
+                        <CustomInputField<SignFormValues>
+                            name="password"
+                            label="Password"
+                            type={showPw ? "text" : "password"}
+                            placeholder="Password"
+                            control={control}
+                            icon={Lock}
+                            rightElement={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPw((v) => !v)}
+                                    className="
         flex
         items-center
         text-gray-400
         hover:text-maroon
       "
-    >
-      {showPw ? (
-        <Eye size={18} />
-      ) : (
-        <EyeOff size={18} />
-      )}
-    </button>
-  }
-                            />
+                                >
+                                    {showPw ? (
+                                        <Eye size={18} />
+                                    ) : (
+                                        <EyeOff size={18} />
+                                    )}
+                                </button>
+                            }
+                        />
                         {/* <div className="relative">
                             <UserRound className="absolute left-3.5 top-1/3 text-gray-400" size={16} />
                             <Input
@@ -261,6 +268,8 @@ export default function Auth() {
                         </div>
                         // </div>
                     ))}
+
+                    <p className='text-xs text-center font-semibold text-muted-foreground'>Powered by <span className='text-maroon-dark'>Iravya</span></p>
                 </div>
             </div >
         </>
