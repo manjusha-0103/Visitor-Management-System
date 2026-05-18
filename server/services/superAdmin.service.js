@@ -128,10 +128,8 @@ const getAllUserService = async ({
 
         WHERE 
          role IN (
-        'super_admin',
-        'receptionist',
-        'visitor'
-    )
+            'visitor'
+        )
         AND (
                 ${search || ''} = ''
 
