@@ -152,9 +152,9 @@ function ActionsCell({
 
         {/* Pending */}
         {isReceptionist &&
- !appt.is_approve &&
- !appt.is_rejected &&
- !appt.check_out && (
+          !appt.is_approve &&
+          !appt.is_rejected &&
+          !appt.check_out && (
             <>
               <Button
                 size="sm"
@@ -187,8 +187,8 @@ function ActionsCell({
 
         {/* Approved */}
         {isReceptionist &&
- appt.is_approve &&
- !appt.check_out && (
+          appt.is_approve &&
+          !appt.check_out && (
             <>
               {!appt.pass_id && (
                 <Button
@@ -228,11 +228,11 @@ function ActionsCell({
             </>
           )}
 
-          {appt.is_rejected && (
-  <Badge className="bg-red-100 text-red-700">
-    Rejected
-  </Badge>
-)}
+        {appt.is_rejected && (
+          <Badge className="bg-red-100 text-red-700">
+            Rejected
+          </Badge>
+        )}
       </div>
     </>
 
@@ -351,10 +351,10 @@ export const walkInColumns = [
     header: "Status",
     cell: ({ row }: any) => (
       <ApproveBadge
-  is_approve={row.original.is_approve}
-  is_rejected={row.original.is_rejected}
-  check_out={row.original.check_out}
-/>
+        is_approve={row.original.is_approve}
+        is_rejected={row.original.is_rejected}
+        check_out={row.original.check_out}
+      />
     ),
     filterFn: (row: any, _: string, value: string) => {
       if (!value || value === "all") return true;
@@ -420,38 +420,38 @@ export const preScheduleColumns = [
     header: "Status",
     cell: ({ row }: any) => (
       <ApproveBadge
-  is_approve={row.original.is_approve}
-  is_rejected={row.original.is_rejected}
-  check_out={row.original.check_out}
-/>
+        is_approve={row.original.is_approve}
+        is_rejected={row.original.is_rejected}
+        check_out={row.original.check_out}
+      />
     ),
-   filterFn: (row: any, _: string, value: string) => {
-  if (!value || value === "all") return true;
+    filterFn: (row: any, _: string, value: string) => {
+      if (!value || value === "all") return true;
 
-  const a: AppointmentRow = row.original;
+      const a: AppointmentRow = row.original;
 
-  if (value === "checked_out") {
-    return !!a.check_out;
-  }
+      if (value === "checked_out") {
+        return !!a.check_out;
+      }
 
-  if (value === "approved") {
-    return a.is_approve && !a.check_out;
-  }
+      if (value === "approved") {
+        return a.is_approve && !a.check_out;
+      }
 
-  if (value === "rejected") {
-    return a.is_rejected;
-  }
+      if (value === "rejected") {
+        return a.is_rejected;
+      }
 
-  if (value === "pending") {
-    return (
-      !a.is_approve &&
-      !a.is_rejected &&
-      !a.check_out
-    );
-  }
+      if (value === "pending") {
+        return (
+          !a.is_approve &&
+          !a.is_rejected &&
+          !a.check_out
+        );
+      }
 
-  return true;
-},
+      return true;
+    },
   },
   {
     id: "actions",
