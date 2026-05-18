@@ -11,14 +11,12 @@ import React from "react";
 
 interface TeamFilterProps {
   searchInput: string;
-
   setSearchInput: React.Dispatch<
     React.SetStateAction<string>
   >;
-
   handleClear: () => void;
-
   onCreate?: () => void;
+  onAddDept?: () => void;
 }
 
 export default function TeamFilters({
@@ -26,11 +24,12 @@ export default function TeamFilters({
   setSearchInput,
   handleClear,
   onCreate,
+  onAddDept
 }: TeamFilterProps) {
   return (
     <section className="mt-6 px-4 lg:px-10">
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-        
+
         {/* Search */}
         <div className="relative w-full sm:max-w-sm">
           <Search
@@ -60,14 +59,24 @@ export default function TeamFilters({
           )}
         </div>
 
-        {/* Create Button */}
-        <Button
-          className="bg-maroon hover:bg-maroon-dark"
-          onClick={onCreate}
-        >
-          <Plus className="w-4 h-4" />
-          Add Employee
-        </Button>
+        <div className="space-x-4">
+          {/* Create Button */}
+          <Button
+            className="bg-maroon hover:bg-maroon-dark"
+            onClick={onAddDept}
+          >
+            <Plus className="w-4 h-4" />
+            Add Department
+          </Button>
+          <Button
+            className="bg-maroon hover:bg-maroon-dark"
+            onClick={onCreate}
+          >
+            <Plus className="w-4 h-4" />
+            Add Employee
+          </Button>
+        </div>
+
       </div>
     </section>
   );

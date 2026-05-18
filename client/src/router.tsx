@@ -55,7 +55,7 @@ const router = createBrowserRouter([
                         element: <ManageTeam />
                     },
                     {
-                        path: "appointments",
+                        path: "check-in",
                         element: <ManageAppointment />
                     },
                     {
@@ -89,22 +89,22 @@ const router = createBrowserRouter([
         ]
 
     },
-    {
-        element: <ProtectedRoute allowedRoles={[ROLES.employee.role]} />,
-        children: [
-            {
-                path: '/employee',
-                element: <AdminLayout />,
-                children: [
-                    {
-                        index: true,
-                        element: <PreSchedule />
-                    },
-                ]
-            }
-        ]
+    // {
+    //     element: <ProtectedRoute allowedRoles={[ROLES.employee.role]} />,
+    //     children: [
+    //         {
+    //             path: '/employee',
+    //             element: <AdminLayout />,
+    //             children: [
+    //                 {
+    //                     index: true,
+    //                     element: <PreSchedule />
+    //                 },
+    //             ]
+    //         }
+    //     ]
 
-    },
+    // },
 
     //public pages
     {
@@ -113,7 +113,7 @@ const router = createBrowserRouter([
     },
     {
         path: "employee",
-        element: <VisitorCheckIn />
+        element: <PreSchedule />
     }
 ])
 

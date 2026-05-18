@@ -18,6 +18,9 @@ interface TeamTableProps {
   setEditMember: (employee: Employee | null) => void;
 setEditOpen: (open: boolean) => void;
 setSheetMode: (mode: "add" | "edit") => void;
+//   setEditMember2: (employee: Employee | null) => void;
+// setEditOpen2: (open: boolean) => void;
+// setSheetMode2: (mode: "add" | "edit") => void;
 }
 
 export default function TeamTable({
@@ -26,6 +29,9 @@ export default function TeamTable({
    setEditMember,
     setEditOpen,
     setSheetMode,
+  //  setEditMember2,
+  //   setEditOpen2,
+  //   setSheetMode2,
   setPage, columnFilters, setColumnFilters,
   totalPages, page, onPrevious, onNext, isFetching,
 }: TeamTableProps) {
@@ -33,14 +39,17 @@ export default function TeamTable({
     departments,
      setEditMember,
     setEditOpen,
-    setSheetMode
+    setSheetMode,
+    // setEditMember2,
+    // setEditOpen2,
+    // setSheetMode2
   }), [departments, setEditMember,
-    setEditOpen,setSheetMode])
-  // const meta = useMemo(
-  //   () => ({ setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete }),
-  //   [setEditMember, setEditOpen, setViewMember, setViewOpen, onDelete]
-  // );
-
+    setEditOpen,setSheetMode,
+    // setEditMember2,
+    // setEditOpen2,
+    // setSheetMode2
+  ])
+ 
   return (
     <section className="mt-6 px-4 lg:px-10">
       <div className="border rounded-lg">

@@ -40,6 +40,9 @@ import {
 } from "@/components/ui/select";
 
 import { FormLabel } from "@/components/form/FormFields";
+import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+
 
 const singleVisitorSchema = visitorSchema.pick({
     first_name: true,
@@ -188,13 +191,15 @@ function VisitorCard({
 export default function PreSchedule() {
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
+    const [empEmail, setEmpEmail] = useState("");
     const {
         control,
         handleSubmit,
         watch,
-        formState: {isSubmitting}
+        formState: { isSubmitting, isValid }
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
+        mode: "onChange",
         defaultValues: {
             visitors: [
                 {
@@ -209,223 +214,267 @@ export default function PreSchedule() {
         },
     });
 
+    const isScheduleDisabled =
+        !date || !time || !empEmail ||  !isValid || isSubmitting;
+
     const { fields, append, remove } = useFieldArray({
         control,
         name: "visitors",
     });
 
-    const [preScheduleVisitor] =
-  usePreScheduleVisitorMutation();
+    const [preScheduleVisitor] = usePreScheduleVisitorMutation();
 
-const onSubmit = async (data: FormValues) => {
-  if (!date || !time) return;
+    const onSubmit = async (data: FormValues) => {
+        if (!date || !time) return;
 
-  const date_time = new Date(
-    `${format(date, "yyyy-MM-dd")}T${time}`
-  ).toISOString();
+        const date_time = new Date(
+            `${format(date, "yyyy-MM-dd")}T${time}`
+        ).toISOString();
 
-  try {
-    const res = await preScheduleVisitor({
-      date_time,
-      visitors: data.visitors,
-    }).unwrap();
+        try {
+            const res = await preScheduleVisitor({
+                date_time,
+                visitors: data.visitors,
+            }).unwrap();
 
-    console.log(res);
-  } catch (err) {
-    console.log(err);
-  }
-};
+            console.log(res);
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
-// const onError = (err    ) => {
-//     console.log(err);
-    
-// }
+    // const onError = (err    ) => {
+    //     console.log(err);
+
+    // }
 
     return (
-        <div className="mx-auto max-w-xl p-4">
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-6">
-                    <div className="border-b p-4">
-                        <h2 className="text-lg font-semibold">
-                            Pre Schedule Visitors
-                        </h2>
+        <div className="min-h-screen bg-gray-50">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-10 w-full border-b bg-white">
+                <nav className="w-full px-4 lg:px-6 h-14 flex items-center justify-between bg-maroon shadow-lg"
+                    style={{
+                        background: 'linear-gradient(90deg, rgb(112, 26, 64) 0%, rgb(84, 11, 40) 100%)'
+                    }}>
 
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Add one or multiple visitors
-                        </p>
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
+                            I
+                        </div>
+
+                        <Link to="/employee" className="flex flex-col leading-tight">
+                            <span className="font-bold text-white text-lg">
+                                Iravya
+                            </span>
+
+                        </Link>
                     </div>
 
-                    {/* Schedule Section */}
-                    <div className="rounded-2xl border bg-white p-4 space-y-4">
-                        <div>
+                </nav>
+            </div>
+
+
+            <div className="mx-auto max-w-xl p-4 overflow-visible">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                    <div className="space-y-6">
+                        <div className="border-b p-4">
                             <h2 className="text-lg font-semibold">
-                                Schedule Visit
+                                Pre Schedule Visitors
                             </h2>
 
-                            <p className="text-sm text-muted-foreground">
-                                Select date and time first
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Add one or multiple visitors
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Schedule Section */}
+                        <div className="rounded-2xl border bg-white p-4 space-y-4">
+                            <div>
+                                <h2 className="text-lg font-semibold">
+                                    Schedule Visit
+                                </h2>
 
-                            {/* Date */}
-                            <div className="space-y-2">
-                                <FormLabel
-                                    htmlFor="visit-date"
-                                    label="Visit Date"
-                                    required
-                                />
+                                <p className="text-sm text-muted-foreground">
+                                    Select date, time of vist and your work email first
+                                </p>
+                            </div>
 
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                {/* Date */}
+                                <div className="space-y-2">
+                                    <FormLabel
+                                        htmlFor="visit-date"
+                                        label="Visit Date"
+                                        required
+                                    />
+
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="
               h-9 w-full justify-start rounded-md
               border-gray-200 bg-white text-left font-normal
             "
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4 text-[#8b1a30]" />
+
+                                                {date ? (
+                                                    format(date, "PPP")
+                                                ) : (
+                                                    <span className="text-gray-400">
+                                                        Select visit date
+                                                    </span>
+                                                )}
+                                            </Button>
+                                        </PopoverTrigger>
+
+                                        <PopoverContent
+                                            side="left"
+                                            align="center"
+                                            sideOffset={4}
+                                            avoidCollisions={false}
+                                            className="w-auto rounded-2xl p-0 bg-white shadow-xl border z-9999"
                                         >
-                                            <CalendarIcon className="mr-2 h-4 w-4 text-[#8b1a30]" />
+                                            <Calendar
+                                                mode="single"
+                                                selected={date}
+                                                onSelect={setDate}
+                                                disabled={(date) => {
+                                                    const today = new Date();
+                                                    today.setHours(0, 0, 0, 0);
 
-                                            {date ? (
-                                                format(date, "PPP")
-                                            ) : (
-                                                <span className="text-gray-400">
-                                                    Select visit date
-                                                </span>
-                                            )}
-                                        </Button>
-                                    </PopoverTrigger>
+                                                    return date < today;
+                                                }}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
 
-                                    <PopoverContent
-                                        className="w-auto rounded-2xl p-0"
-                                        align="start"
-                                    >
-                                        <Calendar
-                                            mode="single"
-                                            selected={date}
-                                            onSelect={setDate}
-                                            disabled={(date) => {
-                                                const today = new Date();
-                                                today.setHours(0, 0, 0, 0);
+                                {/* Time */}
+                                <div className="space-y-2">
+                                    <FormLabel
+                                        htmlFor="visit-time"
+                                        label="Visit Time"
+                                        required
+                                    />
 
-                                                return date < today;
-                                            }}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
+                                    <Select value={time} onValueChange={setTime}>
+                                        <SelectTrigger className="h-11 w-full rounded-md">
+                                            <div className="flex items-center gap-2">
+                                                <Clock3 className="h-4 w-4 text-[#8b1a30]" />
 
-                            {/* Time */}
-                            <div className="space-y-2">
-                                <FormLabel
-                                    htmlFor="visit-time"
-                                    label="Visit Time"
-                                    required
-                                />
+                                                <SelectValue placeholder="Select time" />
+                                            </div>
+                                        </SelectTrigger>
 
-                                <Select value={time} onValueChange={setTime}>
-                                    <SelectTrigger className="h-11 w-full rounded-md">
-                                        <div className="flex items-center gap-2">
-                                            <Clock3 className="h-4 w-4 text-[#8b1a30]" />
+                                        <SelectContent className="max-h-72">
+                                            {Array.from({ length: 48 }).map((_, index) => {
+                                                const hour = Math.floor(index / 2);
 
-                                            <SelectValue placeholder="Select time" />
-                                        </div>
-                                    </SelectTrigger>
+                                                const minute =
+                                                    index % 2 === 0 ? "00" : "30";
 
-                                    <SelectContent className="max-h-72">
-                                        {Array.from({ length: 48 }).map((_, index) => {
-                                            const hour = Math.floor(index / 2);
+                                                const time24 = `${String(hour).padStart(
+                                                    2,
+                                                    "0"
+                                                )}:${minute}`;
 
-                                            const minute =
-                                                index % 2 === 0 ? "00" : "30";
+                                                const hour12 =
+                                                    hour === 0
+                                                        ? 12
+                                                        : hour > 12
+                                                            ? hour - 12
+                                                            : hour;
 
-                                            const time24 = `${String(hour).padStart(
-                                                2,
-                                                "0"
-                                            )}:${minute}`;
+                                                const ampm =
+                                                    hour >= 12 ? "PM" : "AM";
 
-                                            const hour12 =
-                                                hour === 0
-                                                    ? 12
-                                                    : hour > 12
-                                                        ? hour - 12
-                                                        : hour;
+                                                return (
+                                                    <SelectItem
+                                                        key={time24}
+                                                        value={time24}
+                                                    >
+                                                        {`${String(hour12).padStart(
+                                                            2,
+                                                            "0"
+                                                        )}:${minute} ${ampm}`}
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                                            const ampm =
-                                                hour >= 12 ? "PM" : "AM";
+                                {/* Employee Email */}
+                                <div className="space-y-2">
+                                    <FormLabel htmlFor="employee_email" label="Employee email" required={true}/>
+                                    <Input
+                                        name="employee_email"
+                                        type="email"
+                                        placeholder="john@iravya.com"
+                                        value={empEmail}
+                                        onChange={(e) => setEmpEmail(e.target.value)}
+                                        className="rounded-md text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200 border border-[#e8e8f0]"
+                                    />
 
-                                            return (
-                                                <SelectItem
-                                                    key={time24}
-                                                    value={time24}
-                                                >
-                                                    {`${String(hour12).padStart(
-                                                        2,
-                                                        "0"
-                                                    )}:${minute} ${ampm}`}
-                                                </SelectItem>
-                                            );
-                                        })}
-                                    </SelectContent>
-                                </Select>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    {date && time && (
-                        <div className="space-y-5">
-                            {fields.map((field, index) => (
-                                <VisitorCard
-                                    key={field.id}
-                                    field={field}
-                                    index={index}
-                                    control={control}
-                                    watch={watch}
-                                    remove={remove}
-                                    fieldsLength={fields.length}
-                                />
-                            ))}
+                        {date && time && empEmail && (
+                            <div className="space-y-5">
+                                {fields.map((field, index) => (
+                                    <VisitorCard
+                                        key={field.id}
+                                        field={field}
+                                        index={index}
+                                        control={control}
+                                        watch={watch}
+                                        remove={remove}
+                                        fieldsLength={fields.length}
+                                    />
+                                ))}
 
-                            {/* Add Visitor */}
+                                {/* Add Visitor */}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="w-full border border-gray-300 hover:border-gray-400"
+                                    onClick={() =>
+                                        append({
+                                            first_name: "",
+                                            last_name: "",
+                                            phone: "",
+                                            email: "",
+                                            position: "",
+                                            company: "",
+                                        })
+                                    }
+                                >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Another Visitor
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="border-t p-4 flex justify-end">
                             <Button
-                                type="button"
-                                variant="outline"
-                                className="w-full border border-gray-300 hover:border-gray-400"
-                                onClick={() =>
-                                    append({
-                                        first_name: "",
-                                        last_name: "",
-                                        phone: "",
-                                        email: "",
-                                        position: "",
-                                        company: "",
-                                    })
-                                }
+                                type="submit"
+                                disabled={isScheduleDisabled}
+                                className="min-w-36 bg-maroon hover:bg-maroon-dark disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Another Visitor
+                                {isSubmitting
+                                    ? "Submitting..."
+                                    : "Schedule Visit"}
                             </Button>
                         </div>
-                    )}
-
-                    {/* Footer */}
-                    <div className="border-t p-4 flex justify-end">
-                        <Button
-                            type="submit"
-                              disabled={isSubmitting}
-                            className="min-w-36 bg-maroon hover:bg-maroon-dark"
-                        >
-                            {/* Schedule Visit */}
-                            {isSubmitting
-                ? "Submitting..."
-                : "Schedule Visit"}
-                        </Button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

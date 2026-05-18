@@ -1,8 +1,13 @@
 import { api } from "../api";
+import type { Department } from "../visitor-check-in/visitorApi";
 
 // ─────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────
+
+export interface AddDepartmentPayload {
+  name: string;
+}
 
 export interface Employee {
   id: string;
@@ -104,12 +109,24 @@ export const employeeApi = api.injectEndpoints({
       invalidatesTags: ["Employees"],
     }),
 
+    addDepartment: builder.mutation<
+      Department,
+      AddDepartmentPayload
+    >({
+      query: (body) => ({
+        url: "api/v1/super-admin/add-departmemt",
+        method: "POST",
+        body,
+      }),
 
+      invalidatesTags: ["Department"],
+    }),
   }),
 });
 
 export const {
   useGetAllEmployeesQuery,
   useAddEmployeeMutation,
-  useUpdateEmployeeMutation
+  useUpdateEmployeeMutation,
+  useAddDepartmentMutation
 } = employeeApi;

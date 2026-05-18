@@ -42,16 +42,6 @@ import { employeeSchema } from "@/schema";
 type EmployeeFormValues =
   z.infer<typeof employeeSchema>;
 
-// type EmployeeFormValues = {
-//   first_name: string;
-//   last_name: string;
-//   email: string;
-//   phone: string;
-//   company: string;
-//   department: string;
-//   position: string;
-//   role: string;
-// };
 
 interface EmployeeFormSheetProps {
   open: boolean;

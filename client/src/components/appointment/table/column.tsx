@@ -228,11 +228,11 @@ function ActionsCell({
             </>
           )}
 
-        {appt.is_rejected && (
+        {/* {appt.is_rejected && (
           <Badge className="bg-red-100 text-red-700">
             Rejected
           </Badge>
-        )}
+        )} */}
       </div>
     </>
 

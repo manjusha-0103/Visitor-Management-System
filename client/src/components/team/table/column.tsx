@@ -20,7 +20,14 @@ import type { Employee } from "@/lib/features/employee/employeeApi";
 // ── Actions cell ──────────────────────────────────────────────────────────────
 function ActionsCell({ row, table }: { row: any; table: any }) {
   const member: Employee = row.original;
-  const { setEditMember, setEditOpen, setSheetMode } =
+  const { 
+    setEditMember, 
+    setEditOpen, 
+    setSheetMode,
+    // setEditMember2, 
+    // setEditOpen2, 
+    // setSheetMode2 
+  } =
     table.options.meta || {};
 
   return (
