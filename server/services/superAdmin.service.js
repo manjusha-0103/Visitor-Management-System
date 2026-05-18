@@ -240,7 +240,7 @@ const addEmployeeService = async ({
             <p>Email: ${email}</p>
             <p>Password: ${password}</p>
             <div >
-                <a href="https://${process.env.CLIENT_DEV_URL}/">Signin to Your Account →</a>
+                <a href="${process.env.CLIENT_DEV_URL}">Signin to Your Account →</a>
             </div>
         `
     })
