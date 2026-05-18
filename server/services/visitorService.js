@@ -97,8 +97,6 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
             VALUES (${email}, ${first_name}, ${last_name}, ${'visitor'}, ${phone})
             RETURNING "id", "first_name", "last_name", "email", "role", "phone"
         `
-        console.log();
-        
         visitor = await sql`
             INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id")
             VALUES (${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${position}, ${company}, ${user[0].id})
