@@ -12,9 +12,22 @@
   --header-height: 70px;
   --font-family: "Times New Roman", Times, serif;
 }
+
+/* root {
+  --background: #ffff;
+  --foreground: #171717;
+  --primary: #701a40;
+  --dark: #2d0a1a;
+  --gold: #f5b041;
+  --max-width: 1600px;
+  --header-height: 70px;
+  --font-family: "Times New Roman", Times, serif;
+} */
+
+
 @theme {
   --color-maroon: #701a40;
-  --color-maroon-dark: #5a1430;
+  --color-maroon-dark: #2d0a1a;
   --color-gold: #f5b041;
   --color-gold-dark: #ffab25;
 }
