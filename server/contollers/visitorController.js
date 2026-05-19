@@ -15,7 +15,7 @@ import { getIO } from "../config/socket.js";
 
 
 const checkIn = asyncHandler(async (req, res) => {
-    const appointment = await checkInService(req.body)
+    const appointment = await checkInService(req.body, req.file)
 
     console.log(appointment)
 
