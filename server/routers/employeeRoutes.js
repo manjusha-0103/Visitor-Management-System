@@ -4,7 +4,9 @@ import { authorize } from "../middlewares/authoriseRoleMiddleware.js";
 import validate from "../middlewares/validate.js";
 
 import { chekIsApprove,
-    preSchedule
+    preSchedule,
+    sendOtp,
+    verifyOtp
  } from "../contollers/employeeController.js";
 
 const router = express.Router();
@@ -12,5 +14,7 @@ const router = express.Router();
 
 router.get("/is-approve/:appointment_id", chekIsApprove)
 router.post("/preschedule", preSchedule)
+router.post("/send-otp", sendOtp)
+router.post("/verify-otp", verifyOtp)
 export default router;
 
