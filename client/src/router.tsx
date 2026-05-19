@@ -3,6 +3,7 @@ import { lazy } from "react";
 import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import DummyAnalytics from "./pages/analytics/DummyAnalytics";
 
 const Auth = lazy(() => import("@/pages/Auth"))
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"))
@@ -114,6 +115,10 @@ const router = createBrowserRouter([
     {
         path: "employee",
         element: <PreSchedule />
+    },
+    {
+        path: "ana",
+        element: <DummyAnalytics/>
     }
 ])
 

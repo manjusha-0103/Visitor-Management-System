@@ -127,7 +127,7 @@ export const visitorApi = api.injectEndpoints({
     // VISITOR CHECK-IN
     visitorCheckIn: builder.mutation<
       ApiResponse,
-      CheckInPayload
+      FormData
     >({
       query: (body) => ({
         url: "/api/v1/visitors/check-in",

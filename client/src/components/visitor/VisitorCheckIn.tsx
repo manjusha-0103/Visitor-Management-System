@@ -15,7 +15,11 @@ const CHECK_IN_URL =
 
 export default function VisitorCheckIn() {
     const [phase, setPhase] = useState<"qr" | "camera" | "form" | "done">("qr");
-    const [capturedImage, setCapturedImage] = useState<string | null>(null);
+    const [capturedImage, setCapturedImage] =
+    useState<string | null>(null);
+
+const [capturedFile, setCapturedFile] =
+    useState<File | null>(null);
 
     return (
         <section
@@ -169,17 +173,21 @@ export default function VisitorCheckIn() {
 
                         {phase === "camera" && (
                             <FaceCapture
-                                onComplete={(image) => {
-                                    console.log(image);
-                                    
-                                    setCapturedImage(image);
-                                    setPhase("form");
-                                }}
-                                 onBack={() => setPhase("qr")}
-                            />
+    onComplete={(file, preview) => {
+        setCapturedFile(file);
+
+        setCapturedImage(preview);
+
+        setPhase("form");
+    }}
+/>
                         )}
 
-                        {phase === "form" && <VisitorForm setPhase={setPhase} capturedImage={capturedImage}/>}
+                        {phase === "form" && <VisitorForm
+   setPhase={setPhase}
+   capturedImage={capturedImage}
+   capturedFile={capturedFile}
+/>}
 
                         {phase === 'done' && <VisitBookSuccess setPhase={setPhase} />}
                     </div>
