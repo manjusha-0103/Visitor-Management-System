@@ -12,7 +12,13 @@ import upload from "../utils/upload.js";
 
 const router = express.Router();
 
-router.post("/check-in",validate, checkInValidations,upload.single("visitor_photo"), checkIn)
+router.post(
+        "/check-in",
+        upload.single("visitor_photo"), 
+        validate, 
+        checkInValidations,
+        checkIn
+    )
 router.get("/departments", getAllDepartments)
 router.get("/employees/:dept_id", getEmployees)
 router.get("/visitor/:appointment_id",protect, authorize('super_admin', "receptionist"), visitorInfo)
