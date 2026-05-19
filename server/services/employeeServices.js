@@ -159,8 +159,14 @@ const preScheduleService = async ({ visitors, date_time }, email) => {
 
 const employeeEsistService = async (email) => {
     const [emp] = await sql`
-        SELECT * FROM "Users"
-        WHERE email = ${email} AND role = 'employee'
+        SELECT 
+            u.*,
+            e.*
+        
+        FROM "Users" u
+        JOIN "Employee" e
+            ON e.user_id = u.id
+        WHERE u.email = ${email} AND u.role = 'employee'
     `
     return emp
 }
