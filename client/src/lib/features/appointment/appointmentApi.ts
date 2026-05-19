@@ -83,51 +83,6 @@ export const appointmentApi = api.injectEndpoints({
     }),
 
     // ─────────────────────────────────────
-    // WALK-IN
-    // ─────────────────────────────────────
-    // getWalkInAppointments: builder.query<
-    //   AppointmentResponse,
-    //   { page?: number; limit?: number }
-    // >({
-    //   query: ({ page = 1, limit = 10 }) => ({
-    //     url: `api/v1/appointments/walk-in?page=${page}&limit=${limit}`,
-    //     method: "GET",
-    //   }),
-
-    //   providesTags: ["Appointments"],
-    // }),
-
-    // ─────────────────────────────────────
-    // PRE-SCHEDULED
-    // ─────────────────────────────────────
-    // getPreScheduledAppointments: builder.query<
-    //   AppointmentResponse,
-    //   { page?: number; limit?: number }
-    // >({
-    //   query: ({ page = 1, limit = 10 }) => ({
-    //     url: `api/v1/appointments/pre-scheduled?page=${page}&limit=${limit}`,
-    //     method: "GET",
-    //   }),
-
-    //   providesTags: ["Appointments"],
-    // }),
-
-    // ─────────────────────────────────────
-    // PAST
-    // ─────────────────────────────────────
-    // getPastAppointments: builder.query<
-    //   AppointmentResponse,
-    //   { page?: number; limit?: number }
-    // >({
-    //   query: ({ page = 1, limit = 10 }) => ({
-    //     url: `api/v1/appointments/past?page=${page}&limit=${limit}`,
-    //     method: "GET",
-    //   }),
-
-    //   providesTags: ["Appointments"],
-    // }),
-
-    // ─────────────────────────────────────
     // SET PASS
     // ─────────────────────────────────────
     setPassId: builder.mutation({

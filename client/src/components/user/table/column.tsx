@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuRadioGroup,
+//   DropdownMenuRadioItem,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
 import { 
     // MoreHorizontal, Pencil, Eye, 
     Pencil,
@@ -135,53 +135,51 @@ export const userColumns = [
     accessorKey: "phone",
     header: "Phone",
     cell: ({ row }: any) => (
-      <span className="text-sm font-mono text-gray-600">{row.original.phone}</span>
+      <span className="text-sm text-gray-600">{row.original.phone}</span>
     ),
   },
 
   // ── Role (with filter dropdown) ───────────────────────────────────────────
   {
     accessorKey: "role",
-    header: ({ column, table }: any) => {
-      const current = (column.getFilterValue() as string) || "all";
-      return (
-        <div className="flex items-center gap-2">
-          <span>Role</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-6 min-w-20 text-[10px]">
-                {current === "all" ? "All roles" : ROLE_LABELS[current as UserRole] ?? current}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40 bg-white border shadow-md">
-              <DropdownMenuRadioGroup
-                value={current}
-                onValueChange={(v) => {
-                  column.setFilterValue(v === "all" ? undefined : v);
-                  table.options.meta?.updatePage?.(1);
-                }}
-              >
-                <DropdownMenuRadioItem value="all" className="text-xs">
-                  All roles
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="super_admin" className="text-xs">
-                  Super Admin
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="receptionist" className="text-xs">
-                  Receptionist
-                </DropdownMenuRadioItem>
-                {/* <DropdownMenuRadioItem value="employee" className="text-xs">
-                  Employee
-                </DropdownMenuRadioItem> */}
-                <DropdownMenuRadioItem value="visitor" className="text-xs">
-                  Visitor
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
-    },
+    header: "Role",
+    // header: ({ column, table }: any) => {
+    //   const current = (column.getFilterValue() as string) || "all";
+    //   return (
+    //     <div className="flex items-center gap-2">
+    //       <span>Role</span>
+    //       <DropdownMenu>
+    //         <DropdownMenuTrigger asChild>
+    //           <Button variant="outline" size="sm" className="h-6 min-w-20 text-[10px]">
+    //             {current === "all" ? "All roles" : ROLE_LABELS[current as UserRole] ?? current}
+    //           </Button>
+    //         </DropdownMenuTrigger>
+    //         <DropdownMenuContent className="w-40 bg-white border shadow-md">
+    //           <DropdownMenuRadioGroup
+    //             value={current}
+    //             onValueChange={(v) => {
+    //               column.setFilterValue(v === "all" ? undefined : v);
+    //               table.options.meta?.updatePage?.(1);
+    //             }}
+    //           >
+    //             <DropdownMenuRadioItem value="all" className="text-xs">
+    //               All roles
+    //             </DropdownMenuRadioItem>
+    //             <DropdownMenuRadioItem value="super_admin" className="text-xs">
+    //               Super Admin
+    //             </DropdownMenuRadioItem>
+    //             <DropdownMenuRadioItem value="receptionist" className="text-xs">
+    //               Receptionist
+    //             </DropdownMenuRadioItem>
+    //             <DropdownMenuRadioItem value="visitor" className="text-xs">
+    //               Visitor
+    //             </DropdownMenuRadioItem>
+    //           </DropdownMenuRadioGroup>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu>
+    //     </div>
+    //   );
+    // },
     cell: ({ row }: any) => {
       const role: UserRole = row.original.role;
       return (

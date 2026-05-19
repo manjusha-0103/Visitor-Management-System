@@ -37,7 +37,7 @@ export default function CheckInQRCode({
         {/* Actual QR code */}
         <QRCodeSVG
           value={checkInUrl}
-          size={120}
+          size={100}
           fgColor="#3f0b1a"
           bgColor="transparent"
           level="M"               // M = medium error correction — good balance

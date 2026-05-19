@@ -340,7 +340,7 @@ export const walkInColumns = [
     cell: ({ row }: any) => {
       const p = row.original.pass_id;
       return p ? (
-        <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{p}</span>
+        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{p}</span>
       ) : (
         <span className="text-gray-300 text-xs">Not set</span>
       );
@@ -409,7 +409,7 @@ export const preScheduleColumns = [
     cell: ({ row }: any) => {
       const p = row.original.pass_id;
       return p ? (
-        <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{p}</span>
+        <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{p}</span>
       ) : (
         <span className="text-gray-300 text-xs">Not set</span>
       );

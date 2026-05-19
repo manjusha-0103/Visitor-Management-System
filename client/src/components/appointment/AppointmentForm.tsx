@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -13,28 +13,31 @@ import {
 } from "@/components/ui/sheet";
 
 import { Button } from "@/components/ui/button";
-import {
-    FieldGroup,
-    FieldSet,
-} from "@/components/ui/field";
 
 import {
-    Building2,
-    User,
-    Laptop,
-    Car,
     Plus,
 } from "lucide-react";
 
 import {
     useGetDepartmentsQuery,
     useGetEmployeesQuery,
+    usePreScheduleVisitorMutation,
     useVisitorCheckInMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
 
 import { useWatch } from "react-hook-form";
 import { visitorSchema } from "@/schema";
-import { CustomInputField, SelectField } from "../form/FormFields";
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
+import CheckInForm from "./CheckInForm";
+import { format } from "date-fns";
+import { useSelector } from "react-redux";
+import { selectUser } from "@/lib/features/auth/authSlice";
+
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema
@@ -51,8 +54,15 @@ export default function AppointmentForm({
     open,
     onClose,
 }: Props) {
+    const [date, setDate] = useState<Date>();
+    const [time, setTime] = useState("");
+    const [activeTab, setActiveTab] = useState("walkin");
     const [createAppointment, { isLoading }] =
         useVisitorCheckInMutation();
+    const [createPreschedule, { isLoading: isPreScheduling }] = usePreScheduleVisitorMutation();
+    const user = useSelector(selectUser);
+    const isSuperAdmin = user?.role === "super_admin";
+    // const isReceptionist = user?.role === "receptionist";
 
     const {
         register,
@@ -89,8 +99,8 @@ export default function AppointmentForm({
             name: "department_id",
         });
 
-    const hasLaptop = watch("is_laptop");
-    const hasVehicle = watch("is_vehicle");
+    const hasLaptop = watch("is_laptop") ?? false;
+    const hasVehicle = watch("is_vehicle") ?? false;
 
     const {
         data: departments = [],
@@ -116,9 +126,31 @@ export default function AppointmentForm({
         value: String(e.id),
     }));
 
+    const resetForm = () => {
+        reset({
+            first_name: "",
+            last_name: "",
+            phone: "",
+            email: "",
+            position: "",
+            company: "",
+            is_laptop: false,
+            make: "",
+            model: "",
+            serial_no: "",
+            is_vehicle: false,
+            vehicle_no: "",
+            employee_id: "",
+            department_id: "",
+        });
+        setDate(undefined);
+        setTime("");
+        setActiveTab("walkin");
+    };
+
     useEffect(() => {
         if (!open) {
-            reset();
+            resetForm();
         }
     }, [open, reset]);
 
@@ -126,35 +158,79 @@ export default function AppointmentForm({
         data: AppointmentFormValues
     ) => {
         try {
-            const payload = {
-                first_name: data.first_name,
-                last_name: data.last_name,
-                email: data.email,
-                phone: data.phone,
-                company: data.company,
-                position: data.position,
-                is_laptop: data.is_laptop,
-                ...(data.is_laptop ? {
-                    make: data.make,
-                    model: data.model,
-                    serial_no: data.serial_no,
-                } : {
-                    make: "",
-                    model: "",
-                    serial_no: "",
+            if (activeTab === "walkin") {
+                const payload = {
+                    first_name: data.first_name,
+                    last_name: data.last_name,
+                    email: data.email,
+                    phone: data.phone,
+
+                    company: data.company,
+                    position: data.position,
+
+                    is_laptop: data.is_laptop,
+
+                    ...(data.is_laptop
+                        ? {
+                            make: data.make,
+                            model: data.model,
+                            serial_no: data.serial_no,
+                        }
+                        : {
+                            make: "",
+                            model: "",
+                            serial_no: "",
+                        }),
+
+                    is_vehicle: data.is_vehicle,
+
+                    ...(data.is_vehicle
+                        ? {
+                            vehicle_no:
+                                data.vehicle_no,
+                        }
+                        : {
+                            vehicle_no: "",
+                        }),
+
+                    employee_id:
+                        data.employee_id,
+                };
+
+                await createAppointment(
+                    payload
+                ).unwrap();
+            } else {
+                if (!date || !time) {
+                    return;
                 }
-                ),
-                is_vehicle: data.is_vehicle,
-                ...(data.is_vehicle ? { vehicle_no: data.vehicle_no } : { vehicle_no: "" }),
-                employee_id: data.employee_id,
-            };
 
-            await createAppointment(
-                payload
-            ).unwrap();
+                const date_time = new Date(
+                    `${format(date, "yyyy-MM-dd")}T${time}`
+                ).toISOString();
 
-            onClose(false);
-            reset();
+                const payload = {
+                    date_time,
+                    employee_email: selectedEmployeeData?.email ?? "",
+                    visitors: [
+                        {
+                            first_name: data.first_name,
+                            last_name: data.last_name,
+                            email: data.email,
+                            phone: data.phone,
+                            company: data.company,
+                            position: data.position,
+                        },
+                    ],
+                };
+
+                await createPreschedule(
+                    payload
+                ).unwrap();
+            }
+
+            resetForm();
+            onClose(false)
         } catch (err) {
             console.error(err);
         }
@@ -183,308 +259,159 @@ export default function AppointmentForm({
                     </SheetHeader>
 
                     {/* Body */}
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-5">
-                        <FieldGroup>
-                            <FieldSet>
-                                <FieldGroup className="gap-2">
+                    <div className="flex-1 overflow-y-auto px-4 pb-4 pt-2 sm:px-5 sm:pb-5">
+                        {isSuperAdmin ? (
+                            <Tabs
+                                defaultValue="walkin"
+                                value={activeTab}
+                                onValueChange={setActiveTab}
+                                className="w-full"
+                            >
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger
+                                        value="walkin"
+                                        className="
+                    text-xs
+                    text-[#701a40]
+                    data-[state=active]:bg-[#701a40]
+                    data-[state=active]:text-white
+                    data-[state=active]:shadow-none
+                "
+                                    >
+                                        Walk-In
+                                    </TabsTrigger>
 
-                                    <div className="flex items-center gap-2">
-                                        <User
-                                            size={18}
-                                            className="text-maroon"
-                                        />
-                                        <h3 className="font-semibold text-sm">
-                                            Whom To Meet
-                                        </h3>
-                                    </div>
+                                    <TabsTrigger
+                                        value="preschedule"
+                                        className="
+                    text-xs
+                    text-[#701a40]
+                    data-[state=active]:bg-[#701a40]
+                    data-[state=active]:text-white
+                    data-[state=active]:shadow-none
+                "
+                                    >
+                                        Pre-Schedule
+                                    </TabsTrigger>
+                                </TabsList>
 
-                                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                                                                    <div className="space-y-3">
-                                                                        <SelectField<AppointmentFormValues>
-                                                                            name="department_id"
-                                                                            label="Department"
-                                                                            placeholder={deptLoading ? "Loading departments..." : "Select Department"}
-                                                                            control={control}
-                                                                            options={departmentOptions}
-                                                                        />
-                                                                        {selectedDepartmentData && (
-                                                                            <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
-                                                                                <p className="text-xs text-gray-500">Selected Department</p>
-                                                                                <p className="mt-1 text-sm font-semibold text-gray-900">{selectedDepartmentData.name}</p>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        <SelectField<AppointmentFormValues>
-                                                                            name="employee_id"
-                                                                            label="Employee"
-                                                                            placeholder={!selectedDepartment ? "Select department first" : empLoading ? "Loading employees..." : "Select Employee"}
-                                                                            control={control}
-                                                                            options={employeeOptions}
-                                                                            disabled={!selectedDepartment}
-                                                                        />
-                                                                        {selectedEmployeeData && (
-                                                                            <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4">
-                                                                                <p className="text-xs text-gray-500">Selected Employee</p>
-                                                                                <p className="mt-1 text-sm font-semibold text-gray-900">
-                                                                                    {selectedEmployeeData.first_name} {selectedEmployeeData.last_name}
-                                                                                </p>
-                                                                                <p className="mt-1 text-xs text-gray-600">{selectedEmployeeData.position}</p>
-                                                                                <p className="text-xs text-gray-500">{selectedEmployeeData.email}</p>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
+                                <TabsContent value="walkin" className="mt-4">
+                                    <CheckInForm
+                                        control={control}
+                                        register={register}
+                                        deptLoading={deptLoading}
+                                        empLoading={empLoading}
+                                        selectedDepartment={selectedDepartment}
+                                        hasLaptop={hasLaptop}
+                                        hasVehicle={hasVehicle}
+                                        departmentOptions={departmentOptions}
+                                        employeeOptions={employeeOptions}
+                                        selectedDepartmentData={selectedDepartmentData}
+                                        selectedEmployeeData={selectedEmployeeData}
+                                    />
+                                </TabsContent>
 
-                                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <TabsContent value="preschedule" className="mt-4">
+                                    <CheckInForm
+                                        control={control}
+                                        register={register}
+                                        deptLoading={deptLoading}
+                                        empLoading={empLoading}
+                                        selectedDepartment={selectedDepartment}
+                                        hasLaptop={hasLaptop}
+                                        hasVehicle={hasVehicle}
+                                        departmentOptions={departmentOptions}
+                                        employeeOptions={employeeOptions}
+                                        selectedDepartmentData={selectedDepartmentData}
+                                        selectedEmployeeData={selectedEmployeeData}
+                                        showScheduleFields={true}
+                                        date={date}
+                                        setDate={setDate}
+                                        time={time}
+                                        setTime={setTime}
+                                    />
+                                </TabsContent>
+                            </Tabs>
+                        ) : (
+                            <div className="mt-4">
+                                <CheckInForm
+                                    control={control}
+                                    register={register}
+                                    deptLoading={deptLoading}
+                                    empLoading={empLoading}
+                                    selectedDepartment={selectedDepartment}
+                                    hasLaptop={hasLaptop}
+                                    hasVehicle={hasVehicle}
+                                    departmentOptions={departmentOptions}
+                                    employeeOptions={employeeOptions}
+                                    selectedDepartmentData={selectedDepartmentData}
+                                    selectedEmployeeData={selectedEmployeeData}
+                                />
+                            </div>
+                        )}
 
-                                        <Field>
-                                            <FieldLabel>
-                                                Department
-                                            </FieldLabel>
+                        {/* <Tabs defaultValue="walkin"
+                            value={activeTab}
+                            onValueChange={setActiveTab}
+                            className="w-full">
 
-                                            <Select
-                                                onValueChange={(
-                                                    value
-                                                ) =>
-                                                    setValue(
-                                                        "department_id",
-                                                        value
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue
-                                                        placeholder={
-                                                            deptLoading
-                                                                ? "Loading..."
-                                                                : "Select department"
-                                                        }
-                                                    />
-                                                </SelectTrigger>
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="walkin" className="text-xs 
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
+                                    Walk-In
+                                </TabsTrigger>
 
-                                                <SelectContent className="bg-white">
-                                                    <SelectGroup>
-                                                        <SelectLabel>
-                                                            Departments
-                                                        </SelectLabel>
+                                <TabsTrigger value="preschedule" className="text-xs 
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
+                                    Pre-Schedule
+                                </TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="walkin" className="mt-4">
+                                <CheckInForm
+                                    control={control}
+                                    register={register}
+                                    deptLoading={deptLoading}
+                                    empLoading={empLoading}
+                                    selectedDepartment={selectedDepartment}
+                                    hasLaptop={hasLaptop}
+                                    hasVehicle={hasVehicle}
+                                    departmentOptions={departmentOptions}
+                                    employeeOptions={employeeOptions}
+                                    selectedDepartmentData={selectedDepartmentData}
+                                    selectedEmployeeData={selectedEmployeeData}
+                                />
+                            </TabsContent>
+                            <TabsContent value="preschedule" className="mt-4">
+                                <CheckInForm
+                                    control={control}
+                                    register={register}
+                                    deptLoading={deptLoading}
+                                    empLoading={empLoading}
+                                    selectedDepartment={selectedDepartment}
+                                    hasLaptop={hasLaptop}
+                                    hasVehicle={hasVehicle}
+                                    departmentOptions={departmentOptions}
+                                    employeeOptions={employeeOptions}
+                                    selectedDepartmentData={selectedDepartmentData}
+                                    selectedEmployeeData={selectedEmployeeData}
+                                    showScheduleFields={true}
+                                    date={date}
+                                    setDate={setDate}
+                                    time={time}
+                                    setTime={setTime}
+                                />
+                            </TabsContent>
 
-                                                        {departments.map(
-                                                            (dept: any) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        dept.id
-                                                                    }
-                                                                    value={String(
-                                                                        dept.id
-                                                                    )}
-                                                                >
-                                                                    {
-                                                                        dept.name
-                                                                    }
-                                                                </SelectItem>
-                                                            )
-                                                        )}
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
+                        </Tabs> */}
 
-                                            {errors.department_id && (
-                                                <p className="text-red-500 text-[10px] ml-1">
-                                                    {
-                                                        errors
-                                                            .department_id
-                                                            .message
-                                                    }
-                                                </p>
-                                            )}
-                                        </Field>
-
-                                        <Field>
-                                            <FieldLabel>
-                                                Employee
-                                            </FieldLabel>
-
-                                            <Select
-                                                disabled={
-                                                    !selectedDepartment
-                                                }
-                                                onValueChange={(
-                                                    value
-                                                ) =>
-                                                    setValue(
-                                                        "employee_id",
-                                                        value
-                                                    )
-                                                }
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue
-                                                        placeholder={
-                                                            !selectedDepartment
-                                                                ? "Select department first"
-                                                                : empLoading
-                                                                    ? "Loading..."
-                                                                    : "Select employee"
-                                                        }
-                                                    />
-                                                </SelectTrigger>
-
-                                                <SelectContent className="bg-white">
-                                                    <SelectGroup>
-                                                        <SelectLabel>
-                                                            Employees
-                                                        </SelectLabel>
-
-                                                        {employees.map(
-                                                            (
-                                                                emp: any
-                                                            ) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        emp.id
-                                                                    }
-                                                                    value={String(
-                                                                        emp.id
-                                                                    )}
-                                                                >
-                                                                    {
-                                                                        emp.first_name
-                                                                    }{" "}
-                                                                    {
-                                                                        emp.last_name
-                                                                    }
-                                                                </SelectItem>
-                                                            )
-                                                        )}
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-
-                                            {errors.employee_id && (
-                                                <p className="text-red-500 text-[10px] ml-1">
-                                                    {
-                                                        errors
-                                                            .employee_id
-                                                            .message
-                                                    }
-                                                </p>
-                                            )}
-                                        </Field>
-                                    </div> */}
-
-
-                                    <div className="flex items-center gap-2 mt-4 mb-2">
-                                        <User
-                                            size={18}
-                                            className="text-cyan-700"
-                                        />
-                                        <h3 className="font-semibold text-sm">
-                                            Personal Information
-                                        </h3>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <CustomInputField<AppointmentFormValues> name="first_name" label="First Name" placeholder="Rahul" control={control} />
-                                        <CustomInputField<AppointmentFormValues> name="last_name" label="Last Name" placeholder="Sharma" control={control} />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-                                        <CustomInputField<AppointmentFormValues> name="phone" label="Phone Number" placeholder="+91 9876543210" control={control} />
-                                        <CustomInputField<AppointmentFormValues> name="email" type="email" label="Email Address" placeholder="rahul@gmail.com" control={control} />
-                                    </div>
-
-
-                                    <div className="flex items-center gap-2 mt-4 mb-2">
-                                        <Building2
-                                            size={18}
-                                            className="text-indigo-700"
-                                        />
-                                        <h3 className="font-semibold text-sm">
-                                            Company Information
-                                        </h3>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <CustomInputField<AppointmentFormValues> name="company" label="Company Name" placeholder="Infosys" control={control} required={false} />
-                                        <CustomInputField<AppointmentFormValues> name="position" label="Position" placeholder="Software Engineer" control={control} required={false} />
-                                    </div>
-
-                                    <div className="mt-5 rounded-2xl border border-gray-200 overflow-hidden">
-                                        <label className="flex items-center gap-3 px-4 py-4 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                {...register(
-                                                    "is_laptop"
-                                                )}
-                                            />
-
-                                            <div className="flex items-center gap-2">
-                                                <Laptop className="text-purple-700" />
-
-                                                <div>
-                                                    <p className="font-medium text-sm">
-                                                        Carrying a
-                                                        laptop?
-                                                    </p>
-
-                                                    <p className="text-xs text-gray-500">
-                                                        Add laptop
-                                                        details
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </label>
-
-                                        {hasLaptop && (
-                                            <div className="border-t bg-purple-50 p-4 space-y-3">
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                    <CustomInputField<AppointmentFormValues> name="make" label="Laptop Make" placeholder="Dell" control={control} required={false} />
-                                                                                                            <CustomInputField<AppointmentFormValues> name="model" label="Laptop Model" placeholder="Inspiron 15" control={control} required={false} />
-                                                </div>
-
-                                                <CustomInputField<AppointmentFormValues> name="serial_no" label="Serial Number" placeholder="SN123456789" control={control} required={false} />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="rounded-2xl border border-gray-200 overflow-hidden">
-                                        <label className="flex items-center gap-3 px-4 py-4 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                {...register(
-                                                    "is_vehicle"
-                                                )}
-                                            />
-
-                                            <div className="flex items-center gap-2">
-                                                <Car className="text-blue-700" />
-
-                                                <div>
-                                                    <p className="font-medium text-sm">
-                                                        Bringing a
-                                                        vehicle?
-                                                    </p>
-
-                                                    <p className="text-xs text-gray-500">
-                                                        Add vehicle
-                                                        number
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </label>
-
-                                        {hasVehicle && (
-                                            <div className="border-t bg-blue-50 p-4">
-                                                <CustomInputField<AppointmentFormValues> name="vehicle_no" label="Vehicle Registration Number" placeholder="MH12AB1234" control={control} required={false} />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                </FieldGroup>
-                            </FieldSet>
-                        </FieldGroup>
                     </div>
 
                     {/* Footer */}
@@ -493,11 +420,17 @@ export default function AppointmentForm({
                             <Button
                                 type="submit"
                                 className="w-full sm:flex-1 bg-maroon hover:bg-maroon-dark"
-                                disabled={isLoading}
+                                disabled={isLoading || isPreScheduling}
                             >
-                                {isLoading
-                                    ? "Creating..."
-                                    : "Create Appointment"}
+                                {
+                                    isLoading || isPreScheduling
+                                        ? activeTab === "walkin"
+                                            ? "Creating..."
+                                            : "Scheduling..."
+                                        : activeTab === "walkin"
+                                            ? "Create Appointment"
+                                            : "Schedule Appointment"
+                                }
 
                                 <Plus />
                             </Button>
