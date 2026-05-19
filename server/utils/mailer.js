@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
 export const sendEmail = async ({ to, subject, html }) => {
     try {
         const info = await transporter.sendMail({
-            from: `"Iravya App" <${process.env.EMAIL_USER}>`,
+            from: `"VisitMi App" <${process.env.EMAIL_USER}>`,
             to,   // Nodemailer accepts array directly
             subject,
             html

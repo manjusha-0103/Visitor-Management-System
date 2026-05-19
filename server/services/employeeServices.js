@@ -32,8 +32,8 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
     return {amp, visitor}
 }
 
-const preScheduleService = async ({ visitors, date_time }, email) => {
-
+const preScheduleService = async ({ visitors, date_time, employee_email }) => {
+    
     let amp = [];
     let vs = [];
 
@@ -52,7 +52,7 @@ const preScheduleService = async ({ visitors, date_time }, email) => {
         FROM "Employee" e
         JOIN "Users" u
             ON u.id = e.user_id
-        WHERE u.email = ${email}
+        WHERE u.email = ${employee_email}
     `;
 
     if (!employee) {

@@ -518,11 +518,8 @@ const sendOtp = asyncHandler(async (req, res) => {
         `;
 
         await sendEmail({
-
             to: employee_email,
-
             subject: "OTP for prescheduling appointment",
-
             html: `
                 <div style="
                     font-family: Arial;
@@ -599,7 +596,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
         
         await sendEmailToSuperAdmin({"full_name" : `${userExist.first_name} ${userExist.last_name}`,
         "email": userExist.email, "phone" : userExist.phone, "company" : userExist.company, "position": userExist.position})
-        throw new ApiError( 200, "OTP is inavalid or Expired")
+        throw new ApiError( 401, "OTP is invalid or Expired")
         
     }
     else{
@@ -609,7 +606,8 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
 
 const preSchedule = asyncHandler(async (req, res) => {
-    const { employee_email, } = req.body;
+    const { employee_email } = req.body;
+    console.log(employee_email);
     
         const appoinment = await preScheduleService(req.body)
         if (appoinment) {

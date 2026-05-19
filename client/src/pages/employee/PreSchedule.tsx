@@ -1,24 +1,21 @@
 import { Button } from "@/components/ui/button";
-import {
-    CustomInputField,
-} from "@/components/form/FormFields";
-
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
     usePreScheduleVisitorMutation,
+    useSendOtpMutation,
+    useVerifyOtpMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
 
 import { visitorSchema } from "@/schema";
 import z from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     CalendarIcon,
     Clock3,
     Plus,
-    Trash2,
 } from "lucide-react";
 
 import { format } from "date-fns";
@@ -42,6 +39,7 @@ import {
 import { FormLabel } from "@/components/form/FormFields";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import VisitorCard from "./VisitorCard";
 
 
 const singleVisitorSchema = visitorSchema.pick({
@@ -57,144 +55,26 @@ const formSchema = z.object({
     visitors: z.array(singleVisitorSchema),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-
-function VisitorCard({
-    index,
-    field,
-    control,
-    remove,
-    fieldsLength,
-}: any) {
-
-    // const selectedDepartment = watch(
-    //     `visitors.${index}.department_id`
-    // );
-
-    // const { data: departments = [] } =
-    //     useGetDepartmentsQuery();
-
-    // const { data: employees = [] } =
-    //     useGetEmployeesQuery(selectedDepartment, {
-    //         skip: !selectedDepartment,
-    //     });
-
-    // const departmentOptions = departments.map((d) => ({
-    //     label: d.name,
-    //     value: String(d.id),
-    // }));
-
-
-    // const employeeOptions = employees.map((e: any) => ({
-    //     label: `${e.first_name} ${e.last_name}`,
-    //     value: String(e.id),
-    // }));
-
-    return (
-        <div
-            key={field.id}
-            className="rounded-2xl border p-4 space-y-4"
-        >
-            <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">
-                    Visitor {index + 1}
-                </h3>
-
-                {fieldsLength > 1 && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => remove(index)}
-                    >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
-                )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.first_name`}
-                    label="First Name"
-                    placeholder="Rahul"
-                    control={control}
-                />
-
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.last_name`}
-                    label="Last Name"
-                    placeholder="Sharma"
-                    control={control}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.phone`}
-                    label="Phone Number"
-                    placeholder="+91 9876543210"
-                    control={control}
-                />
-
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.email`}
-                    type="email"
-                    label="Email"
-                    placeholder="rahul@gmail.com"
-                    control={control}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.company`}
-                    label="Company"
-                    placeholder="Infosys"
-                    control={control}
-                />
-
-                <CustomInputField<FormValues>
-                    name={`visitors.${index}.position`}
-                    label="Position"
-                    placeholder="Software Engineer"
-                    control={control}
-                />
-            </div>
-
-            {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <SelectField<FormValues>
-                    name={`visitors.${index}.department_id`}
-                    label="Department"
-                    placeholder="Select Department"
-                    control={control}
-                    options={departmentOptions}
-                />
-
-                <SelectField<FormValues>
-                    name={`visitors.${index}.employee_id`}
-                    label="Employee"
-                    placeholder={
-                        !selectedDepartment
-                            ? "Select department first"
-                            : "Select Employee"
-                    }
-                    control={control}
-                    options={employeeOptions}
-                    disabled={!selectedDepartment}
-                />
-            </div> */}
-        </div>
-    );
-}
+export type FormValues = z.infer<typeof formSchema>;
 
 export default function PreSchedule() {
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
     const [empEmail, setEmpEmail] = useState("");
+    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
+    // const [sendOtpLoading, setSendOtpLoading] = useState(false);
+    // const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [resendTimer, setResendTimer] = useState(30);
+    const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
+    const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
+
     const {
         control,
         handleSubmit,
+        reset,
         watch,
         formState: { isSubmitting, isValid }
     } = useForm<FormValues>({
@@ -215,7 +95,7 @@ export default function PreSchedule() {
     });
 
     const isScheduleDisabled =
-        !date || !time || !empEmail ||  !isValid || isSubmitting;
+        !date || !time || !empEmail || !isValid || isSubmitting;
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -232,21 +112,89 @@ export default function PreSchedule() {
         ).toISOString();
 
         try {
-            const res = await preScheduleVisitor({
+            await preScheduleVisitor({
                 date_time,
+                employee_email: empEmail,
                 visitors: data.visitors,
             }).unwrap();
-
-            console.log(res);
+          
+            reset();
         } catch (err) {
             console.log(err);
         }
     };
 
-    // const onError = (err    ) => {
-    //     console.log(err);
+    const handleSendOtp = async () => {
+        try {
+            // call backend api here
+            await sendOtp({
+                employee_email: empEmail,
+            }).unwrap();
 
-    // }
+            setOtpSent(true);
+
+            // reset timer
+            setResendTimer(30);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        try {
+            setResendLoading(true);
+
+             await sendOtp({
+            employee_email: empEmail,
+        }).unwrap();
+
+            // reset otp boxes
+            setOtp(["", "", "", "", "", ""]);
+
+            // restart timer
+            setResendTimer(30);
+
+            // focus first box
+            const firstInput = document.getElementById(
+                "otp-0"
+            ) as HTMLInputElement;
+
+            firstInput?.focus();
+
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setResendLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async () => {
+        try {
+            const enteredOtp = otp.join("");
+
+            await verifyOtp({
+                email: empEmail,
+                otp: enteredOtp,
+            }).unwrap();
+            setOtpVerified(true);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (otpSent && resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer((prev) => prev - 1);
+            }, 1000);
+        }
+
+        return () => clearInterval(interval);
+    }, [otpSent, resendTimer]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -264,7 +212,7 @@ export default function PreSchedule() {
 
                         <Link to="/employee" className="flex flex-col leading-tight">
                             <span className="font-bold text-white text-lg">
-                                Iravya
+                                VisitMi
                             </span>
 
                         </Link>
@@ -272,7 +220,6 @@ export default function PreSchedule() {
 
                 </nav>
             </div>
-
 
             <div className="mx-auto max-w-xl p-4 overflow-visible">
                 <form onSubmit={handleSubmit(onSubmit)}>
@@ -410,7 +357,7 @@ export default function PreSchedule() {
 
                                 {/* Employee Email */}
                                 <div className="space-y-2">
-                                    <FormLabel htmlFor="employee_email" label="Employee email" required={true}/>
+                                    <FormLabel htmlFor="employee_email" label="Employee email" required={true} />
                                     <Input
                                         name="employee_email"
                                         type="email"
@@ -460,17 +407,149 @@ export default function PreSchedule() {
                             </div>
                         )}
 
+
+                        {/* OTP Verification */}
+                        {otpSent && !otpVerified && (
+                            <div className="rounded-2xl border bg-white p-5 space-y-5">
+                                <div>
+                                    <h3 className="font-semibold text-lg">
+                                        Verify OTP
+                                    </h3>
+
+                                    <p className="text-sm text-muted-foreground">
+                                        Enter the 6 digit OTP sent to employee email
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    {otp.map((digit, index) => (
+                                        <Input
+                                            key={index}
+                                            id={`otp-${index}`}
+                                            value={digit}
+                                            maxLength={1}
+                                            className="w-12 h-12 text-center border-[#c5c5ce] font-semibold rounded-md text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200"
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, "");
+
+                                                const newOtp = [...otp];
+                                                newOtp[index] = value;
+
+                                                setOtp(newOtp);
+
+                                                // move forward
+                                                if (value && index < 5) {
+                                                    const next = document.getElementById(
+                                                        `otp-${index + 1}`
+                                                    );
+
+                                                    (next as HTMLInputElement)?.focus();
+                                                }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                // backspace handling
+                                                if (e.key === "Backspace") {
+
+                                                    // if current box has value -> clear it
+                                                    if (otp[index]) {
+                                                        const newOtp = [...otp];
+                                                        newOtp[index] = "";
+
+                                                        setOtp(newOtp);
+
+                                                        return;
+                                                    }
+
+                                                    // move to previous box
+                                                    if (index > 0) {
+                                                        const prev = document.getElementById(
+                                                            `otp-${index - 1}`
+                                                        ) as HTMLInputElement;
+
+                                                        prev?.focus();
+
+                                                        const newOtp = [...otp];
+                                                        newOtp[index - 1] = "";
+
+                                                        setOtp(newOtp);
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    ))}
+
+                                    <Button
+                                        type="button"
+                                        onClick={handleVerifyOtp}
+                                        disabled={
+                                            otp.join("").length !== 6 ||
+                                            verifyOtpLoading
+                                        }
+                                        className="bg-maroon hover:bg-maroon-dark"
+                                    >
+                                        {verifyOtpLoading
+                                            ? "Verifying..."
+                                            : "Verify OTP"}
+                                    </Button>
+                                </div>
+
+
+                                <div className="flex items-center gap-3">
+                                    <p className="text-sm text-muted-foreground">
+                                        Didn&apos;t receive OTP?
+                                    </p>
+
+                                    <Button
+                                        type="button"
+                                        variant="link"
+                                        onClick={handleResendOtp}
+                                        disabled={resendTimer > 0 || resendLoading}
+                                        className="p-0 h-auto text-[#8b1a30]"
+                                    >
+                                        {resendLoading
+                                            ? "Resending..."
+                                            : resendTimer > 0
+                                                ? `Resend in ${resendTimer}s`
+                                                : "Resend OTP"}
+                                    </Button>
+                                </div>
+
+                            </div>
+                        )}
+
                         {/* Footer */}
                         <div className="border-t p-4 flex justify-end">
-                            <Button
-                                type="submit"
-                                disabled={isScheduleDisabled}
-                                className="min-w-36 bg-maroon hover:bg-maroon-dark disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting
-                                    ? "Submitting..."
-                                    : "Schedule Visit"}
-                            </Button>
+
+                            {!otpSent ? (
+                                <Button
+                                    type="button"
+                                    disabled={isScheduleDisabled}
+                                    onClick={handleSendOtp}
+                                    className="bg-maroon hover:bg-maroon-dark"
+                                >
+                                    {sendOtpLoading
+                                        ? "Sending OTP..."
+                                        : "Send OTP"}
+                                </Button>
+                            ) : !otpVerified ? (
+                                <Button
+                                    type="button"
+                                    disabled
+                                    className="bg-maroon hover:bg-maroon-dark"
+                                >
+                                    Verify OTP First
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="bg-maroon hover:bg-maroon-dark"
+                                >
+                                    {isSubmitting
+                                        ? "Submitting..."
+                                        : "Schedule Visit"}
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </form>
