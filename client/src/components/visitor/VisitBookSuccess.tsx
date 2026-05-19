@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 interface VisitBookSuccessProps {
     setPhase: React.Dispatch<
-        React.SetStateAction<"qr" | "form" | "done">
+        React.SetStateAction<"qr" | "camera" | "form" | "done">
     >;
 }
 

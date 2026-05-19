@@ -118,7 +118,7 @@ export function SelectField<T extends FieldValues>({
               <SelectTrigger
                 id={name}
                 className={`
-                  h-11 rounded-md w-full
+                  h-11 rounded-md mb-0 w-full border border-[#e8e8f0] text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200
                   ${
                     fieldState.error
                       ? "border-red-500 focus:ring-red-500"

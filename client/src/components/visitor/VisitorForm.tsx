@@ -15,7 +15,8 @@ import {
     Clock,
     MapPin,
     Clock3,
-    CalendarIcon
+    CalendarIcon,
+    QrCode,
 } from "lucide-react";
 import { format } from "date-fns"
 import { visitorSchema } from "@/schema";
@@ -53,20 +54,21 @@ interface SectionHeaderItem {
 }
 
 interface VisitorFormProps {
-    setPhase: React.Dispatch<React.SetStateAction<"qr" | "form" | "done">>;
+    setPhase: React.Dispatch<React.SetStateAction<"qr" | "camera" | "form" | "done">>;
+     capturedImage: string | null;
 }
 
 // ─── Section header ────────────────────────────────────────────────────────────
-function SectionHeader({ icon, heading, color, description }: SectionHeaderItem) {
+function SectionHeader({ icon, heading, description }: SectionHeaderItem) {
     const Icon = icon;
     return (
-        <div className="mb-6 flex items-start gap-4">
-            <div className={`flex h-11 w-11 items-center justify-center rounded-lg ${color} shadow-lg`}>
-                <Icon className="h-5 w-5 text-white" />
+        <div className="mb-6 flex items-center gap-3">
+            <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-maroon shadow-lg`}>
+                <Icon className="h-4 w-4 text-white" />
             </div>
             <div>
                 <h3 className="text-lg font-semibold text-gray-900">{heading}</h3>
-                {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+                {description && <p className="text-sm text-gray-500">{description}</p>}
             </div>
         </div>
     );
@@ -204,7 +206,7 @@ export function SuccessScreen({
 }
 
 // ─── Main form ─────────────────────────────────────────────────────────────────
-export default function VisitorForm({ setPhase }: VisitorFormProps) {
+export default function VisitorForm({ setPhase, capturedImage }: VisitorFormProps) {
     const [step, setStep] = useState(0);
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
@@ -292,6 +294,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                 phone: data.phone,
                 company: data.company,
                 position: data.position,
+                visitor_photo: capturedImage,
                 is_laptop: data.is_laptop,
                 ...(data.is_laptop ? {
                     make: data.make,
@@ -335,7 +338,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-3xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
                             <SectionHeader
                                 icon={User}
                                 heading="Whom to Meet"
@@ -352,7 +355,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                         options={departmentOptions}
                                     />
                                     {selectedDepartmentData && (
-                                        <div className="rounded-2xl border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
+                                        <div className="rounded-md border border-[#8b1a30]/10 bg-amber-50 p-4 backdrop-blur">
                                             <p className="text-xs text-gray-500">Selected Department</p>
                                             <p className="mt-1 text-sm font-semibold text-gray-900">{selectedDepartmentData.name}</p>
                                         </div>
@@ -368,7 +371,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                         disabled={!watchedDepartment}
                                     />
                                     {selectedEmployeeData && (
-                                        <div className="rounded-2xl border border-[#8b1a30]/10 bg-white/80 p-4">
+                                        <div className="rounded-md border border-[#8b1a30]/10 bg-amber-50 p-4">
                                             <p className="text-xs text-gray-500">Selected Employee</p>
                                             <p className="mt-1 text-sm font-semibold text-gray-900">
                                                 {selectedEmployeeData.first_name} {selectedEmployeeData.last_name}
@@ -485,7 +488,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm"
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
                         >
                             <SectionHeader
                                 icon={User}
@@ -512,7 +515,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm"
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
                         >
                             <SectionHeader
                                 icon={Building2}
@@ -537,7 +540,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             transition={{ duration: 0.25 }}
                             className="space-y-5"
                         >
-                            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                            <div className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
                                 <SectionHeader
                                     icon={Laptop}
                                     heading="Additional Details"
@@ -546,8 +549,8 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                 />
 
                                 {/* Laptop toggle */}
-                                <div className="overflow-hidden rounded-2xl border-2 border-gray-200 transition-all hover:border-purple-300">
-                                    <label className="group flex cursor-pointer items-center gap-4 px-5 py-4">
+                                <div className="overflow-hidden rounded-md border-2 border-gray-200 transition-all hover:border-purple-300">
+                                    <label className="group flex cursor-pointer items-center gap-4 px-4 py-3">
                                         <input
                                             type="checkbox"
                                             {...register("is_laptop")}
@@ -559,8 +562,8 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                             className="h-4 w-4 rounded border-gray-300 text-[#8b1a30]"
                                         />
                                         <div className="flex flex-1 items-center gap-3">
-                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-100 transition-colors group-hover:bg-purple-200">
-                                                <Laptop className="h-5 w-5 text-purple-700" />
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 transition-colors group-hover:bg-purple-200">
+                                                <Laptop className="h-4 w-4 text-purple-700" />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-900">Carrying a Laptop?</p>
@@ -589,8 +592,8 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                 </div>
 
                                 {/* Vehicle toggle */}
-                                <div className="mt-5 overflow-hidden rounded-2xl border-2 border-gray-200 transition-all hover:border-blue-300">
-                                    <label className="group flex cursor-pointer items-center gap-4 px-5 py-4">
+                                <div className="mt-5 overflow-hidden rounded-md border-2 border-gray-200 transition-all hover:border-blue-300">
+                                    <label className="group flex cursor-pointer items-center gap-4 px-4 py-3">
                                         <input
                                             type="checkbox"
                                             {...register("is_vehicle")}
@@ -602,8 +605,8 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                                             className="h-4 w-4 rounded border-gray-300 text-[#8b1a30]"
                                         />
                                         <div className="flex flex-1 items-center gap-3">
-                                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 transition-colors group-hover:bg-blue-200">
-                                                <Car className="h-5 w-5 text-blue-700" />
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 transition-colors group-hover:bg-blue-200">
+                                                <Car className="h-4 w-4 text-blue-700" />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-semibold text-gray-900">Bringing a Vehicle?</p>
@@ -639,16 +642,19 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             type="button"
                             variant="outline"
                             onClick={() => setPhase("qr")}
-                            className="h-10 rounded-md text-sm border-gray-300 px-5 text-gray-700 hover:bg-gray-50"
+                            className="rounded-md text-sm border-gray-300 px-5 text-gray-700 hover:bg-gray-50"
                         >
-                            Scan QR Instead
+                            <ArrowLeft className="h-4 w-4" />
+                            Scan
+                            <QrCode className="h-5 w-5" />
+                            {/* Scan QR Instead */}
                         </Button>
                     ) : (
                         <Button
                             type="button"
                             variant="outline"
                             onClick={prevStep}
-                            className="h-12 w-12 rounded-full border-gray-300"
+                            className="h-10 w-10 rounded-full border-gray-300"
                         >
                             <ArrowLeft className="h-4 w-4" />
                         </Button>
@@ -659,7 +665,7 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                         <Button
                             type="button"
                             onClick={nextStep}
-                            className="h-12 w-12 rounded-full text-white shadow-lg transition-all hover:scale-[1.02]"
+                            className="h-10 w-10 rounded-full text-white shadow-lg transition-all hover:scale-[1.02]"
                             style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
                         >
                             <ArrowRight className="h-4 w-4" />
@@ -674,11 +680,16 @@ export default function VisitorForm({ setPhase }: VisitorFormProps) {
                             type="button"
                             disabled={isSubmitting}
                             onClick={handleSubmit(onSubmit)}
-                            className="h-11 rounded-xl px-6 text-white shadow-xl transition-all hover:scale-[1.02] disabled:opacity-60"
+                            className="h-10 w-10 rounded-full text-white shadow-xl transition-all hover:scale-[1.02] disabled:opacity-60"
                             style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
                         >
-                            {isSubmitting ? "Submitting..." : "Complete Registration"}
-                            {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                            {isSubmitting 
+                            ? "Submitting..." 
+                            : 
+                            <Check className="w-4 h-4"/>
+                            // "Complete Registration"
+                            }
+                            {/* {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />} */}
                         </Button>
                     )}
                 </div>

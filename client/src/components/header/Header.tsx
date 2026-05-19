@@ -48,13 +48,13 @@ export default function Header() {
 
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
-            I
+          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
+            V
           </div>
 
           <Link to="/admin" className="flex flex-col leading-tight">
             <span className="font-bold text-white text-lg">
-              Iravya
+              VisitMi
             </span>
             {/* <span className="text-sm font-semibold tracking-widest uppercase text-rose-200">
               Manager
