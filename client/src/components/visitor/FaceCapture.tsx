@@ -11,7 +11,11 @@ import {
 } from "lucide-react";
 
 interface Props {
-    onComplete: (image: string) => void;
+    onComplete: (
+        file: File,
+        preview: string
+    ) => void;
+
     onBack?: () => void;
 }
 
@@ -26,6 +30,8 @@ export default function FaceCapture({
     const [faceInside, setFaceInside] = useState(false);
 
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
+
+const [capturedFile, setCapturedFile] = useState<File | null>(null);
 
     const [isDetecting, setIsDetecting] = useState(false);
 
@@ -104,15 +110,35 @@ export default function FaceCapture({
         return () => clearInterval(interval);
     }, [modelsLoaded, capturedImage, isDetecting]);
 
-    const capture = () => {
-        if (!faceInside) return;
+    const capture = async () => {
+    if (!faceInside) return;
 
-        const image = webcamRef.current?.getScreenshot();
+    const imageSrc =
+        webcamRef.current?.getScreenshot();
 
-        if (image) {
-            setCapturedImage(image);
-        }
-    };
+    if (!imageSrc) return;
+
+    try {
+        const response = await fetch(imageSrc);
+
+        const blob = await response.blob();
+
+        const file = new File(
+            [blob],
+            `visitor-${Date.now()}.jpg`,
+            {
+                type: "image/jpeg",
+            }
+        );
+
+        setCapturedImage(imageSrc);
+
+        setCapturedFile(file);
+
+    } catch (error) {
+        console.error(error);
+    }
+};
 
     const recapture = () => {
         setCapturedImage(null);
@@ -246,7 +272,17 @@ export default function FaceCapture({
 
                         <Button
                             type="button"
-                            onClick={() => onComplete(capturedImage)}
+                            onClick={() => {
+    if (
+        capturedFile &&
+        capturedImage
+    ) {
+        onComplete(
+            capturedFile,
+            capturedImage
+        );
+    }
+}}
                             className="
                                 rounded-full bg-maroon
                                 hover:bg-maroon-dark w-10 h-10

@@ -11,12 +11,13 @@ import {
     ArrowRight,
     ArrowLeft,
     Check,
-    CalendarCheck,
-    Clock,
-    MapPin,
+    // CalendarCheck,
+    // Clock,
+    // MapPin,
     Clock3,
     CalendarIcon,
     QrCode,
+    Loader2,
 } from "lucide-react";
 import { format } from "date-fns"
 import { visitorSchema } from "@/schema";
@@ -55,7 +56,8 @@ interface SectionHeaderItem {
 
 interface VisitorFormProps {
     setPhase: React.Dispatch<React.SetStateAction<"qr" | "camera" | "form" | "done">>;
-     capturedImage: string | null;
+    capturedImage: string | null;
+capturedFile: File | null;
 }
 
 // ─── Section header ────────────────────────────────────────────────────────────
@@ -82,131 +84,133 @@ const steps = [
 ];
 
 // ─── Success screen (exported so VisitorCheckIn can render it in "done" phase) ─
-export function SuccessScreen({
-    visitorName,
-    hostName,
-    onReset,
-}: {
-    visitorName: string;
-    hostName: string;
-    onReset: () => void;
-}) {
-    return (
-        <motion.div
-            key="success"
-            initial={{ opacity: 0, scale: 0.94, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
-            className="flex flex-col items-center gap-6 py-4 text-center"
-        >
-            {/* Animated check */}
-            <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-                className="flex h-24 w-24 items-center justify-center rounded-full"
-                style={{
-                    background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-                    boxShadow: "0 8px 32px rgba(16,185,129,0.20)",
-                }}
-            >
-                <Check className="h-10 w-10 text-emerald-600" strokeWidth={2.5} />
-            </motion.div>
+// export function SuccessScreen({
+//     visitorName,
+//     hostName,
+//     onReset,
+// }: {
+//     visitorName: string;
+//     hostName: string;
+//     onReset: () => void;
+// }) {
+//     return (
+//         <motion.div
+//             key="success"
+//             initial={{ opacity: 0, scale: 0.94, y: 16 }}
+//             animate={{ opacity: 1, scale: 1, y: 0 }}
+//             transition={{ duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }}
+//             className="flex flex-col items-center gap-6 py-4 text-center"
+//         >
+//             {/* Animated check */}
+//             <motion.div
+//                 initial={{ scale: 0 }}
+//                 animate={{ scale: 1 }}
+//                 transition={{ delay: 0.15, duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
+//                 className="flex h-24 w-24 items-center justify-center rounded-full"
+//                 style={{
+//                     background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+//                     boxShadow: "0 8px 32px rgba(16,185,129,0.20)",
+//                 }}
+//             >
+//                 <Check className="h-10 w-10 text-emerald-600" strokeWidth={2.5} />
+//             </motion.div>
 
-            {/* Title */}
-            <div className="space-y-1.5">
-                <motion.h2
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                    className="text-2xl font-bold text-gray-900"
-                    style={{ letterSpacing: "-0.02em" }}
-                >
-                    Visit Booked Successfully!
-                </motion.h2>
-                <motion.p
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.32 }}
-                    className="text-sm text-gray-500 leading-relaxed"
-                >
-                    Your host has been notified and will approve your visit shortly.
-                </motion.p>
-            </div>
+//             {/* Title */}
+//             <div className="space-y-1.5">
+//                 <motion.h2
+//                     initial={{ opacity: 0, y: 8 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: 0.25 }}
+//                     className="text-2xl font-bold text-gray-900"
+//                     style={{ letterSpacing: "-0.02em" }}
+//                 >
+//                     Visit Booked Successfully!
+//                 </motion.h2>
+//                 <motion.p
+//                     initial={{ opacity: 0, y: 8 }}
+//                     animate={{ opacity: 1, y: 0 }}
+//                     transition={{ delay: 0.32 }}
+//                     className="text-sm text-gray-500 leading-relaxed"
+//                 >
+//                     Your host has been notified and will approve your visit shortly.
+//                 </motion.p>
+//             </div>
 
-            {/* Info cards */}
-            <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="w-full space-y-2.5"
-            >
-                <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#8b1a30] to-[#6b1223]">
-                        <User className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Visitor</p>
-                        <p className="text-sm font-semibold text-gray-800">{visitorName}</p>
-                    </div>
-                </div>
+//             {/* Info cards */}
+//             <motion.div
+//                 initial={{ opacity: 0, y: 10 }}
+//                 animate={{ opacity: 1, y: 0 }}
+//                 transition={{ delay: 0.4 }}
+//                 className="w-full space-y-2.5"
+//             >
+//                 <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
+//                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#8b1a30] to-[#6b1223]">
+//                         <User className="h-4 w-4 text-white" />
+//                     </div>
+//                     <div>
+//                         <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Visitor</p>
+//                         <p className="text-sm font-semibold text-gray-800">{visitorName}</p>
+//                     </div>
+//                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#8b1a30]/10">
-                        <CalendarCheck className="h-4 w-4 text-[#8b1a30]" />
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Meeting</p>
-                        <p className="text-sm font-semibold text-gray-800">{hostName}</p>
-                    </div>
-                </div>
+//                 <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-left">
+//                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#8b1a30]/10">
+//                         <CalendarCheck className="h-4 w-4 text-[#8b1a30]" />
+//                     </div>
+//                     <div>
+//                         <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">Meeting</p>
+//                         <p className="text-sm font-semibold text-gray-800">{hostName}</p>
+//                     </div>
+//                 </div>
 
-                <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-left">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100">
-                        <Clock className="h-4 w-4 text-amber-600" />
-                    </div>
-                    <div>
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-amber-500">Status</p>
-                        <p className="text-sm font-semibold text-amber-700">Awaiting host approval</p>
-                    </div>
-                </div>
-            </motion.div>
+//                 <div className="flex items-center gap-3 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-left">
+//                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100">
+//                         <Clock className="h-4 w-4 text-amber-600" />
+//                     </div>
+//                     <div>
+//                         <p className="text-[11px] font-medium uppercase tracking-wide text-amber-500">Status</p>
+//                         <p className="text-sm font-semibold text-amber-700">Awaiting host approval</p>
+//                     </div>
+//                 </div>
+//             </motion.div>
 
-            {/* Lobby instruction */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
-                className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 w-full"
-            >
-                <MapPin size={14} className="text-emerald-600 shrink-0" />
-                <p className="text-xs text-emerald-700 text-left">
-                    Please wait in the lobby. The receptionist will guide you once approved.
-                </p>
-            </motion.div>
+//             {/* Lobby instruction */}
+//             <motion.div
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 transition={{ delay: 0.55 }}
+//                 className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 w-full"
+//             >
+//                 <MapPin size={14} className="text-emerald-600 shrink-0" />
+//                 <p className="text-xs text-emerald-700 text-left">
+//                     Please wait in the lobby. The receptionist will guide you once approved.
+//                 </p>
+//             </motion.div>
 
-            {/* New check-in */}
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="w-full"
-            >
-                <Button
-                    type="button"
-                    onClick={onReset}
-                    variant="outline"
-                    className="w-full rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                    New Check-In
-                </Button>
-            </motion.div>
-        </motion.div>
-    );
-}
+//             {/* New check-in */}
+//             <motion.div
+//                 initial={{ opacity: 0 }}
+//                 animate={{ opacity: 1 }}
+//                 transition={{ delay: 0.6 }}
+//                 className="w-full"
+//             >
+//                 <Button
+//                     type="button"
+//                     onClick={onReset}
+//                     variant="outline"
+//                     className="w-full rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50"
+//                 >
+//                     New Check-In
+//                 </Button>
+//             </motion.div>
+//         </motion.div>
+//     );
+// }
 
 // ─── Main form ─────────────────────────────────────────────────────────────────
-export default function VisitorForm({ setPhase, capturedImage }: VisitorFormProps) {
+export default function VisitorForm({ setPhase,
+    capturedImage,
+    capturedFile }: VisitorFormProps) {
     const [step, setStep] = useState(0);
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
@@ -286,40 +290,59 @@ export default function VisitorForm({ setPhase, capturedImage }: VisitorFormProp
 
     // ── Submit — invoked ONLY by the final button's onClick ───────────────────
     const onSubmit = async (data: VisitorFormValues) => {
-        try {
-            const payload = {
-                first_name: data.first_name,
-                last_name: data.last_name,
-                email: data.email,
-                phone: data.phone,
-                company: data.company,
-                position: data.position,
-                visitor_photo: capturedImage,
-                is_laptop: data.is_laptop,
-                ...(data.is_laptop ? {
-                    make: data.make,
-                    model: data.model,
-                    serial_no: data.serial_no,
-                } : {
-                    make: "",
-                    model: "",
-                    serial_no: "",
-                }
-                ),
-                is_vehicle: data.is_vehicle,
-                ...(data.is_vehicle ? { vehicle_no: data.vehicle_no } : { vehicle_no: "" }),
-                employee_id: data.employee_id,
-            };
+    try {
+        console.log(capturedImage, capturedFile);
+        
+        const formData = new FormData();
 
-            await checkInVisitor(payload).unwrap();
+        // Basic details
+        formData.append("first_name", data.first_name);
+        formData.append("last_name", data.last_name);
+        formData.append("email", data.email);
+        formData.append("phone", data.phone);
+        formData.append("company", data.company || "");
+        formData.append("position", data.position || "");
 
-            reset();
-            setStep(0);
-            setPhase("done");
-        } catch (error) {
-            console.error(error);
+        // Employee
+        formData.append("employee_id", data.employee_id);
+
+        // Photo file
+        if (capturedFile) {
+            formData.append("visitor_photo", capturedFile);
         }
-    };
+
+        // Laptop
+        formData.append("is_laptop", String(data.is_laptop));
+
+        if (data.is_laptop) {
+            formData.append("make", data.make || "");
+            formData.append("model", data.model || "");
+            formData.append("serial_no", data.serial_no || "");
+        } else {
+            formData.append("make", "");
+            formData.append("model", "");
+            formData.append("serial_no", "");
+        }
+
+        // Vehicle
+        formData.append("is_vehicle", String(data.is_vehicle));
+
+        if (data.is_vehicle) {
+            formData.append("vehicle_no", data.vehicle_no || "");
+        } else {
+            formData.append("vehicle_no", "");
+        }
+
+        await checkInVisitor(formData).unwrap();
+
+        reset();
+        setStep(0);
+        setPhase("done");
+
+    } catch (error) {
+        console.error(error);
+    }
+};
 
     return (
         <div className="mx-auto w-full max-w-4xl">
@@ -684,7 +707,7 @@ export default function VisitorForm({ setPhase, capturedImage }: VisitorFormProp
                             style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
                         >
                             {isSubmitting 
-                            ? "Submitting..." 
+                            ?  <Loader2 className="w-4 h-4 animate-spin" />
                             : 
                             <Check className="w-4 h-4"/>
                             // "Complete Registration"

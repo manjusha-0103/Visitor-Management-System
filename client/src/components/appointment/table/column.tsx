@@ -85,8 +85,7 @@ function ActionsCell({
 }) {
   const appt: AppointmentRow = row.original;
   const user = useSelector(selectUser);
-  const isReceptionist =
-    user?.role === "receptionist";
+  const isReceptionist = user?.role === "receptionist";
   const [actionType, setActionType] = useState<
     "approve" | "reject" | null
   >(null);
@@ -151,7 +150,7 @@ function ActionsCell({
       <div className="flex items-center justify-end gap-2 flex-wrap">
 
         {/* Pending */}
-        {isReceptionist &&
+        {
           !appt.is_approve &&
           !appt.is_rejected &&
           !appt.check_out && (
@@ -186,7 +185,7 @@ function ActionsCell({
           )}
 
         {/* Approved */}
-        {isReceptionist &&
+        {
           appt.is_approve &&
           !appt.check_out && (
             <>
