@@ -3,11 +3,13 @@ import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
 import { userExistbyemailService } from "./auth.service.js"
+import { uploadFile } from "../config/uploadFile.js"
 
 
-const checkInService = async ({first_name, last_name, email, phone, position, is_laptop, company, make, model, serial_no, is_vehicle, vehicle_no, employee_id}) => {
+const checkInService = async ({first_name, last_name, email, phone, position, is_laptop, company, make, model, serial_no, is_vehicle, vehicle_no, employee_id},file) => {
     const [visitorexist] = await userExistbyemailService(email)
     const date_time = new Date()
+    const photo_url = await uploadFile(file, "visitor_photos")
     const [employee] = await sql`
         SELECT
             e.id AS employee_id,
@@ -38,15 +40,16 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
                 "is_vehicle" = ${is_vehicle},
                 "vehicle_no" = ${vehicle_no},
                 "position" = ${position},
-                "company" = ${company}
+                "company" = ${company},
+                "photo" = ${photo_url}
             WHERE "user_id" = ${visitorexist.id}
             RETURNING *
         `
-        console.log("visitor",visitor);
+        console.log("visitor",visitor,employee_id);
         
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position")
-            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position} )
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img")
+            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url} )
             RETURNING *
         ` 
 
@@ -97,15 +100,17 @@ const checkInService = async ({first_name, last_name, email, phone, position, is
             VALUES (${email}, ${first_name}, ${last_name}, ${'visitor'}, ${phone})
             RETURNING "id", "first_name", "last_name", "email", "role", "phone"
         `
+        console.log(user);
+        
         visitor = await sql`
-            INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id")
-            VALUES (${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${position}, ${company}, ${user[0].id})
+            INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id", "photo")
+            VALUES (${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${position}, ${company}, ${user[0].id}, ${photo_url})
             RETURNING *
         `
         // console.log(visitor)
         appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position")
-            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position})
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img")
+            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url})
             RETURNING *
         ` 
         await sendEmail({

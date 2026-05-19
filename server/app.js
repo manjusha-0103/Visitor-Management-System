@@ -9,7 +9,7 @@ import employeeRoutes from "./routers/employeeRoutes.js"
 import dashboardRoutes from "./routers/dashboardRoutes.js"
 import receptionistRoutes from "./routers/receptionistRoutes.js"
 import appointmentRoutes from "./routers/appointmentRoutes.js"
-
+import analyticsRoutes from "./routers/analyticsRoutes.js"
 import superAdminsRoutes from "./routers/superAdminsRoutes.js"
 
 const app = express()
@@ -36,7 +36,7 @@ app.use('/api/v1/dashboard',dashboardRoutes)
 app.use('/api/v1/appointments',appointmentRoutes)
 app.use('/api/v1/receptionist', receptionistRoutes)
 app.use('/api/v1/super-admin', superAdminsRoutes)
-
+app.use('/api/v1/analytics', analyticsRoutes)
 
 app.use(globalErrorHandler);
 
