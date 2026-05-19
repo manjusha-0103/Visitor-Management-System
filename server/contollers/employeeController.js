@@ -15,7 +15,136 @@ import { getIO } from "../config/socket.js";
 import { userExistbyemailService } from "../services/auth.service.js";
 import { sendEmail } from "../utils/mailer.js";
 
+const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
+    const super_admin = await allSuperAdminService()
+    for (let s of super_admin){
 
+        await sendEmail({
+            to: s.email,
+            subject: "Appoiment Check-In Missed-use",
+            html:`
+                html
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+            <style>
+
+            body{
+                margin:0;
+                padding:0;
+                background:#f5f5f5;
+                font-family:'Times New Roman', Times, serif;
+                color:#222;
+            }
+
+            .container{
+                max-width:620px;
+                margin:40px auto;
+                background:#ffffff;
+                border-radius:12px;
+                overflow:hidden;
+                border:1px solid #e5e5e5;
+            }
+
+            .content{
+                padding:35px;
+                line-height:1.8;
+                font-size:16px;
+            }
+
+            .alert-box{
+                margin:25px 0;
+                padding:18px 20px;
+                background:#fef2f2;
+                border-left:5px solid #dc2626;
+                border-radius:8px;
+                color:#991b1b;
+            }
+
+            .user-info{
+                margin-top:20px;
+                padding:18px 20px;
+                background:#fafafa;
+                border-radius:8px;
+                border:1px solid #ececec;
+            }
+
+            .user-info p{
+                margin:8px 0;
+            }
+
+            .warning{
+                margin-top:25px;
+                color:#b91c1c;
+                font-weight:bold;
+            }
+
+            .footer{
+                padding:20px;
+                text-align:center;
+                font-size:13px;
+                color:#6b7280;
+                border-top:1px solid #e5e7eb;
+            }
+
+            </style>
+            </head>
+
+            <body>
+
+            <div class="container">
+
+                <div class="content">
+
+                    <p>Dear Super admin,</p>
+
+                    <p>
+                        We detected suspicious appointment activity associated with information on our platform.
+                    </p>
+
+                    <div class="alert-box">
+                        Someone may be using his details to schedule appointments without your permission.
+                    </div>
+
+                    <p>The following information was used:</p>
+
+                    <div class="user-info">
+
+                        ${Object.values(employee).map(value => `
+
+                            <p>${value}</p>
+
+                        `).join('')}
+                        
+                    </div>
+                    <p>
+                        Regards,<br/>
+                        VisitMi
+                    </p>
+
+                </div>
+
+                <div class="footer">
+                    Powered by Iravya
+                </div>
+
+            </div>
+
+            </body>
+            </html>
+            `
+        
+        })
+    }
+    
+})
+
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 const chekIsApprove = asyncHandler(async (req, res) => {
     const is_approve = req.query.is_approve === "true"
@@ -351,10 +480,137 @@ const chekIsApprove = asyncHandler(async (req, res) => {
 })
 
 
-const preSchedule = asyncHandler(async (req, res) => {
+
+
+const sendOtp = asyncHandler(async (req, res) => {
+
     const { employee_email } = req.body;
-    const [userExist] = await employeeEsistService(employee_email)
+
+    const userExist =
+        await employeeEsistService(employee_email);
+
     if(userExist){
+
+        const otp = generateOTP();
+
+        await sql`
+
+            INSERT INTO email_otp
+            (
+                email,
+                otp,
+                expires_at
+            )
+
+            VALUES
+            (
+                ${employee_email},
+                ${otp},
+                NOW() + INTERVAL '5 minutes'
+            )
+
+            ON CONFLICT (email)
+
+            DO UPDATE SET
+                otp = EXCLUDED.otp,
+                expires_at = EXCLUDED.expires_at
+
+        `;
+
+        await sendEmail({
+
+            to: employee_email,
+
+            subject: "OTP for prescheduling appointment",
+
+            html: `
+                <div style="
+                    font-family: Arial;
+                    max-width:500px;
+                    margin:auto;
+                    padding:30px;
+                    text-align:center;
+                    border:1px solid #ddd;
+                    border-radius:10px;
+                ">
+
+                    <h2>Email Verification</h2>
+
+                    <p>Your OTP is:</p>
+
+                    <h1 style="
+                        letter-spacing:5px;
+                        color:#2563eb;
+                    ">
+                        ${otp}
+                    </h1>
+
+                    <p>
+                        Valid for 5 minutes
+                    </p>
+
+                </div>
+            `
+        });
+
+        sendResponse(
+            res,
+            200,
+            [],
+            "OTP sent successfully"
+        );
+
+    }
+    else{
+
+        await sendEmailToSuperAdmin(req.body);
+
+        sendResponse(
+            res,
+            404,
+            [],
+            "Employee not exist"
+        );
+    }
+
+});
+
+
+const verifyOtp = asyncHandler(async (req, res) => {
+    const {otp, email} = req.body
+
+    const result = await sql`
+
+        SELECT *
+
+        FROM email_otp
+
+        WHERE email = ${email}
+
+        AND otp = ${otp}
+
+        AND expires_at > NOW()
+
+        LIMIT 1
+    `;
+
+    if(result.length === 0){
+        const userExist = await employeeEsistService(email)
+        
+        await sendEmailToSuperAdmin({"full_name" : `${userExist.first_name} ${userExist.last_name}`,
+        "email": userExist.email, "phone" : userExist.phone, "company" : userExist.company, "position": userExist.position})
+        throw new ApiError( 200, "OTP is inavalid or Expired")
+        
+    }
+    else{
+        sendResponse(res,200, result,"OTP is verified" )
+    }
+})
+
+
+const preSchedule = asyncHandler(async (req, res) => {
+    const { employee_email, } = req.body;
+    
         const appoinment = await preScheduleService(req.body)
         if (appoinment) {
             const io = getIO();
@@ -369,145 +625,14 @@ const preSchedule = asyncHandler(async (req, res) => {
         else {
             throw new ApiError(400, "Failed to schedule")
         }
-    }
-    else{
-        const super_admin = await allSuperAdminService()
-        for (let s of super_admin){
-
-            await sendEmail({
-                to: s.email,
-                subject: "Appoiment Check-In",
-                html:`
-                    html
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-                <style>
-
-                body{
-                    margin:0;
-                    padding:0;
-                    background:#f5f5f5;
-                    font-family:'Times New Roman', Times, serif;
-                    color:#222;
-                }
-
-                .container{
-                    max-width:620px;
-                    margin:40px auto;
-                    background:#ffffff;
-                    border-radius:12px;
-                    overflow:hidden;
-                    border:1px solid #e5e5e5;
-                }
-
-                .content{
-                    padding:35px;
-                    line-height:1.8;
-                    font-size:16px;
-                }
-
-                .alert-box{
-                    margin:25px 0;
-                    padding:18px 20px;
-                    background:#fef2f2;
-                    border-left:5px solid #dc2626;
-                    border-radius:8px;
-                    color:#991b1b;
-                }
-
-                .user-info{
-                    margin-top:20px;
-                    padding:18px 20px;
-                    background:#fafafa;
-                    border-radius:8px;
-                    border:1px solid #ececec;
-                }
-
-                .user-info p{
-                    margin:8px 0;
-                }
-
-                .warning{
-                    margin-top:25px;
-                    color:#b91c1c;
-                    font-weight:bold;
-                }
-
-                .footer{
-                    padding:20px;
-                    text-align:center;
-                    font-size:13px;
-                    color:#6b7280;
-                    border-top:1px solid #e5e7eb;
-                }
-
-                </style>
-                </head>
-
-                <body>
-
-                <div class="container">
-
-                    <div class="content">
-
-                        <p>Dear Super admin,</p>
-
-                        <p>
-                            We detected suspicious appointment activity associated with information on our platform.
-                        </p>
-
-                        <div class="alert-box">
-                            Someone may be using his details to schedule appointments without your permission.
-                        </div>
-
-                        <p>The following information was used:</p>
-
-                        <div class="user-info">
-
-                            <p><strong>Full Name:</strong> ${user.full_name}</p>
-
-                            <p><strong>Email:</strong> ${user.email}</p>
-
-                            <p><strong>Phone:</strong> ${user.phone}</p>
-
-                            <p><strong>Company:</strong> ${user.company}</p>
-
-                            <p><strong>Position:</strong> ${user.position}</p>
-
-                        </div>
-
-                        
-
-                        <p>
-                            Regards,<br/>
-                            VisitMi
-                        </p>
-
-                    </div>
-
-                    <div class="footer">
-                        Powered by Iravya
-                    </div>
-
-                </div>
-
-                </body>
-                </html>
-                `
-            
-            })
-        }
-
-    }
+    
 
 })
 
 export {
 
     chekIsApprove,
-    preSchedule
+    preSchedule,
+    sendOtp,
+    verifyOtp
 }
