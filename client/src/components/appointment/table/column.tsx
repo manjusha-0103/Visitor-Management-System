@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { AppointmentRow } from '@/types';
-import { useSelector } from "react-redux";
-import { selectUser } from "@/lib/features/auth/authSlice";
+// import { useSelector } from "react-redux";
+// import { selectUser } from "@/lib/features/auth/authSlice";
 import SetPassIdDialog from "../SetPassIdDialog";
 import { useState } from "react";
 import { useApproveAppointmentMutation, useCheckOutMutation } from "@/lib/features/appointment/appointmentApi";
@@ -84,8 +84,8 @@ function ActionsCell({
   row: any;
 }) {
   const appt: AppointmentRow = row.original;
-  const user = useSelector(selectUser);
-  const isReceptionist = user?.role === "receptionist";
+  // const user = useSelector(selectUser);
+  // const isReceptionist = user?.role === "receptionist";
   const [actionType, setActionType] = useState<
     "approve" | "reject" | null
   >(null);
