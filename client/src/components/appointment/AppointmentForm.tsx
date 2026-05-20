@@ -528,21 +528,32 @@ export default function AppointmentForm({
                                 </TabsContent>
                             </Tabs>
                         ) : (
-                            <div className="mt-4">
-                                <CheckInForm
-                                    control={control}
-                                    register={register}
-                                    deptLoading={deptLoading}
-                                    empLoading={empLoading}
-                                    selectedDepartment={selectedDepartment}
-                                    hasLaptop={hasLaptop}
-                                    hasVehicle={hasVehicle}
-                                    departmentOptions={departmentOptions}
-                                    employeeOptions={employeeOptions}
-                                    selectedDepartmentData={selectedDepartmentData}
-                                    selectedEmployeeData={selectedEmployeeData}
+
+                            walkinStep === "camera" ? (
+                                <FaceCapture
+                                    onComplete={(file, image) => {
+                                        setCapturedImage(image);
+                                        setCapturedFile(file);
+                                        setWalkinStep("form");
+                                    }}
                                 />
-                            </div>
+                            ) : (
+                                <div className="mt-4">
+                                    <CheckInForm
+                                        control={control}
+                                        register={register}
+                                        deptLoading={deptLoading}
+                                        empLoading={empLoading}
+                                        selectedDepartment={selectedDepartment}
+                                        hasLaptop={hasLaptop}
+                                        hasVehicle={hasVehicle}
+                                        departmentOptions={departmentOptions}
+                                        employeeOptions={employeeOptions}
+                                        selectedDepartmentData={selectedDepartmentData}
+                                        selectedEmployeeData={selectedEmployeeData}
+                                    />
+                                </div>
+                            )
                         )}
 
                     </div>
