@@ -163,11 +163,11 @@ export const getAppointmentsService = async ({
   // -------------------
   // TYPE FILTER
   // -------------------
-  if (type === "walkin") {
+  if (type === "all") {
     whereClause = sql`
       ${whereClause}
       AND ${appointmentDate} = ${today}
-      AND a.is_preschedule = false
+      
     `;
   }
 
@@ -277,7 +277,7 @@ export const getAppointmentsService = async ({
     JOIN "Users" eu ON eu.id = e.user_id
     JOIN "Users" vu ON vu.id = v.user_id
     WHERE ${whereClause}
-    ORDER BY a.date_time DESC
+    ORDER BY a.date_time ASC
     LIMIT ${limit}
     OFFSET ${offset}
   `;
