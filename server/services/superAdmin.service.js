@@ -353,11 +353,22 @@ const updateUserService = async (id, { first_name, last_name, email, phone, role
     `;
     return user
 }
+
+const deleteDeparmentService = async (id) => {
+    const dept = await sql `
+        DELETE FROM "Departments"
+        WHERE id = ${id}
+        RETURNING *
+    `
+    return dept
+}
+
 export {
     getALLEmployeesservice,
     getAllUserService,
     addEmployeeService,
     addDepartmentService,
     updateEmployeeService,
-    updateUserService
+    updateUserService,
+    deleteDeparmentService
 }
