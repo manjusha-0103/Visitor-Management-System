@@ -146,10 +146,10 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
     };
 
     return (
-        <div className="space-y-5">
+        <div className="ms-14 space-y-5">
             {/* Header */}
-            <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900">
+            <div className="">
+                <h2 className="text-xl font-bold text-gray-900">
                     Capture Visitor Photo
                 </h2>
 
@@ -161,7 +161,7 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
             {/* Camera / Preview */}
             {!capturedImage ? (
                 <div className="space-y-4">
-                    <div className="relative mx-auto w-60 overflow-hidden rounded-3xl bg-black shadow-xl">
+                    <div className="relative w-60 overflow-hidden rounded-3xl bg-black shadow-xl">
                         <Webcam
                             ref={webcamRef}
                             screenshotFormat="image/jpeg"
@@ -220,7 +220,7 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center gap-3">
                         {onBack && (
                             <Button
                                 type="button"
@@ -249,7 +249,7 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
                     </div>
                 </div>
             ) : (
-                <div className="space-y-4 text-center">
+                <div className="space-y-4">
                     <img
                         src={capturedImage}
                         alt="Captured"
