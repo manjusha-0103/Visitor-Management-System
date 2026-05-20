@@ -136,17 +136,17 @@ export default function CheckInForm({
     setTime,
 }: CheckInFormProps) {
     return (
-        <FieldGroup>
+        <FieldGroup className="max-w-xl ms-10">
             <FieldSet>
-                <FieldGroup className="gap-0">
+                <FieldGroup className="gap-2">
 
                     {showScheduleFields && (
-                        <>
+                        <div className=" border border-gray-200 p-4 rounded-xl">
                             <h3 className="font-semibold text-sm mb-2">
                                 Schedule Visit
                             </h3>
-
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-1">
+
 
                                 {/* Date */}
 
@@ -278,154 +278,156 @@ export default function CheckInForm({
                                     </Select>
                                 </div>
                             </div>
-
-                            <span className="border-b border-gray-200 h-2 mb-2"></span>
-                        </>
+                        </div>
                     )}
 
                     {/* Whom To Meet */}
 
-                    <h3 className="font-semibold text-sm mb-1">
-                        Whom To Meet
-                    </h3>
+                    <div className="border border-gray-200 p-4 rounded-xl">
+                        <h3 className="font-semibold text-sm mb-1">
+                            Whom To Meet
+                        </h3>
 
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mb-2">
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mb-2">
 
-                        <div className="space-y-3">
+                            <div className="space-y-3 ">
 
-                            <SelectField<AppointmentFormValues>
-                                name="department_id"
-                                label="Department"
-                                placeholder={
-                                    deptLoading
-                                        ? "Loading departments..."
-                                        : "Select Department"
-                                }
-                                control={control}
-                                options={departmentOptions}
-                            />
+                                <SelectField<AppointmentFormValues>
+                                    name="department_id"
+                                    label="Department"
+                                    placeholder={
+                                        deptLoading
+                                            ? "Loading departments..."
+                                            : "Select Department"
+                                    }
+                                    control={control}
+                                    options={departmentOptions}
+                                />
 
-                            {selectedDepartmentData && (
-                                <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
+                                {selectedDepartmentData && (
+                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
 
-                                    <p className="text-xs text-gray-500">
-                                        Selected Department
-                                    </p>
+                                        <p className="text-xs text-gray-500">
+                                            Selected Department
+                                        </p>
 
-                                    <p className="mt-1 text-sm font-semibold text-gray-900">
-                                        {selectedDepartmentData.name}
-                                    </p>
+                                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                                            {selectedDepartmentData.name}
+                                        </p>
 
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-3">
+
+                                <SelectField<AppointmentFormValues>
+                                    name="employee_id"
+                                    label="Employee"
+                                    placeholder={
+                                        !selectedDepartment
+                                            ? "Select department first"
+                                            : empLoading
+                                                ? "Loading employees..."
+                                                : "Select Employee"
+                                    }
+                                    control={control}
+                                    options={employeeOptions}
+                                    disabled={!selectedDepartment}
+                                />
+
+                                {selectedEmployeeData && (
+                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4">
+
+                                        <p className="text-xs text-gray-500">
+                                            Selected Employee
+                                        </p>
+
+                                        <p className="mt-1 text-sm font-semibold text-gray-900">
+                                            {selectedEmployeeData.first_name}{" "}
+                                            {selectedEmployeeData.last_name}
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-gray-600">
+                                            {selectedEmployeeData.position}
+                                        </p>
+
+                                        <p className="text-xs text-gray-500">
+                                            {selectedEmployeeData.email}
+                                        </p>
+
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="space-y-3">
-
-                            <SelectField<AppointmentFormValues>
-                                name="employee_id"
-                                label="Employee"
-                                placeholder={
-                                    !selectedDepartment
-                                        ? "Select department first"
-                                        : empLoading
-                                            ? "Loading employees..."
-                                            : "Select Employee"
-                                }
-                                control={control}
-                                options={employeeOptions}
-                                disabled={!selectedDepartment}
-                            />
-
-                            {selectedEmployeeData && (
-                                <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4">
-
-                                    <p className="text-xs text-gray-500">
-                                        Selected Employee
-                                    </p>
-
-                                    <p className="mt-1 text-sm font-semibold text-gray-900">
-                                        {selectedEmployeeData.first_name}{" "}
-                                        {selectedEmployeeData.last_name}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-gray-600">
-                                        {selectedEmployeeData.position}
-                                    </p>
-
-                                    <p className="text-xs text-gray-500">
-                                        {selectedEmployeeData.email}
-                                    </p>
-
-                                </div>
-                            )}
-                        </div>
                     </div>
 
-                    <span className="border-b border-gray-200 h-2"></span>
-
-                    <h3 className="font-semibold text-sm mt-3 mb-1">
+                    <div className="border border-gray-200 p-4 rounded-xl">
+                    <h3 className="font-semibold text-sm mb-1">
                         Personal Information
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
-                        <CustomInputField<AppointmentFormValues>
-                            name="first_name"
-                            label="First Name"
-                            placeholder="Rahul"
-                            control={control}
-                        />
+                            <CustomInputField<AppointmentFormValues>
+                                name="first_name"
+                                label="First Name"
+                                placeholder="Rahul"
+                                control={control}
+                            />
 
-                        <CustomInputField<AppointmentFormValues>
-                            name="last_name"
-                            label="Last Name"
-                            placeholder="Sharma"
-                            control={control}
-                        />
+                            <CustomInputField<AppointmentFormValues>
+                                name="last_name"
+                                label="Last Name"
+                                placeholder="Sharma"
+                                control={control}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 mb-2">
+
+                            <CustomInputField<AppointmentFormValues>
+                                name="phone"
+                                label="Phone Number"
+                                placeholder="+91 9876543210"
+                                control={control}
+                            />
+
+                            <CustomInputField<AppointmentFormValues>
+                                name="email"
+                                type="email"
+                                label="Email Address"
+                                placeholder="rahul@gmail.com"
+                                control={control}
+                            />
+                        </div>
+
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 mb-2">
+                    <div className="border border-gray-200 p-4 rounded-xl">
+                        <h3 className="font-semibold text-sm my-1">
+                            Company Information
+                        </h3>
 
-                        <CustomInputField<AppointmentFormValues>
-                            name="phone"
-                            label="Phone Number"
-                            placeholder="+91 9876543210"
-                            control={control}
-                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
-                        <CustomInputField<AppointmentFormValues>
-                            name="email"
-                            type="email"
-                            label="Email Address"
-                            placeholder="rahul@gmail.com"
-                            control={control}
-                        />
-                    </div>
+                            <CustomInputField<AppointmentFormValues>
+                                name="company"
+                                label="Company Name"
+                                placeholder="Infosys"
+                                control={control}
+                                required={false}
+                            />
 
-                    <span className="border-b border-gray-200 h-2 mb-2"></span>
-
-                    <h3 className="font-semibold text-sm my-1">
-                        Company Information
-                    </h3>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-
-                        <CustomInputField<AppointmentFormValues>
-                            name="company"
-                            label="Company Name"
-                            placeholder="Infosys"
-                            control={control}
-                            required={false}
-                        />
-
-                        <CustomInputField<AppointmentFormValues>
-                            name="position"
-                            label="Position"
-                            placeholder="Software Engineer"
-                            control={control}
-                            required={false}
-                        />
+                            <CustomInputField<AppointmentFormValues>
+                                name="position"
+                                label="Position"
+                                placeholder="Software Engineer"
+                                control={control}
+                                required={false}
+                            />
+                        </div>
                     </div>
 
                     {/* Laptop */}
