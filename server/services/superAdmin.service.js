@@ -362,7 +362,15 @@ const deleteDeparmentService = async (id) => {
     `
     return dept
 }
+const deleteEmployeeService = async (id) => {
+    const emp = await sql`
+        DELETE FROM "Employee"
+        WHERE id = ${id}
+        RETURNING *
+    `
 
+    return emp
+}
 export {
     getALLEmployeesservice,
     getAllUserService,
@@ -370,5 +378,6 @@ export {
     addDepartmentService,
     updateEmployeeService,
     updateUserService,
-    deleteDeparmentService
+    deleteDeparmentService,
+    deleteEmployeeService
 }

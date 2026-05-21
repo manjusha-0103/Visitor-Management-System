@@ -9,7 +9,8 @@ import { getALLEmployees,
     addDepartment,
     updateEmployee,
     updateUser,
-    deleteDeparment
+    deleteDeparment,
+    deleteEmployee
  } from "../contollers/superAdminController.js";
 
 import { addEmployeeValidator} from "../validations/superAdminValidations.js";
@@ -21,6 +22,7 @@ router.post('/add', protect, authorize('super_admin'), validate, addEmployeeVali
 router.post('/add-departmemt', protect, authorize('super_admin'), addDepartment)
 router.put('/update-employee/:id', protect, authorize('super_admin'),updateEmployee)
 router.put('/update-user/:id', protect, authorize('super_admin'), updateUser)
-router.delete('/delete-dept/:id',deleteDeparment)
+router.delete('/delete-dept/:id',authorize('super_admin'),deleteDeparment)
+router.delete('/delete-emp/:id', deleteEmployee)
 
 export default router;
