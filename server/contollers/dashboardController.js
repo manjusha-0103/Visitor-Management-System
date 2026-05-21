@@ -44,16 +44,25 @@ const pastAppointments = asyncHandler(async (req, res) => {
 
 
 const downlaodAppointments = async (req, res) => {
-    
-    const appoitments = await downloadAppointmentsService(req.body)
-    if(appoitments){
-        sendResponse(res, 201, appoitments, "Appointment reports")
-    }
-    else{
-        throw new ApiError(400, "Bad request")
-    }
-}
 
+    const appointments =
+        await downloadAppointmentsService(req.body);
+
+    if (!appointments) {
+        throw new ApiError(
+            400,
+            "Bad request"
+        );
+    }
+
+    return sendResponse(
+        res,
+        200,
+        appointments,
+        appointments.message ||
+        "Appointment reports downloaded"
+    );
+};
 
 
 

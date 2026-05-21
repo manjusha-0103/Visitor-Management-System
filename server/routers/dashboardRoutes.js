@@ -9,7 +9,7 @@ import { pastAppointments,
 const router = express.Router();
 
 router.get("/past",protect, authorize('super_admin', "receptionist"), pastAppointments)
-router.get("/get-reports", downlaodAppointments)
+router.post("/get-reports", downlaodAppointments)
 
 
 export default router;

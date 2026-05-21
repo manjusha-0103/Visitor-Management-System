@@ -29,6 +29,25 @@ export interface GetAppointmentsParams {
   date?: string | null;
 }
 
+export interface DownloadAppointmentsPayload {
+    from_date: string;
+    to_date: string;
+    format: "csv" | "pdf" | "xlsx";
+}
+
+export interface DownloadAppointmentsResponse {
+    statusCode: number;
+
+    data: {
+        success: boolean;
+        already_exists: boolean;
+        file_url: string;
+    };
+
+    message: string;
+    success: boolean;
+}
+
 export const appointmentApi = api.injectEndpoints({
   endpoints: (builder) => ({
 
@@ -133,6 +152,18 @@ export const appointmentApi = api.injectEndpoints({
       invalidatesTags: ["Appointments"],
     }),
 
+
+    downloadAppointments: builder.mutation<
+    DownloadAppointmentsResponse,
+    DownloadAppointmentsPayload
+>({
+    query: (body) => ({
+        url: "/api/v1/dashboard/get-reports",
+        method: "POST",
+        body,
+    }),
+}),
+
   }),
 });
 
@@ -144,4 +175,5 @@ export const {
   useSetPassIdMutation,
   useApproveAppointmentMutation,
   useCheckOutMutation,
+  useDownloadAppointmentsMutation
 } = appointmentApi;

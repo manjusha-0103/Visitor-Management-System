@@ -190,10 +190,13 @@ export default function CheckInForm({
                                                 onSelect={setDate}
                                                 disabled={(date) => {
                                                     const today = new Date();
-
                                                     today.setHours(0, 0, 0, 0);
 
-                                                    return date < today;
+                                                    // 4 weeks from today
+                                                    const maxDate = new Date(today);
+                                                    maxDate.setDate(today.getDate() + 36);
+
+                                                    return date < today || date > maxDate;
                                                 }}
                                             />
                                         </PopoverContent>
@@ -362,9 +365,9 @@ export default function CheckInForm({
                     </div>
 
                     <div className="border border-gray-200 p-4 rounded-xl">
-                    <h3 className="font-semibold text-sm mb-1">
-                        Personal Information
-                    </h3>
+                        <h3 className="font-semibold text-sm mb-1">
+                            Personal Information
+                        </h3>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
