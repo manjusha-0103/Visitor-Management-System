@@ -5,7 +5,9 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiError from "../utils/ApiError.js";
 import crypto from 'crypto';
 import sendResponse from "../utils/sendResponse.js";
-import { pastAppointmentsService } from "../services/dashboard.service.js";
+import { pastAppointmentsService,
+    downloadAppointmentsService
+ } from "../services/dashboard.service.js";
 
 const pastAppointments = asyncHandler(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
@@ -41,10 +43,23 @@ const pastAppointments = asyncHandler(async (req, res) => {
 })
 
 
+const downlaodAppointments = async (req, res) => {
+    
+    const appoitments = await downloadAppointmentsService(req.body)
+    if(appoitments){
+        sendResponse(res, 201, appoitments, "Appointment reports")
+    }
+    else{
+        throw new ApiError(400, "Bad request")
+    }
+}
+
+
 
 
 export{
     pastAppointments,
     pastAppointmentsService,
+    downlaodAppointments
     
 }
