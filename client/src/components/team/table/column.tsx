@@ -13,7 +13,8 @@ import {
 } from "lucide-react";
 import { format, parseISO, formatDistanceToNow } from "date-fns";
 import { getNameInitials } from "@/lib/utils/helperFunctions";
-import type { Employee } from "@/lib/features/employee/employeeApi";
+import { useDeleteEmployeeMutation, type Employee } from "@/lib/features/employee/employeeApi";
+import DeleteModal from "@/components/DeleteModal";
 
 
 
@@ -30,6 +31,31 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
   } =
     table.options.meta || {};
 
+
+     const [
+    deleteEmployee,
+    { isLoading: isDeleting }
+  ] = useDeleteEmployeeMutation ();
+
+  const handleDelete =
+    async () => {
+
+      try {
+
+        await deleteEmployee(
+          member.id
+        ).unwrap();
+
+      } catch (error) {
+
+        console.error(
+          "Failed to delete employee",
+          error
+        );
+      }
+    };
+
+
   return (
     <div className="flex items-center gap-2 justify-end">
       <Button
@@ -45,12 +71,16 @@ function ActionsCell({ row, table }: { row: any; table: any }) {
         <Pencil size={14} />
       </Button>
 
-      {/* <DeleteModal
+      {/* DELETE */}
+      <DeleteModal
         who={member.full_name}
-        m1active="Employee will not be assignable for visitor appointments"
-        onConfirm={() => onDelete?.(member.id)}
-        isLoading={false}
-      /> */}
+        m1active="
+          Employee will not be assignable
+          for visitor appointments
+        "
+        onConfirm={handleDelete}
+        isLoading={isDeleting}
+      />
 
       {/* <DropdownMenu>
         <DropdownMenuTrigger asChild>

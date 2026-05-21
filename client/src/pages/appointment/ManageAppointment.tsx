@@ -12,6 +12,7 @@ import {
 import { getSocket } from "@/lib/utils/socket";
 import { useDispatch } from "react-redux";
 import AppointmentTable from "@/components/appointment/AppointmentTable";
+import AppointmentReportDownload from "@/components/appointment/AppointmentReportDownload";
 // import { selectUser } from "@/lib/features/auth/authSlice";
 // import AppointmentDetailSheet from "@/components/appointment/AppointmentDetailSheet";
 // import type { AppointmentRow } from "@/types";
@@ -70,7 +71,7 @@ export default function ManageAppointment() {
 
       <Tabs defaultValue="walkin" className="mt-6 px-4 lg:px-10">
         {/* Tabs + Button Row */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
 
           <TabsList>
             <TabsTrigger value="walkin" className="
@@ -93,20 +94,7 @@ export default function ManageAppointment() {
 
           </TabsList>
 
-          {/* Receptionist Only */}
-          {/* {isReceptionist && ( */}
-            {/* <Button
-              className="bg-maroon hover:bg-maroon-dark"
-              onClick={() =>
-                setOpenAppointmentSheet(
-                  true
-                )
-              }
-            >
-              <Plus className="w-4 h-4" />
-              Create Appointment
-            </Button> */}
-          {/* )} */}
+          <AppointmentReportDownload/>  
         </div>
       
         {/* WALK-IN */}

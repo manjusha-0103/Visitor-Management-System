@@ -103,7 +103,7 @@ export default function VisitBookSuccess({
                     bg-emerald-50/70 p-4
                 "
             >
-                <div className="flex items-center gap-3">
+                <div className="flex justify-center items-center gap-3">
                     <div
                         className="
                             flex h-10 w-10 items-center justify-center

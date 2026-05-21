@@ -9,6 +9,7 @@ import { Parser } from "json2csv";
 import PDFDocument from "pdfkit";
 import { uploadFile } from "../config/uploadFile.js";
 import supabase from "../config/supabase.js"
+import sendResponse from "../utils/sendResponse.js";
 
 // const pastAppointmentsService = async ({
 //             page,
@@ -426,6 +427,17 @@ const downloadAppointmentsService = async ({
 
         PassID: item.pass_id || "-"
     }));
+
+
+    if (formattedData.length === 0) {
+
+    return {
+        success: false,
+        file_url: null,
+        message:
+            "No appointments found for selected date range"
+    };
+}
 
     // ── File Name ───────────────────────────────────────
     const fileName =
