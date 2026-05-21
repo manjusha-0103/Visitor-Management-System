@@ -13,8 +13,10 @@ import { getALLEmployeesservice,
     addDepartmentService,
     updateEmployeeService,
     updateUserService,
-    deleteDeparmentService
+    deleteDeparmentService,
+    deleteEmployeeService
  } from "../services/superAdmin.service.js";
+import { request } from "http";
 
 
 const addEmployee = asyncHandler(async (req, res) => {
@@ -80,6 +82,18 @@ const addEmployees = asyncHandler(async (req, res) => {
 
     sendResponse(res, 200, {total: employees.length,
         results}, "")
+})
+
+const deleteEmployee = asyncHandler(async (req, res) => {
+    const {id} = req.params
+    console.log(id);
+    
+    const employee = await deleteEmployeeService(id)
+    if(employee){
+        sendResponse(res, 200, employee, "Employee deleted successfully")
+    }else{
+        throw new ApiError(400, "Bad request")
+    }
 })
 
 const getALLEmployees = asyncHandler(async (req, res) => {
@@ -168,6 +182,7 @@ export{
     addDepartment,
     updateEmployee,
     updateUser,
-    deleteDeparment
+    deleteDeparment,
+    deleteEmployee
     
 }
