@@ -143,6 +143,15 @@ export const employeeApi = api.injectEndpoints({
         "Employees",
       ],
     }),
+
+    deleteEmployee: builder.mutation({
+  query: (id) => ({
+    url: `/api/v1/super-admin/delete-emp/${id}`,
+    method: "DELETE",
+  }),
+
+  invalidatesTags: ["Employees"],
+}),
   }),
 });
 
@@ -151,5 +160,6 @@ export const {
   useAddEmployeeMutation,
   useUpdateEmployeeMutation,
   useAddDepartmentMutation,
-  useDeleteDepartmentMutation
+  useDeleteDepartmentMutation,
+  useDeleteEmployeeMutation
 } = employeeApi;

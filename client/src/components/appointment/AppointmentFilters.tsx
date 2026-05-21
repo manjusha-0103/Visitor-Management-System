@@ -19,7 +19,10 @@ import React from "react";
 
 import { format } from "date-fns";
 
+type AppointmentType = "walkin" | "prescheduled" | "past";
+
 interface AppointmentFilterProps {
+  type: AppointmentType;
   searchInput: string;
   setSearchInput: React.Dispatch<
     React.SetStateAction<string>
@@ -33,6 +36,7 @@ interface AppointmentFilterProps {
 }
 
 export default function AppointmentFilters({
+  type,
   searchInput,
   setSearchInput,
   selectedDate,
@@ -71,7 +75,9 @@ export default function AppointmentFilters({
         </div>
 
         {/* Date Filter */}
-        <div className="flex items-center gap-1 w-full sm:w-auto">
+        {
+          type === "prescheduled" &&  (
+            <div className="flex items-center gap-1 w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -133,6 +139,9 @@ export default function AppointmentFilters({
             </Button>
           )}
         </div>
+          )
+        }
+        
       </div>
     </section>
   );

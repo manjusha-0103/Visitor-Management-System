@@ -57,15 +57,15 @@ interface SectionHeaderItem {
 interface VisitorFormProps {
     setPhase: React.Dispatch<React.SetStateAction<"qr" | "camera" | "form" | "done">>;
     capturedImage: string | null;
-capturedFile: File | null;
+    capturedFile: File | null;
 }
 
 // ─── Section header ────────────────────────────────────────────────────────────
 function SectionHeader({ icon, heading, description }: SectionHeaderItem) {
     const Icon = icon;
     return (
-        <div className="mb-6 flex items-center gap-3">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-maroon shadow-lg`}>
+        <div className="mb-6 flex items-start gap-3">
+            <div className={`flex h-10 w-10 md:w-10 items-center justify-center rounded-full bg-maroon shadow-lg`}>
                 <Icon className="h-4 w-4 text-white" />
             </div>
             <div>
@@ -267,14 +267,15 @@ export default function VisitorForm({ setPhase,
     // ── Navigation ────────────────────────────────────────────────────────────
     const nextStep = async () => {
         // Step 2 (Company) is fully optional — no validation needed
-        if (step === 2) {
-            setStep((p) => p + 1);
-            return;
-        }
+        // if (step === 2) {
+        //     setStep((p) => p + 1);
+        //     return;
+        // }
 
         const fieldMap: Record<number, (keyof VisitorFormValues)[]> = {
             0: ["department_id", "employee_id"],
             1: ["first_name", "last_name", "phone", "email"],
+            2: ["company"]
         };
 
         const fields = fieldMap[step];
@@ -290,59 +291,66 @@ export default function VisitorForm({ setPhase,
 
     // ── Submit — invoked ONLY by the final button's onClick ───────────────────
     const onSubmit = async (data: VisitorFormValues) => {
-    try {
-        console.log(capturedImage, capturedFile);
-        
-        const formData = new FormData();
+        try {
+            console.log(capturedImage, capturedFile);
 
-        // Basic details
-        formData.append("first_name", data.first_name);
-        formData.append("last_name", data.last_name);
-        formData.append("email", data.email);
-        formData.append("phone", data.phone);
-        formData.append("company", data.company || "");
-        formData.append("position", data.position || "");
+            const formData = new FormData();
 
-        // Employee
-        formData.append("employee_id", data.employee_id);
+            // Basic details
+            formData.append("first_name", data.first_name);
+            formData.append("last_name", data.last_name);
+            formData.append("email", data.email);
+            formData.append("phone", data.phone);
+            formData.append("company", data.company || "");
+            formData.append("position", data.position || "");
 
-        // Photo file
-        if (capturedFile) {
-            formData.append("visitor_photo", capturedFile);
+            // Employee
+            formData.append("employee_id", data.employee_id);
+
+            // Photo file
+            if (capturedFile) {
+                formData.append("visitor_photo", capturedFile);
+            }
+
+            // ── Laptop Logic ─────────────────────────────
+            const hasLaptopDetails =
+                !!data.make?.trim() ||
+                !!data.model?.trim() ||
+                !!data.serial_no?.trim();
+
+            formData.append("is_laptop", String(hasLaptopDetails));
+
+            if (hasLaptopDetails) {
+                formData.append("make", data.make?.trim() || "");
+                formData.append("model", data.model?.trim() || "");
+                formData.append("serial_no", data.serial_no?.trim() || "");
+            } else {
+                formData.append("make", "");
+                formData.append("model", "");
+                formData.append("serial_no", "");
+            }
+
+            // ── Vehicle Logic ────────────────────────────
+            const hasVehicleDetails = !!data.vehicle_no?.trim();
+
+            formData.append("is_vehicle", String(hasVehicleDetails));
+
+            if (hasVehicleDetails) {
+                formData.append("vehicle_no", (data.vehicle_no ?? "").trim());
+            } else {
+                formData.append("vehicle_no", "");
+            }
+
+            await checkInVisitor(formData).unwrap();
+
+            reset();
+            setStep(0);
+            setPhase("done");
+
+        } catch (error) {
+            console.error(error);
         }
-
-        // Laptop
-        formData.append("is_laptop", String(data.is_laptop));
-
-        if (data.is_laptop) {
-            formData.append("make", data.make || "");
-            formData.append("model", data.model || "");
-            formData.append("serial_no", data.serial_no || "");
-        } else {
-            formData.append("make", "");
-            formData.append("model", "");
-            formData.append("serial_no", "");
-        }
-
-        // Vehicle
-        formData.append("is_vehicle", String(data.is_vehicle));
-
-        if (data.is_vehicle) {
-            formData.append("vehicle_no", data.vehicle_no || "");
-        } else {
-            formData.append("vehicle_no", "");
-        }
-
-        await checkInVisitor(formData).unwrap();
-
-        reset();
-        setStep(0);
-        setPhase("done");
-
-    } catch (error) {
-        console.error(error);
-    }
-};
+    };
 
     return (
         <div className="mx-auto w-full max-w-4xl">
@@ -361,7 +369,7 @@ export default function VisitorForm({ setPhase,
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-4 md:p-6 shadow-sm">
                             <SectionHeader
                                 icon={User}
                                 heading="Whom to Meet"
@@ -511,7 +519,7 @@ export default function VisitorForm({ setPhase,
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-4 md:p-6 shadow-sm"
                         >
                             <SectionHeader
                                 icon={User}
@@ -538,7 +546,7 @@ export default function VisitorForm({ setPhase,
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -40 }}
                             transition={{ duration: 0.25 }}
-                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm"
+                            className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-4 md:p-6 shadow-sm"
                         >
                             <SectionHeader
                                 icon={Building2}
@@ -547,7 +555,7 @@ export default function VisitorForm({ setPhase,
                                 color="bg-indigo-700"
                             />
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                <CustomInputField<VisitorFormValues> name="company" label="Company Name" placeholder="Infosys" control={control} required={false} />
+                                <CustomInputField<VisitorFormValues> name="company" label="Company Name" placeholder="Infosys" control={control} required={true} />
                                 <CustomInputField<VisitorFormValues> name="position" label="Position" placeholder="Software Engineer" control={control} required={false} />
                             </div>
                         </motion.div>
@@ -563,7 +571,7 @@ export default function VisitorForm({ setPhase,
                             transition={{ duration: 0.25 }}
                             className="space-y-5"
                         >
-                            <div className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-6 shadow-sm">
+                            <div className="rounded-xl border border-[#8b1a30]/10 bg-linear-to-br from-[#8b1a30]/5 to-[#6b1223]/5 p-4 md:p-6 shadow-sm">
                                 <SectionHeader
                                     icon={Laptop}
                                     heading="Additional Details"
@@ -706,11 +714,11 @@ export default function VisitorForm({ setPhase,
                             className="h-10 w-10 rounded-full text-white shadow-xl transition-all hover:scale-[1.02] disabled:opacity-60"
                             style={{ background: "linear-gradient(135deg, #8b1a30 0%, #6b1223 100%)" }}
                         >
-                            {isSubmitting 
-                            ?  <Loader2 className="w-4 h-4 animate-spin" />
-                            : 
-                            <Check className="w-4 h-4"/>
-                            // "Complete Registration"
+                            {isSubmitting
+                                ? <Loader2 className="w-4 h-4 animate-spin" />
+                                :
+                                <Check className="w-4 h-4" />
+                                // "Complete Registration"
                             }
                             {/* {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />} */}
                         </Button>

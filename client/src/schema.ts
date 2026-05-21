@@ -15,7 +15,7 @@ export const visitorSchema = z.object({
     .min(1, "Email is required")
     .email("Invalid email"),
   position: z.string(),
-  company: z.string().min(1, "Position is required"),
+  company: z.string().min(1, "Company is required"),
   is_laptop: z.boolean(),
 
   make: z.string().optional(),

@@ -279,8 +279,8 @@ export default function PreSchedule() {
                                         </PopoverTrigger>
 
                                         <PopoverContent
-                                            side="left"
-                                            align="center"
+                                            side="bottom"
+                                            align="start"
                                             sideOffset={4}
                                             avoidCollisions={false}
                                             className="w-auto rounded-2xl p-0 bg-white shadow-xl border z-9999"
@@ -293,7 +293,11 @@ export default function PreSchedule() {
                                                     const today = new Date();
                                                     today.setHours(0, 0, 0, 0);
 
-                                                    return date < today;
+                                                    // 4 weeks from today
+                                                    const maxDate = new Date(today);
+                                                    maxDate.setDate(today.getDate() + 36);
+
+                                                    return date < today || date > maxDate;
                                                 }}
                                             />
                                         </PopoverContent>
