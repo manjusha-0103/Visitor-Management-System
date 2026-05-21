@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import AdminSubHeader from "@/components/AdminSubHeader";
 import {
   Tabs,
@@ -10,26 +10,21 @@ import {
   appointmentApi,
 } from "@/lib/features/appointment/appointmentApi";
 import { getSocket } from "@/lib/utils/socket";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import AppointmentTable from "@/components/appointment/AppointmentTable";
-import { Plus } from "lucide-react";
-import { selectUser } from "@/lib/features/auth/authSlice";
-import { Button } from "@/components/ui/button";
-import AppointmentForm from "@/components/appointment/AppointmentForm";
+// import { selectUser } from "@/lib/features/auth/authSlice";
+// import AppointmentDetailSheet from "@/components/appointment/AppointmentDetailSheet";
+// import type { AppointmentRow } from "@/types";
 
 const socket = getSocket();
 
 export default function ManageAppointment() {
   const dispatch = useDispatch();
-  const user = useSelector(selectUser);
+  // const user = useSelector(selectUser);
 
-  const isReceptionist =
-    user?.role === "receptionist";
+  // const isReceptionist = user?.role === "receptionist";
 
-  const [
-    openAppointmentSheet,
-    setOpenAppointmentSheet,
-  ] = useState(false);
+  
 
   useEffect(() => {
     // const refreshAppointments = () => {
@@ -65,18 +60,13 @@ export default function ManageAppointment() {
     <section className="space-y-5 mb-10">
 
       <AdminSubHeader
-        showBack={isReceptionist ? false : true}
+        showBack={true}
         to={"/admin"}
-        heading="Manage Appointment"
-        subh={"View, filter and add appointments"}
+        heading="Manage Appointments"
+        subh={"View, approve, reject, check-out appointments"}
       />
 
-      <AppointmentForm
-        open={openAppointmentSheet}
-        onClose={
-          setOpenAppointmentSheet
-        }
-      />
+     
 
       <Tabs defaultValue="walkin" className="mt-6 px-4 lg:px-10">
         {/* Tabs + Button Row */}
@@ -89,7 +79,7 @@ export default function ManageAppointment() {
       data-[state=active]:text-white
       data-[state=active]:shadow-none
     ">
-              Walk-in
+              All
             </TabsTrigger>
 
             <TabsTrigger value="prescheduled" className="
@@ -101,19 +91,11 @@ export default function ManageAppointment() {
               Pre Scheduled
             </TabsTrigger>
 
-            <TabsTrigger value="past" className="
-      text-[#701a40]
-      data-[state=active]:bg-[#701a40]
-      data-[state=active]:text-white
-      data-[state=active]:shadow-none
-    ">
-              Past
-            </TabsTrigger>
           </TabsList>
 
           {/* Receptionist Only */}
           {/* {isReceptionist && ( */}
-            <Button
+            {/* <Button
               className="bg-maroon hover:bg-maroon-dark"
               onClick={() =>
                 setOpenAppointmentSheet(
@@ -123,14 +105,10 @@ export default function ManageAppointment() {
             >
               <Plus className="w-4 h-4" />
               Create Appointment
-            </Button>
+            </Button> */}
           {/* )} */}
         </div>
-        {/* <TabsList>
-          <TabsTrigger value="walkin">Walk-in</TabsTrigger>
-          <TabsTrigger value="prescheduled">Pre Scheduled</TabsTrigger>
-          <TabsTrigger value="past">Past</TabsTrigger>
-        </TabsList> */}
+      
         {/* WALK-IN */}
         <TabsContent value="walkin">
           <AppointmentTable type="walkin" />

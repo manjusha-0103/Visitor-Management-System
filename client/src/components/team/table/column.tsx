@@ -96,7 +96,7 @@ export const teamColumns = [
       return (
         <div className="flex items-center gap-3">
           <div
-            className={"w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold p-1 bg-gold text-white"}
+            className={"w-9 h-9 rounded-full flex items-center justify-center uppercase text-sm font-semibold p-1 bg-gold text-white"}
           >
             {getNameInitials(
               member.full_name.split(

@@ -32,8 +32,9 @@ const checkInValidations = [
         .isIn(["super_admin", "employee", "receptionist","visitor"])
         .withMessage("Invalid role"),
     body("position")
-        .notEmpty()
-        .withMessage("Position is required"),
+        .optional()
+        .isString()
+        .withMessage("Position must be string"),
 
     body("company")
         .notEmpty()

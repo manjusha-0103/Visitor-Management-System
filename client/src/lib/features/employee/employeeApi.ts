@@ -38,6 +38,13 @@ export interface EmployeesData {
   pagination: EmployeePagination;
 }
 
+export interface DeleteDepartmentResponse {
+  statusCode: number;
+  data: Department;
+  message: string;
+  success: boolean;
+}
+
 export interface GetAllEmployeesResponse {
   statusCode: number;
   data: EmployeesData;
@@ -121,6 +128,21 @@ export const employeeApi = api.injectEndpoints({
 
       invalidatesTags: ["Department"],
     }),
+
+    deleteDepartment: builder.mutation<
+      DeleteDepartmentResponse,
+      string
+    >({
+      query: (id) => ({
+        url: `/api/v1/super-admin/delete-dept/${id}`,
+        method: "DELETE",
+      }),
+
+      invalidatesTags: [
+        "Department",
+        "Employees",
+      ],
+    }),
   }),
 });
 
@@ -128,5 +150,6 @@ export const {
   useGetAllEmployeesQuery,
   useAddEmployeeMutation,
   useUpdateEmployeeMutation,
-  useAddDepartmentMutation
+  useAddDepartmentMutation,
+  useDeleteDepartmentMutation
 } = employeeApi;

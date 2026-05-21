@@ -21,13 +21,10 @@ import { format } from "date-fns";
 
 interface AppointmentFilterProps {
   searchInput: string;
-
   setSearchInput: React.Dispatch<
     React.SetStateAction<string>
   >;
-
   selectedDate: string;
-
   setSelectedDate: React.Dispatch<
     React.SetStateAction<string>
   >;
@@ -58,7 +55,7 @@ export default function AppointmentFilters({
             onChange={(e) =>
               setSearchInput(e.target.value)
             }
-            placeholder="Search appointments..."
+            placeholder="Search by visitor or employee name or company..."
             className="pl-9 pr-9 bg-transparent border border-input"
           />
 

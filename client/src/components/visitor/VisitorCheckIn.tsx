@@ -14,12 +14,19 @@ const CHECK_IN_URL =
     (import.meta as any).env?.VITE_CHECKIN_URL ?? window.location.href;
 
 export default function VisitorCheckIn() {
-    const [phase, setPhase] = useState<"qr" | "camera" | "form" | "done">("qr");
-    const [capturedImage, setCapturedImage] =
-    useState<string | null>(null);
+    const isMobile =
+        window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 
-const [capturedFile, setCapturedFile] =
-    useState<File | null>(null);
+    const [phase, setPhase] = useState<
+        "qr" | "camera" | "form" | "done"
+    >(
+        isMobile ? "camera" : "qr"
+    );
+    const [capturedImage, setCapturedImage] =
+        useState<string | null>(null);
+
+    const [capturedFile, setCapturedFile] =
+        useState<File | null>(null);
 
     return (
         <section
@@ -173,21 +180,21 @@ const [capturedFile, setCapturedFile] =
 
                         {phase === "camera" && (
                             <FaceCapture
-    onComplete={(file, preview) => {
-        setCapturedFile(file);
+                                onComplete={(file, preview) => {
+                                    setCapturedFile(file);
 
-        setCapturedImage(preview);
+                                    setCapturedImage(preview);
 
-        setPhase("form");
-    }}
-/>
+                                    setPhase("form");
+                                }}
+                            />
                         )}
 
                         {phase === "form" && <VisitorForm
-   setPhase={setPhase}
-   capturedImage={capturedImage}
-   capturedFile={capturedFile}
-/>}
+                            setPhase={setPhase}
+                            capturedImage={capturedImage}
+                            capturedFile={capturedFile}
+                        />}
 
                         {phase === 'done' && <VisitBookSuccess setPhase={setPhase} />}
                     </div>

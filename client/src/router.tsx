@@ -15,7 +15,7 @@ const ManageAppointment = lazy(() => import("@/pages/appointment/ManageAppointme
 const VisitorCheckIn = lazy(() => import("@/components/visitor/VisitorCheckIn"));
 const PreSchedule = lazy(() => import("@/pages/employee/PreSchedule"))
 const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
-const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
+// const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
 
 const router = createBrowserRouter([
     //Auth Routes
@@ -49,20 +49,20 @@ const router = createBrowserRouter([
                         element: <DashHome />
                     },
                     {
-                        path: "users",
-                        element: <ManageUsers />
+                        path: "visitors",
+                        element: <ManageAppointment />
                     },
                     {
                         path: "team",
                         element: <ManageTeam />
                     },
-                    {
-                        path: "new-check-in",
-                        element: <CheckIn/>
-                    },
+                    // {
+                    //     path: "new-check-in",
+                    //     element: <CheckIn/>
+                    // },
                     {
                         path: "check-in",
-                        element: <ManageAppointment />
+                        element: <CheckIn />
                     },
                     {
                         path: "analytics",
@@ -83,9 +83,17 @@ const router = createBrowserRouter([
                 children: [
                     {
                         index: true,
-                        element: <ManageAppointment />
-                        // element: <DashHome />
+                        // element: <ManageAppointment />
+                        element: <DashHome />
                     },
+                     {
+                        path: "visitors",
+                        element: <ManageAppointment />
+                    },
+                    {
+                        path: "check-in",
+                        element: <CheckIn />
+                    }
                 ]
             }
         ]
