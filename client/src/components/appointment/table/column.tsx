@@ -8,7 +8,8 @@ import {
   Car,
   Laptop,
   Clock,
-  Loader2
+  Loader2,
+  Eye
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { AppointmentRow } from '@/types';
@@ -19,15 +20,15 @@ import { useState } from "react";
 import { useApproveAppointmentMutation, useCheckOutMutation } from "@/lib/features/appointment/appointmentApi";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const AVATAR_COLORS = [
-  "bg-violet-500", "bg-cyan-600", "bg-amber-600",
-  "bg-rose-500", "bg-green-600", "bg-sky-600",
-];
-function avatarColor(name: string) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length];
-}
+// const AVATAR_COLORS = [
+//   "bg-violet-500", "bg-cyan-600", "bg-amber-600",
+//   "bg-rose-500", "bg-green-600", "bg-sky-600",
+// ];
+// function avatarColor(name: string) {
+//   let h = 0;
+//   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+//   return AVATAR_COLORS[h % AVATAR_COLORS.length];
+// }
 function initials(first: string, last: string) {
   return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase();
 }
@@ -80,10 +81,13 @@ function ApproveBadge({
 
 function ActionsCell({
   row,
+  table
 }: {
   row: any;
+  table: any;
 }) {
   const appt: AppointmentRow = row.original;
+  const { setSelectedApp, setOpenDetailSheet } = table.options.meta || {}
   // const user = useSelector(selectUser);
   // const isReceptionist = user?.role === "receptionist";
   const [actionType, setActionType] = useState<
@@ -149,6 +153,19 @@ function ActionsCell({
       />
       <div className="flex items-center justify-end gap-2 flex-wrap">
 
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8 text-xs"
+          onClick={() => {
+              setSelectedApp?.(appt)
+              setOpenDetailSheet?.(true)
+          }} 
+        >
+          <Eye size={12} />
+          View
+        </Button>
+
         {/* Pending */}
         {
           !appt.is_approve &&
@@ -199,7 +216,7 @@ function ActionsCell({
                   }
                 >
                   <BadgeCheck size={12} />
-                  Pass ID
+                  Visitor ID
                 </Button>
               )}
 
@@ -245,7 +262,9 @@ function VisitorCell({ row }: { row: any }) {
   return (
     <div className="flex items-center gap-3">
       <div
-        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${avatarColor(name)}`}
+      className={"w-9 h-9 rounded-full flex items-center justify-center uppercase text-sm font-semibold p-1 bg-gold text-white"}
+        // className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${avatarColor(name)}`}
+        // className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${avatarColor(name)}`}
       >
         {initials(appt.visitor_first_name, appt.visitor_last_name)}
       </div>
@@ -277,7 +296,7 @@ function HostCell({ row }: { row: any }) {
 function ExtrasCell({ row }: { row: any }) {
   const appt: AppointmentRow = row.original;
   return (
-    <div className="flex gap-1.5">
+    <div className="flex flex-col gap-1.5">
       {appt.is_laptop && (
         <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
           <Laptop size={10} /> Laptop
@@ -335,7 +354,7 @@ export const walkInColumns = [
   },
   {
     accessorKey: "pass_id",
-    header: "Pass ID",
+    header: "Visitor ID",
     cell: ({ row }: any) => {
       const p = row.original.pass_id;
       return p ? (
@@ -366,7 +385,7 @@ export const walkInColumns = [
   },
   {
     id: "actions",
-    cell: ({ row }: any) => <ActionsCell row={row} />,
+    cell: ({ row, table }: any) => <ActionsCell row={row} table={table}/>,
   },
 ];
 
@@ -404,7 +423,7 @@ export const preScheduleColumns = [
   },
   {
     accessorKey: "pass_id",
-    header: "Pass ID",
+    header: "Visitor ID",
     cell: ({ row }: any) => {
       const p = row.original.pass_id;
       return p ? (
@@ -454,7 +473,7 @@ export const preScheduleColumns = [
   },
   {
     id: "actions",
-    cell: ({ row }: any) => <ActionsCell row={row} />,
+    cell: ({ row, table }: any) => <ActionsCell row={row} table={table}/>,
   },
 ];
 

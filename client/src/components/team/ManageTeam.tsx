@@ -93,7 +93,7 @@ export default function ManageTeam() {
                 showBack={true}
                 to="/admin"
                 heading="Manage Team"
-                subh="View all employees — their department, position, and visitor activity"
+                subh="View all employees — their department, position, and last active"
             />
 
             <TeamFilters

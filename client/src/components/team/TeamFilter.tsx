@@ -44,7 +44,7 @@ export default function TeamFilters({
                 e.target.value
               )
             }
-            placeholder="Search employees..."
+            placeholder="Search by employee name or email..."
             className="pl-9 pr-9 bg-transparent border border-input"
           />
 
@@ -59,14 +59,14 @@ export default function TeamFilters({
           )}
         </div>
 
-        <div className="space-x-4">
+        <div className="space-x-4 flex">
           {/* Create Button */}
           <Button
             className="bg-maroon hover:bg-maroon-dark"
             onClick={onAddDept}
           >
-            <Plus className="w-4 h-4" />
-            Add Department
+            {/* <Plus className="w-4 h-4" /> */}
+            Add / Delete Department
           </Button>
           <Button
             className="bg-maroon hover:bg-maroon-dark"

@@ -4,6 +4,8 @@ import { AppointmentDataTable } from "./table/data-table";
 import { pastColumns, preScheduleColumns, walkInColumns } from "./table/column";
 import AppointmentFilters from "./AppointmentFilters";
 import { useGetAppointmentsQuery } from "@/lib/features/appointment/appointmentApi";
+import type { AppointmentRow } from "@/types";
+import AppointmentDetailSheet from "./AppointmentDetailSheet";
 
 type AppointmentType = "walkin" | "prescheduled" | "past";
 
@@ -17,6 +19,8 @@ export default function AppointmentTable({ type }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [openDetailSheet, setOpenDetailSheet] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<AppointmentRow | null>(null)
 
   // ─────────────────────────────────────
   // Debounce Search
@@ -62,37 +66,31 @@ export default function AppointmentTable({ type }: Props) {
   // ─────────────────────────────────────
 
   const { data, isLoading, isFetching } = useGetAppointmentsQuery({
-    type,page,limit: 10,
-    search:
-      type === "past"
-        ? debouncedSearch
-        : undefined,
+    type, page, limit: 10,
+    search: debouncedSearch,
     is_approve: filters.is_approve as
       | boolean
       | undefined,
     is_preschedule: filters.is_preschedule as
       | boolean
       | undefined,
-    date:
-      type === "past"
-        ? selectedDate || undefined
-        : undefined,
+    date: selectedDate || undefined
   });
 
-   const appointments = useMemo(() => data?.data || [], [data])
-    const totalPages = useMemo(() => data?.pagination?.totalPages || 1, [data])
-    const currentPage = useMemo(() => data?.pagination?.page || 1, [data])
+  const appointments = useMemo(() => data?.data || [], [data])
+  const totalPages = useMemo(() => data?.pagination?.totalPages || 1, [data])
+  const currentPage = useMemo(() => data?.pagination?.page || 1, [data])
 
   // ─────────────────────────────────────
   // Clear Search
   // ─────────────────────────────────────
 
   const handleClear = () => {
-  setSearchInput("");
-  setDebouncedSearch("");
-  setSelectedDate("");
-  setPage(1);
-};
+    setSearchInput("");
+    setDebouncedSearch("");
+    setSelectedDate("");
+    setPage(1);
+  };
 
   // ─────────────────────────────────────
   // Columns
@@ -104,26 +102,37 @@ export default function AppointmentTable({ type }: Props) {
     past: pastColumns,
   }[type];
 
-   const handlePrevious = () => setPage(prev => Math.max(prev - 1, 1))
-    const handleNext = () => setPage(prev => prev < totalPages ? prev + 1 : prev)
+  const handlePrevious = () => setPage(prev => Math.max(prev - 1, 1))
+  const handleNext = () => setPage(prev => prev < totalPages ? prev + 1 : prev)
 
+
+  const meta = useMemo(() => ({
+        setSelectedApp,
+        setOpenDetailSheet
+    }), [setSelectedApp,setOpenDetailSheet])
 
   return (
     <>
-      {type === "past" && (
-        <AppointmentFilters
-           searchInput={searchInput}
-  setSearchInput={setSearchInput}
-  selectedDate={selectedDate}
-  setSelectedDate={setSelectedDate}
-  handleClear={handleClear}
-        />
-      )}
+
+      <AppointmentDetailSheet
+        appointment={selectedApp}
+        open={openDetailSheet}
+        onClose={setOpenDetailSheet}
+      />
+
+      <AppointmentFilters
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        handleClear={handleClear}
+      />
 
       <AppointmentDataTable
         data={appointments}
         columns={columns}
         page={currentPage}
+        meta={meta}
         setPage={setPage}
         totalPages={totalPages}
         isFetching={isFetching || isLoading}

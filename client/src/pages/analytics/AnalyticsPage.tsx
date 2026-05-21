@@ -197,7 +197,7 @@ const chartTitle = last15Days
 
         {/* ── TODAY AT A GLANCE ─────────────────────────────────────────── */}
         <div>
-          <SectionLabel>Today at a glance</SectionLabel>
+          {/* <SectionLabel>Today at a glance</SectionLabel> */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <MetricCard
               label="Total visits"

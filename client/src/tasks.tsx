@@ -12,7 +12,7 @@ export const SUPER_ADMIN_TASKS = [
     label: "Visitors",
     icon: UserRound,
     bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
-    path: "/admin/users",
+    path: "/admin/visitors",
   },
 
   {
@@ -50,34 +50,34 @@ export const SUPER_ADMIN_TASKS = [
 
 export const RECEPTIONIST_TASKS = [
   {
-    key: "users",
-    label: "Users",
+    key: "visitors",
+    label: "Visitors",
     icon: UserRound,
     bg: "bg-amber-700 shadow-lg shadow-amber-700/40",
-    path: "/receptionist/users",
+    path: "/receptionist/visitors",
   },
 
   {
-    key: "appointments",
-    label: "Appointments",
+    key: "check-in",
+    label: "Check In",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/receptionist/appointments",
+    path: "/receptionist/check-in",
   },
 
-  {
-    key: "team",
-    label: "Team",
-    icon: UsersRound,
-    bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
-    path: "/receptionist/team",
-  },
+  // {
+  //   key: "team",
+  //   label: "Team",
+  //   icon: UsersRound,
+  //   bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
+  //   path: "/receptionist/team",
+  // },
 
-  {
-    key: "analytics",
-    label: "Analytics",
-    icon: ChartNoAxesCombined,
-    bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40",
-    path: "/receptionist/analytics",
-  },
+  // {
+  //   key: "analytics",
+  //   label: "Analytics",
+  //   icon: ChartNoAxesCombined,
+  //   bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40",
+  //   path: "/receptionist/analytics",
+  // },
 ] as const;

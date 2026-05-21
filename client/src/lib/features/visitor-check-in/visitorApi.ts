@@ -22,7 +22,7 @@ export interface CheckInPayload {
   email: string;
   phone: string;
 
-  position: string;
+  position?: string;
   company: string;
 
   is_laptop?: boolean;
@@ -41,7 +41,7 @@ export interface PreScheduleVisitor {
   last_name: string;
   phone: string;
   email: string;
-  position: string;
+  position?: string;
   company: string;
 }
 

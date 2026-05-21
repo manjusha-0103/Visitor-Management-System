@@ -297,9 +297,9 @@ export default function EmployeeForm({
                   },
                   {
                     label:
-                      "Receptionist",
+                      "User",
                     value:
-                      "receptionist",
+                      "user",
                   },
                 ]}
               />

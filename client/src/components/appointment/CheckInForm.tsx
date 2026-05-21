@@ -136,7 +136,7 @@ export default function CheckInForm({
     setTime,
 }: CheckInFormProps) {
     return (
-        <FieldGroup className="max-w-xl ms-10">
+        <FieldGroup className="max-w-xl">
             <FieldSet>
                 <FieldGroup className="gap-2">
 
@@ -146,8 +146,6 @@ export default function CheckInForm({
                                 Schedule Visit
                             </h3>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-1">
-
-
                                 {/* Date */}
 
                                 <div className="space-y-2">
@@ -184,7 +182,7 @@ export default function CheckInForm({
                                         <PopoverContent
                                             side="bottom"
                                             align="start"
-                                            className="w-auto rounded-2xl p-0 bg-white shadow-xl border z-50"
+                                            className="w-auto rounded-2xl p-0 bg-white shadow-xl border z-9999"
                                         >
                                             <Calendar
                                                 mode="single"
@@ -217,7 +215,7 @@ export default function CheckInForm({
                                         value={time}
                                         onValueChange={setTime}
                                     >
-                                        <SelectTrigger className="h-11 w-full rounded-md mb-0">
+                                        <SelectTrigger className="h-11 w-full mb-0 rounded-md border-gray-200 bg-white">
 
                                             <div className="flex items-center gap-2">
 
@@ -229,7 +227,7 @@ export default function CheckInForm({
 
                                         </SelectTrigger>
 
-                                        <SelectContent className="max-h-72">
+                                        <SelectContent className="max-h-72 z-9999">
 
                                             {Array.from({ length: 48 }).map(
                                                 (_, index) => {
@@ -305,7 +303,7 @@ export default function CheckInForm({
                                 />
 
                                 {selectedDepartmentData && (
-                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4 backdrop-blur">
+                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-3 sm:p-4 backdrop-blur">
 
                                         <p className="text-xs text-gray-500">
                                             Selected Department
@@ -337,7 +335,7 @@ export default function CheckInForm({
                                 />
 
                                 {selectedEmployeeData && (
-                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-4">
+                                    <div className="rounded-md border border-[#8b1a30]/10 bg-white/80 p-3 sm:p-4">
 
                                         <p className="text-xs text-gray-500">
                                             Selected Employee
@@ -417,7 +415,7 @@ export default function CheckInForm({
                                 label="Company Name"
                                 placeholder="Infosys"
                                 control={control}
-                                required={false}
+                                required={true}
                             />
 
                             <CustomInputField<AppointmentFormValues>

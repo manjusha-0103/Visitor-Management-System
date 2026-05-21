@@ -81,7 +81,7 @@ export default function SetPassIdDialog({
       onOpenChange(false);
     } catch (error) {
       console.error(
-        "Failed to set pass id",
+        "Failed to set visitor id",
         error
       );
     }
@@ -95,11 +95,11 @@ export default function SetPassIdDialog({
       <DialogContent className="sm:max-w-md gap-2">
         <DialogHeader>
           <DialogTitle>
-            Set Visitor Pass ID
+            Set Visitor's Visitor ID
           </DialogTitle>
 
           <DialogDescription>
-            Assign a pass ID for{" "}
+            Assign a visitor ID for{" "}
             <span className="font-medium text-black">
               {
                 appointment?.visitor_first_name
@@ -146,12 +146,12 @@ export default function SetPassIdDialog({
           <CustomInputField
             name="pass_id"
             control={control}
-            label="Pass ID"
+            label="Visitor ID"
             placeholder="8787828"
             required
             rules={{
               required:
-                "Pass ID is required",
+                "Visitor ID is required",
               // pattern: {
               //   value: /^P-\d{4}$/,
               //   message:
@@ -187,7 +187,7 @@ export default function SetPassIdDialog({
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               )}
 
-              Set Pass ID
+              Set Visitor ID
             </Button>
           </div>
         </form>

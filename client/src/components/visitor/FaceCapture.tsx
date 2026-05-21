@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 interface Props {
+    isSuperAdmin?: boolean;
     onComplete: (
         file: File,
         preview: string
@@ -31,7 +32,7 @@ export default function FaceCapture({
 
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-const [capturedFile, setCapturedFile] = useState<File | null>(null);
+    const [capturedFile, setCapturedFile] = useState<File | null>(null);
 
     const [isDetecting, setIsDetecting] = useState(false);
 
@@ -111,34 +112,34 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
     }, [modelsLoaded, capturedImage, isDetecting]);
 
     const capture = async () => {
-    if (!faceInside) return;
+        if (!faceInside) return;
 
-    const imageSrc =
-        webcamRef.current?.getScreenshot();
+        const imageSrc =
+            webcamRef.current?.getScreenshot();
 
-    if (!imageSrc) return;
+        if (!imageSrc) return;
 
-    try {
-        const response = await fetch(imageSrc);
+        try {
+            const response = await fetch(imageSrc);
 
-        const blob = await response.blob();
+            const blob = await response.blob();
 
-        const file = new File(
-            [blob],
-            `visitor-${Date.now()}.jpg`,
-            {
-                type: "image/jpeg",
-            }
-        );
+            const file = new File(
+                [blob],
+                `visitor-${Date.now()}.jpg`,
+                {
+                    type: "image/jpeg",
+                }
+            );
 
-        setCapturedImage(imageSrc);
+            setCapturedImage(imageSrc);
 
-        setCapturedFile(file);
+            setCapturedFile(file);
 
-    } catch (error) {
-        console.error(error);
-    }
-};
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const recapture = () => {
         setCapturedImage(null);
@@ -146,7 +147,8 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
     };
 
     return (
-        <div className="ms-14 space-y-5">
+        <div className={`space-y-5`}>
+
             {/* Header */}
             <div className="">
                 <h2 className="text-xl font-bold text-gray-900">
@@ -254,12 +256,12 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
                         src={capturedImage}
                         alt="Captured"
                         className="
-                            mx-auto w-60
+                            w-60
                             rounded-3xl border shadow-lg
                         "
                     />
 
-                    <div className="flex justify-center gap-3">
+                    <div className="flex gap-3">
                         <Button
                             type="button"
                             variant="outline"
@@ -273,16 +275,16 @@ const [capturedFile, setCapturedFile] = useState<File | null>(null);
                         <Button
                             type="button"
                             onClick={() => {
-    if (
-        capturedFile &&
-        capturedImage
-    ) {
-        onComplete(
-            capturedFile,
-            capturedImage
-        );
-    }
-}}
+                                if (
+                                    capturedFile &&
+                                    capturedImage
+                                ) {
+                                    onComplete(
+                                        capturedFile,
+                                        capturedImage
+                                    );
+                                }
+                            }}
                             className="
                                 rounded-full bg-maroon
                                 hover:bg-maroon-dark w-10 h-10

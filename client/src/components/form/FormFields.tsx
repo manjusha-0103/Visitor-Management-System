@@ -129,7 +129,10 @@ export function SelectField<T extends FieldValues>({
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
 
-              <SelectContent>
+              <SelectContent
+                position="popper"
+                sideOffset={5}
+              >
                 <SelectGroup>
                   <SelectLabel>
                     {label}
