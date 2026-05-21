@@ -6,6 +6,7 @@ import AppointmentFilters from "./AppointmentFilters";
 import { useGetAppointmentsQuery } from "@/lib/features/appointment/appointmentApi";
 import type { AppointmentRow } from "@/types";
 import AppointmentDetailSheet from "./AppointmentDetailSheet";
+import { format } from "date-fns";
 
 type AppointmentType = "walkin" | "prescheduled" | "past";
 
@@ -20,7 +21,9 @@ export default function AppointmentTable({ type }: Props) {
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [openDetailSheet, setOpenDetailSheet] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<AppointmentRow | null>(null)
+  const [selectedApp, setSelectedApp] = useState<AppointmentRow | null>(null);
+
+  const todayDate = format(new Date(),"yyyy-MM-dd");
 
   // ─────────────────────────────────────
   // Debounce Search
@@ -74,7 +77,7 @@ export default function AppointmentTable({ type }: Props) {
     is_preschedule: filters.is_preschedule as
       | boolean
       | undefined,
-    date: selectedDate || undefined
+    date: selectedDate || (type === "walkin" ? todayDate : undefined)
   });
 
   const appointments = useMemo(() => data?.data || [], [data])
@@ -121,6 +124,7 @@ export default function AppointmentTable({ type }: Props) {
       />
 
       <AppointmentFilters
+      type={type}
         searchInput={searchInput}
         setSearchInput={setSearchInput}
         selectedDate={selectedDate}
