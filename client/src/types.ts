@@ -111,5 +111,6 @@ export interface AppointmentRow {
   visitor_last_name: string;
   visitor_email: string;
   visitor_phone: string;
+  visitor_img: string;
 }
 

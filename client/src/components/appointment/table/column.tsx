@@ -330,9 +330,10 @@ export const walkInColumns = [
   },
   {
     accessorKey: "check_in",
-    header: "Check-in",
+    header: "Check-in/Scheduled",
     cell: ({ row }: any) => {
       const t = row.original.check_in;
+      const appt: AppointmentRow = row.original;
       return t ? (
         <div className="-space-y-0.5">
           <p className="text-sm">{format(parseISO(t), "dd MMM yyyy")}</p>
@@ -343,7 +344,11 @@ export const walkInColumns = [
         //   <span className="text-sm">{t}</span>
         // </div>
       ) : (
-        <span className="text-gray-300 text-sm">—</span>
+        // <span className="text-gray-300 text-sm">—</span>
+        <div className="-space-y-0.5">
+          <p className="text-sm">{format(parseISO(appt.date_time), "dd MMM yyyy")}</p>
+          <p className="text-xs text-gray-400">{format(parseISO(appt.date_time), "hh:mm a")}</p>
+        </div>
       );
     },
   },
