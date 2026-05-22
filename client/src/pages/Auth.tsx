@@ -130,7 +130,7 @@ export default function Auth() {
                     className="bg-white rounded-2xl w-full max-w-105 animate-fade-up p-6 lg:p-8"
 
                 >
-                    <img src={'./iravya-logo.png'} width={160} height={160} className='text-center mx-auto' />
+                    <img src={'/iravya-logo.png'} width={160} height={160} className='text-center mx-auto' />
                     {/* Heading */}
                     {/* <h1
                         className="text-xl font-semibold text-[#1a1a2e] text-center mb-1.5"
