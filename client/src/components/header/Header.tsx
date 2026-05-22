@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
-
+// import logo from "./iravya-logo.png"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -41,24 +41,23 @@ export default function Header() {
     <div className="bg-zinc-100 sticky top-0 z-50">
       {/* Navbar */}
       <nav className="w-full px-4 lg:px-6 h-16 flex items-center justify-between bg-maroon shadow-lg"
-         style={{
+        style={{
           background: 'linear-gradient(90deg, rgb(112, 26, 64) 0%, rgb(84, 11, 40) 100%)'
-    }}
+        }}
       >
 
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
+          <img src={'./app.png'} width={40} height={40} className='text-center mx-auto mb-2 bg-white rounded-full' />
+          
+          {/* <div className="w-10 h-10 rounded-full flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
             V
-          </div>
+          </div> */}
 
           <Link to="/admin" className="flex flex-col leading-tight">
             <span className="font-bold text-white text-lg">
-              VisitMi
+              Iravya
             </span>
-            {/* <span className="text-sm font-semibold tracking-widest uppercase text-rose-200">
-              Manager
-            </span> */}
           </Link>
         </div>
 

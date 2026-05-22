@@ -163,7 +163,7 @@ export default function FaceCapture({
             {/* Camera / Preview */}
             {!capturedImage ? (
                 <div className="space-y-4">
-                    <div className="relative w-96 overflow-hidden rounded-3xl bg-black shadow-xl">
+                    <div className="relative w-76 overflow-hidden rounded-3xl bg-black shadow-xl">
                         <Webcam
                             ref={webcamRef}
                             screenshotFormat="image/jpeg"
@@ -181,7 +181,7 @@ export default function FaceCapture({
                         <div
                             className={`
                                 absolute left-1/2 top-1/2
-                                h-68 w-68
+                                h-56 w-56
                                 -translate-x-1/2 -translate-y-1/2
                                 rounded-[100px]
                                 border-2
