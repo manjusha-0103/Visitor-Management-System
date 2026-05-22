@@ -67,7 +67,7 @@ export default function VisitorCheckIn() {
                     "
                     >
                         <div className="flex items-center gap-2">
-                            <img src={'./iravya-logo.png'} width={100} height={100} className='text-center mx-auto' />
+                            <img src={'/iravya-logo.png'} width={100} height={100} className='text-center mx-auto' />
                             {/* <div
                                 className="
                                 flex h-10 w-10 items-center justify-center rounded-full
