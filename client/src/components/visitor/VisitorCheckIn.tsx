@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
     ArrowRight,
-    Building2,
+    // Building2,
     Lock,
 } from "lucide-react";
 import VisitorForm from "./VisitorForm";
@@ -67,7 +67,8 @@ export default function VisitorCheckIn() {
                     "
                     >
                         <div className="flex items-center gap-2">
-                            <div
+                            <img src={'./iravya-logo.png'} width={100} height={100} className='text-center mx-auto' />
+                            {/* <div
                                 className="
                                 flex h-10 w-10 items-center justify-center rounded-full
                                 bg-linear-to-br from-[#8b1a30] to-[#6b1223]
@@ -81,7 +82,7 @@ export default function VisitorCheckIn() {
                                 <h2 className="text-base font-bold text-gray-900">
                                     VisitMi
                                 </h2>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div

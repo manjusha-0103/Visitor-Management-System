@@ -10,7 +10,7 @@ import { setUser } from '@/lib/features/auth/authSlice';
 import { CREDENTIALS } from '@/contants';
 import { signInSchema } from '@/schema';
 import { Button } from '@/components/ui/button';
-import logo from "@/assets/Racca-Logo.avif";
+// import logo from "iravya-logo.png"
 import { CustomInputField } from '@/components/form/FormFields';
 
 type SignFormValues = z.infer<typeof signInSchema>;
@@ -130,7 +130,7 @@ export default function Auth() {
                     className="bg-white rounded-2xl w-full max-w-105 animate-fade-up p-6 lg:p-8"
 
                 >
-                    <img src={logo} width={120} height={120} className='text-center mx-auto mb-2' />
+                    <img src={'./iravya-logo.png'} width={160} height={160} className='text-center mx-auto' />
                     {/* Heading */}
                     {/* <h1
                         className="text-xl font-semibold text-[#1a1a2e] text-center mb-1.5"
