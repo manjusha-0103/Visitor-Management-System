@@ -48,7 +48,7 @@ export default function Header() {
 
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
-          <img src={'/app.png'} width={40} height={40} className='text-center mx-auto mb-2 bg-white rounded-full' />
+          <img src={'./app.png'} width={40} height={40} className='text-center mx-auto mb-2 bg-white rounded-full' />
           
           {/* <div className="w-10 h-10 rounded-full flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
             V
@@ -56,7 +56,7 @@ export default function Header() {
 
           <Link to="/admin" className="flex flex-col leading-tight">
             <span className="font-bold text-white text-lg">
-              Iravya
+              iravya
             </span>
           </Link>
         </div>
