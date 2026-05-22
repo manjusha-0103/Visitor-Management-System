@@ -294,7 +294,7 @@ const downloadAppointmentsService = async ({
 }) => {
 
     // ── File identity ────────────────────────────────────
-    const fileName   = `appointments-${from_date}-${to_date}.${format}`;
+    const fileName   = `appointments-${from_date}-to-${to_date}.${format}`;
     const bucketPath = `appointment-reports/${fileName}`;
 
     // ── Early-exit: file already in bucket ──────────────
@@ -421,28 +421,11 @@ const downloadAppointmentsService = async ({
         PassID:           item.pass_id        || "-"
     }));
 
-<<<<<<< Updated upstream
-
-    if (formattedData.length === 0) {
-
-    return {
-        success: false,
-        file_url: null,
-        message:
-            "No appointments found for selected date range"
-    };
-}
-
-    // ── File Name ───────────────────────────────────────
-    const fileName =
-        `appointments-${from_date}-${to_date}.${format}`;
-=======
     // ────────────────────────────────────────────────────
     // Build file entirely in memory → fileBuffer
     // No temp directory, no disk writes.
     // ────────────────────────────────────────────────────
     let fileBuffer;
->>>>>>> Stashed changes
 
     const mimeTypes = {
         xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
