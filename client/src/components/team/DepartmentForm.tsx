@@ -226,7 +226,7 @@ export default function DepartmentForm({
                         <div className="flex-1 overflow-y-auto p-4 space-y-5">
 
                             {/* Warning */}
-                            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+                            {/* <div className="rounded-xl border border-red-200 bg-red-50 p-4">
                                 <div className="flex items-start gap-3">
                                     <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
                                         <Trash2 className="w-5 h-5 text-red-600" />
@@ -243,12 +243,12 @@ export default function DepartmentForm({
                                         </p>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Department Select */}
                             <SelectField<DepartmentFormValues>
                                 name="department_id"
-                                label="Department"
+                                label="Selete department to delete"
                                 placeholder={
                                     deptLoading
                                         ? "Loading departments..."
