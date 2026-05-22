@@ -243,6 +243,7 @@ export const getAppointmentsService = async ({
       a.is_approve,
       a.is_rejected,
       a.pass_id,
+      a.visitor_img,
 
       -- Employee
       e.id AS employee_id,
