@@ -74,6 +74,14 @@ export default function AppointmentDetailSheet({
 
     const employeeName = `${appointment.employee_first_name} ${appointment.employee_last_name}`;
 
+
+    function handleImageClick(url: string){
+        window.open(
+                    url,
+                    "_blank"
+                );
+    }
+
     return (
         <Sheet open={open} onOpenChange={onClose}>
             <SheetContent className="w-full sm:max-w-xl p-0 bg-white overflow-y-auto">
@@ -113,7 +121,7 @@ export default function AppointmentDetailSheet({
                         </Badge>
                     </div>
 
-                    {/* QUICK STATS */}
+                    {/* QUICK STATS */} 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
 
                         <div className="rounded-xl border bg-gray-50 p-3">
@@ -168,7 +176,17 @@ export default function AppointmentDetailSheet({
                             Visitor Information
                         </h3>
 
-                        <div className="rounded-2xl border bg-white px-4">
+                        <div className="rounded-2xl border bg-white p-4">
+                            {
+                                appointment.visitor_img && 
+                                <img 
+                                    src={appointment.visitor_img} 
+                                    width={100} 
+                                    height={100}
+                                    onClick={() => handleImageClick(appointment.visitor_img)} 
+                                    className="border border-gray-200 rounded-md cursor-pointer"
+                                />
+                            }
 
                             <DetailRow
                                 icon={User}
