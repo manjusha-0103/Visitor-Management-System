@@ -5,7 +5,7 @@ import { sendEmail } from "../utils/mailer.js"
 
 
 const registerUserService = async (userData) => {
-    const { first_name, last_name, email, password, role, phone } = userData
+    const { first_name, last_name, email, password, role, phone, birth_date } = userData
     console.log(first_name, last_name, email, password, role)
 
     const salt = await bcrypt.genSalt(10)
@@ -14,8 +14,8 @@ const registerUserService = async (userData) => {
 
     // Insert user
     const newUser = await sql`
-        INSERT INTO "Users" ("email", "first_name", "last_name", "password", "role", "phone")
-    VALUES (${email}, ${first_name}, ${last_name}, ${hashedPassword}, ${role}, ${phone})
+        INSERT INTO "Users" ("email", "first_name", "last_name", "password", "role", "phone", "birth_date")
+    VALUES (${email}, ${first_name}, ${last_name}, ${hashedPassword}, ${role}, ${phone}, ${birth_date})
     RETURNING "id", "first_name", "last_name", "email", "role", "phone"
     `
     // await sendEmail({

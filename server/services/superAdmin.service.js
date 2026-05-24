@@ -49,6 +49,11 @@ const getALLEmployeesservice = async ({
                 ${department}::varchar IS NULL
                 OR d.name = ${department}
             )
+            
+            AND(
+                u.role = 'employee'
+                OR u.role = 'user'
+            )
 
         ORDER BY e.created_at DESC
 
@@ -195,7 +200,8 @@ const addEmployeeService = async ({
     company,
     department,
     position,
-    role
+    role,
+    birth_date
 }) => {
 
     const userExist = await userExistbyemailService(email)
@@ -209,11 +215,12 @@ const addEmployeeService = async ({
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
+
     const [user] = await sql`
         INSERT INTO "Users"
-        ("first_name", "last_name", "email", "phone", "role", "password")
+        ("first_name", "last_name", "email", "phone", "role", "password", "birth_date")
         VALUES
-        (${first_name}, ${last_name}, ${email}, ${phone}, ${role}, ${hashedPassword})
+        (${first_name}, ${last_name}, ${email}, ${phone}, ${role}, ${hashedPassword}, ${birth_date})
         RETURNING "id", "first_name", "last_name", "email", "phone", "role"
     `
 
@@ -224,30 +231,32 @@ const addEmployeeService = async ({
         (${company}, ${department}, ${position}, ${user.id})
         RETURNING *
     `
-
-    await sendEmail({
-        to: email,
-        subject: "Welcome to VisitMi | Account Creation",
-        html: `
-            <h2>Welcome ${first_name}</h2>
-            <p>Thank you for registering with VMS. Your account has been created successfully. 
-            Below are the details -- please keep them safe and do not share your credentials 
-            with anyone.</p>
-            <p>Your Signup Details</p>
-            <p>Name: ${first_name} ${last_name}</p>
-            <p>Email: ${email}</p>
-            <p>Password: ${password}</p>
-            <div >
-                <a href="${process.env.CLIENT_DEV_URL}">Signin to Your Account →</a>
-            </div>
-        `
-    })
+    if(role === 'user'){
+        await sendEmail({
+            to: email,
+            subject: "Welcome to VisitMi | Account Creation",
+            html: `
+                <h2>Welcome ${first_name}</h2>
+                <p>Thank you for registering with VMS. Your account has been created successfully. 
+                Below are the details -- please keep them safe and do not share your credentials 
+                with anyone.</p>
+                <p>Your Signup Details</p>
+                <p>Name: ${first_name} ${last_name}</p>
+                <p>Email: ${email}</p>
+                <p>Password: ${password}</p>
+                <div >
+                    <a href="${process.env.CLIENT_DEV_URL}">Signin to Your Account →</a>
+                </div>
+            `
+        })
+    }
 
     return {
         user,
         emp
     }
 }
+
 
 const addDepartmentService = async ({ name }) => {
     console.log(name);

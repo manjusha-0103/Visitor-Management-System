@@ -17,7 +17,38 @@ import { getALLEmployeesservice,
     deleteEmployeeService
  } from "../services/superAdmin.service.js";
 import { request } from "http";
+import fs from 'fs'
+import csv from 'csv-parser'
+import { Readable } from 'stream'
 
+const parseExcel = (buffer) => {
+
+    const workbook = XLSX.read(buffer, {
+        type: 'buffer'
+    })
+
+    const sheetName = workbook.SheetNames[0]
+
+    const sheet = workbook.Sheets[sheetName]
+
+    return XLSX.utils.sheet_to_json(sheet)
+}
+
+const parseCSV = async (buffer) => {
+
+    return new Promise((resolve, reject) => {
+
+        const results = []
+
+        const stream = Readable.from(buffer)
+
+        stream
+            .pipe(csv())
+            .on('data', (data) => results.push(data))
+            .on('end', () => resolve(results))
+            .on('error', (error) => reject(error))
+    })
+}
 
 const addEmployee = asyncHandler(async (req, res) => {
     const employee = await addEmployeeService(req.body)
@@ -31,57 +62,231 @@ const addEmployee = asyncHandler(async (req, res) => {
 })
 
 const addEmployees = asyncHandler(async (req, res) => {
+
     if (!req.file) {
-        return res.status(400).json({
-            success: false,
-            message: "Excel file is required"
-        });
+        throw new ApiError(400, 'File is required')
     }
 
-    // Read excel buffer
-    const workbook = XLSX.read(req.file.buffer, {
-        type: "buffer"
-    });
+    const fileBuffer = req.file.buffer
 
-    const sheetName = workbook.SheetNames[0];
+    const ext = req.file.originalname
+        .split('.')
+        .pop()
+        .toLowerCase()
 
-    const worksheet = workbook.Sheets[sheetName];
+    let employees = []
 
-    // Convert to JSON
-    const employees = XLSX.utils.sheet_to_json(worksheet);
 
-    const results = [];
+    if (ext === 'csv') {
 
-    for (const employee of employees) {
+        employees = await parseCSV(fileBuffer)
+
+    } else if (ext === 'xlsx' || ext === 'xls') {
+
+        employees = parseExcel(fileBuffer)
+
+    } else {
+
+        throw new ApiError(
+            400,
+            'Only CSV or Excel files are allowed'
+        )
+    }
+
+    const imported = []
+
+    const failed = []
+
+
+    for (const row of employees) {
 
         try {
 
-            const savedEmployee = await addEmployeeService(employee);
+            const {
+                first_name,
+                last_name,
+                email,
+                phone,
+                role,
+                birth_date,
+                company,
+                department,
+                position
+            } = row
 
-            results.push({
-                email: employee.email,
-                status: "success",
-                data: savedEmployee
-            });
+
+            if (
+                !first_name ||
+                !last_name ||
+                !email ||
+                !department
+            ) {
+
+                failed.push({
+                    email,
+                    reason: 'Required fields are missing'
+                })
+
+                continue
+            }
+
+            const [departmentData] = await sql`
+                SELECT id, name
+                FROM "Departments"
+                WHERE LOWER(name) = LOWER(${department})
+            `
+
+            if (!departmentData) {
+
+                failed.push({
+                    email,
+                    reason: `Department "${department}" does not exist`
+                })
+
+                continue
+            }
+
+            const existingUser = await sql`
+                SELECT id
+                FROM "Users"
+                WHERE LOWER(email) = LOWER(${email})
+            `
+
+            if (existingUser.length > 0) {
+
+                failed.push({
+                    email,
+                    reason: 'Email already exists'
+                })
+
+                continue
+            }
+
+            const password =
+                Math.random()
+                    .toString(36)
+                    .slice(-8)
+
+            const hashedPassword =
+                await bcrypt.hash(password, 10)
+
+
+            await sql.begin(async (sql) => {
+
+                const [user] = await sql`
+                    INSERT INTO "Users"
+                    (
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "phone",
+                        "role",
+                        "password",
+                        "birth_date"
+                    )
+                    VALUES
+                    (
+                        ${first_name},
+                        ${last_name},
+                        ${email},
+                        ${phone || null},
+                        ${role || 'user'},
+                        ${hashedPassword},
+                        ${birth_date || null}
+                    )
+                    RETURNING
+                    "id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "phone",
+                    "role"
+                `
+
+                const [emp] = await sql`
+                    INSERT INTO "Employee"
+                    (
+                        "company",
+                        "department",
+                        "position",
+                        "user_id"
+                    )
+                    VALUES
+                    (
+                        ${company || null},
+                        ${departmentData.id},
+                        ${position || null},
+                        ${user.id}
+                    )
+                    RETURNING *
+                `
+
+                if ((role || 'user') === 'user') {
+
+                    await sendEmail({
+                        to: email,
+                        subject: 'Welcome to VisitMi | Account Creation',
+                        html: `
+                            <h2>Welcome ${first_name}</h2>
+
+                            <p>
+                                Thank you for registering with VMS.
+                                Your account has been created successfully.
+                            </p>
+
+                            <p>
+                                <b>Name:</b>
+                                ${first_name} ${last_name}
+                            </p>
+
+                            <p>
+                                <b>Email:</b>
+                                ${email}
+                            </p>
+
+                            <p>
+                                <b>Password:</b>
+                                ${password}
+                            </p>
+
+                            <div>
+                                <a href="${process.env.CLIENT_DEV_URL}">
+                                    Signin to Your Account →
+                                </a>
+                            </div>
+                        `
+                    })
+                }
+
+                imported.push({
+                    user,
+                    employee: emp
+                })
+            })
 
         } catch (error) {
 
-            results.push({
-                email: employee.email,
-                status: "failed",
-                message: error.message
-            });
+            failed.push({
+                email: row.email || null,
+                reason: error.message
+            })
         }
     }
 
-    // res.status(200).json({
-    //     success: true,
-    //     total: employees.length,
-    //     results
-    // });
+    const results = {
+        total: employees.length,
+        importedCount: imported.length,
+        failedCount: failed.length,
+        imported,
+        failed
+    }
 
-    sendResponse(res, 200, {total: employees.length,
-        results}, "")
+    sendResponse(
+        res,
+        200,
+        results,
+        'Employees imported successfully'
+    )
 })
 
 const deleteEmployee = asyncHandler(async (req, res) => {
@@ -183,6 +388,7 @@ export{
     updateEmployee,
     updateUser,
     deleteDeparment,
-    deleteEmployee
+    deleteEmployee,
+    addEmployees
     
 }
