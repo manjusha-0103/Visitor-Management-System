@@ -8,8 +8,8 @@ import { pastAppointments,
 
 const router = express.Router();
 
-router.get("/past",protect, authorize('super_admin', "receptionist"), pastAppointments)
-router.post("/get-reports", downlaodAppointments)
+router.get("/past",protect, authorize('super_admin', "user"), pastAppointments)
+router.post("/get-reports",protect, authorize('super_admin', 'user'), downlaodAppointments)
 
 
 export default router;

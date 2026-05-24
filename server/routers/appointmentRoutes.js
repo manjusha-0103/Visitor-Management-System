@@ -9,7 +9,7 @@ const router = express.Router();
 router.get(
   "/appointments",
   protect,
-  authorize("super_admin", "receptionist"),
+  authorize("super_admin", "user"),
   getAppointments
 );
 

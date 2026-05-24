@@ -8,7 +8,7 @@ import { analyticsHederData,
 
 const router = express.Router();
 
-router.get("/analytics-header", protect, authorize('super_admin'), analyticsHederData)
-router.get("/graph-data", analyticsGraphn)
+router.get("/analytics-header", protect, authorize('super_admin', 'user'), analyticsHederData)
+router.get("/graph-data", protect, authorize('super_admin', 'user'), analyticsGraphn)
 
 export default router
