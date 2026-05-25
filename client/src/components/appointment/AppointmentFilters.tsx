@@ -76,7 +76,7 @@ export default function AppointmentFilters({
 
         {/* Date Filter */}
         {
-          type === "prescheduled" &&  (
+          (type === "prescheduled" || type === "past") &&  (
             <div className="flex items-center gap-1 w-full sm:w-auto">
           <Popover>
             <PopoverTrigger asChild>

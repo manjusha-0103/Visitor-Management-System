@@ -14,6 +14,7 @@ export interface Employee {
   user_id: string;
   position: string;
   department: string;
+  birth_date: Date | undefined;
   email: string;
   phone: string;
   last_login: string | null;
@@ -57,6 +58,28 @@ export interface GetAllEmployeesParams {
   limit?: number;
   search?: string;
   department?: string;
+}
+
+export interface ImportEmployeeResponse {
+  statusCode: number;
+  data: {
+    total: number;
+    importedCount: number;
+    failedCount: number;
+
+    imported: {
+      user: Employee;
+      employee: Employee;
+    }[];
+
+    failed: {
+      email: string | null;
+      reason: string;
+    }[];
+  };
+
+  message: string;
+  success: boolean;
 }
 
 // ─────────────────────────────────────
@@ -145,13 +168,26 @@ export const employeeApi = api.injectEndpoints({
     }),
 
     deleteEmployee: builder.mutation({
-  query: (id) => ({
-    url: `/api/v1/super-admin/delete-emp/${id}`,
-    method: "DELETE",
-  }),
+      query: (id) => ({
+        url: `/api/v1/super-admin/delete-emp/${id}`,
+        method: "DELETE",
+      }),
 
-  invalidatesTags: ["Employees"],
-}),
+      invalidatesTags: ["Employees"],
+    }),
+
+    importEmployees: builder.mutation<
+      ImportEmployeeResponse,
+      FormData
+    >({
+      query: (formData) => ({
+        url: "/api/v1/super-admin/add-employees",
+        method: "POST",
+        body: formData,
+      }),
+
+      invalidatesTags: ["Employees"],
+    }),
   }),
 });
 
@@ -161,5 +197,6 @@ export const {
   useUpdateEmployeeMutation,
   useAddDepartmentMutation,
   useDeleteDepartmentMutation,
-  useDeleteEmployeeMutation
+  useDeleteEmployeeMutation,
+  useImportEmployeesMutation
 } = employeeApi;

@@ -21,6 +21,7 @@ const getALLEmployeesservice = async ({
             e.*,
             u.email,
             u.phone,
+            u.birth_date,
             u.last_login,
             DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
 

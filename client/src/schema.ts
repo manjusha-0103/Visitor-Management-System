@@ -41,6 +41,8 @@ export const employeeSchema = z.object({
     .string()
     .email("Enter a valid email"),
 
+  birth_date: z.date().max(new Date(), { message: "Birthday cannot be in the future" }),
+
   phone: z
     .string()
     .min(10, "Phone number must be 10 digits")
