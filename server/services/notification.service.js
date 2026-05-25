@@ -8,8 +8,8 @@ const processtBirthdayService = async () => {
     
     const users = await sql`
         SELECT 
-            id,
-            CONCAT(first_name, ' ', last_name) AS name,
+            u.id,
+            CONCAT(u.first_name, ' ', u.last_name) AS name,
             e.position,
             e.company,
             d.name AS department
