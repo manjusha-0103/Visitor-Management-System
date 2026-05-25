@@ -1,10 +1,12 @@
 Using environment variables and GitHub Secrets for VisitMi
 
-1) Local / server env file
+1. Local / server env file
+
 - Copy `.env.production.example` to `.env.production` on the server and fill in secret values (DB password, SMTP credentials, JWT_SECRET, etc.).
 - Keep `.env.production` out of git (add to `.gitignore`).
 
-2) GitHub Actions / Secrets (recommended for CI-based deploy)
+2. GitHub Actions / Secrets (recommended for CI-based deploy)
+
 - In your GitHub repo Settings → Secrets → Actions, add secrets such as:
   - `PROD_DATABASE_URL`
   - `PROD_APP_URL`
@@ -30,7 +32,7 @@ Using environment variables and GitHub Secrets for VisitMi
     # Do not print secrets in logs; they are masked automatically
 ```
 
-3) SSH deploy snippet (copy site file and env to server)
+3. SSH deploy snippet (copy site file and env to server)
 
 ```yaml
 - name: Upload site & env
@@ -55,11 +57,14 @@ Using environment variables and GitHub Secrets for VisitMi
       sudo systemctl reload nginx
 ```
 
-4) Notes & security
+4. Notes & security
+
 - Never echo secrets into public logs. Use GitHub Secrets and masked outputs.
 - Prefer storing sensitive connection strings, like `DATABASE_URL`, as a single secret rather than separate local Postgres fields.
 - On the server, protect `.env.production` with proper filesystem permissions and limit who can read it.
+- If you deploy into `/opt/visitor-management-system`, the SSH user must be able to create and write that directory; the workflow now prepares it before SCP uploads.
 
 If you want, I can:
+
 - Add a GitHub Actions deploy job that writes `.env.production` on the runner and SCPs files to the server using secrets.
 - Or just add a short sample `deploy.yml` under `.github/workflows/` using your existing CI.
