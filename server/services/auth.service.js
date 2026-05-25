@@ -7,8 +7,15 @@ const getMeService = async (id) => {
     const me = await sql`
         SELECT 
             u.id,
+<<<<<<< Updated upstream
             u.first_name, u.last_name,
+=======
+            u.first_name, 
+            u.last_name,
+>>>>>>> Stashed changes
             u.email,
+            u.last_login,
+            u.created_at,
             u.phone,
             DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
             u.role,
@@ -16,6 +23,7 @@ const getMeService = async (id) => {
             e.position,
             e.company,
 
+            d.id AS department_id,
             d.name AS department
             
         FROM "Users" u
@@ -80,19 +88,40 @@ const loginUserService = async (email, password) => {
         throw new ApiError(401,"Invalid credentials")
     }
 
-    const [userData] = await sql`
-        UPDATE "Users"
-        SET "last_login" = NOW()
-        WHERE "id" = ${user.id}
-        RETURNING  "id", 
-            "first_name", 
-            "last_name", 
-            "email", 
-            "role", 
-            "phone",
-            "last_login",
-            "created_at"
-    `
+    await sql`
+    UPDATE "Users"
+    SET "last_login" = NOW()
+    WHERE "id" = ${user.id}
+`
+
+const [userData] = await sql`
+    SELECT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.role,
+        u.phone,
+        u.birth_date,
+        u.last_login,
+        u.created_at,
+
+        e.position,
+        e.company,
+
+        d.id AS department_id,
+        d.name AS department
+
+    FROM "Users" u
+
+    LEFT JOIN "Employee" e
+        ON u.id = e.user_id
+
+    LEFT JOIN "Departments" d
+        ON d.id = e.department
+
+    WHERE u.id = ${user.id}
+`
     return userData
 }
 
@@ -138,7 +167,7 @@ const changePasswordService = async ({old_pass, new_pass}, id) => {
     return user_
 }
 
-const updateMeService = async (data, id) => {
+const updateMeService = async (data, id, role) => {
 
     const {
         first_name = null,
@@ -169,15 +198,16 @@ const updateMeService = async (data, id) => {
             birth_date = COALESCE(${birth_date}, birth_date)
         WHERE id = ${id}
     `
-
-    await sql`
-        UPDATE "Employee"
-        SET
-            position = COALESCE(${position}, position),
-            company = COALESCE(${company}, company),
-            department = COALESCE(${department}, department)
-        WHERE user_id = ${id}
-    `
+    if(role !== 'super_admin'){
+        await sql`
+            UPDATE "Employee"
+            SET
+                position = COALESCE(${position}, position),
+                company = COALESCE(${company}, company),
+                department = COALESCE(${department}, department)
+            WHERE user_id = ${id}
+        `
+    }
 
     const profile = await sql`
         SELECT 

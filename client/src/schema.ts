@@ -2,8 +2,8 @@ import z from "zod";
 
 
 export const signInSchema = z.object({
-    email: z.email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters")
+  email: z.email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters")
 })
 
 export const visitorSchema = z.object({
@@ -41,7 +41,12 @@ export const employeeSchema = z.object({
     .string()
     .email("Enter a valid email"),
 
-  birth_date: z.date().max(new Date(), { message: "Birthday cannot be in the future" }),
+  birth_date: z
+    .date("Date of birth is required")
+    .max(new Date(), {
+      message:
+        "Birthday cannot be in the future",
+    }),
 
   phone: z
     .string()
@@ -84,7 +89,7 @@ export const userSchema = z.object({
 
   role: z.enum([
     "super_admin",
-    "receptionist",
-    "visitor",
+    "user",
+    // "visitor",
   ]),
 });

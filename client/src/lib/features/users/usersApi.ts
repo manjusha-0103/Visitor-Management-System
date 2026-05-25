@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { UserRole } from "@/components/user/table/column";
+// import type { UserRole } from "@/components/user/table/column";
 export interface User {
   id: string;
   full_name: string;
@@ -7,7 +7,7 @@ export interface User {
   last_name: string;
   email: string;
   phone: string;
-  role: UserRole;
+  role: "super_admin" | "user";
   last_login: string | null;
   created_at: string;
 }

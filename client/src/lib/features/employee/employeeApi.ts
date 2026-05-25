@@ -14,7 +14,7 @@ export interface Employee {
   user_id: string;
   position: string;
   department: string;
-  birth_date: Date | undefined;
+  birth_date: "" | undefined;
   email: string;
   phone: string;
   last_login: string | null;

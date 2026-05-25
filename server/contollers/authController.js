@@ -19,11 +19,13 @@ import { userExistbyemailService,
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
     const user = await getMeService(req.user.id)
-    sendResponse(res, 200, user, "")
+    console.log("getMe", user);
+    
+    sendResponse(res, 200, user[0], "")
 })
 
 const updateMe = asyncHandler(async (req, res) => {
-    const profile = await updateMeService(req.body, req.user.id)
+    const profile = await updateMeService(req.body, req.user.id, req.user.role)
     if(profile){
         sendResponse(res, 200, profile, "Data is updated successfully")
     }else{
