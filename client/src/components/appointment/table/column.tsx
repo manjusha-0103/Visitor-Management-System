@@ -13,6 +13,13 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import type { AppointmentRow } from '@/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 // import { useSelector } from "react-redux";
 // import { selectUser } from "@/lib/features/auth/authSlice";
 import SetPassIdDialog from "../SetPassIdDialog";
@@ -298,12 +305,12 @@ function ExtrasCell({ row }: { row: any }) {
   return (
     <div className="flex flex-col gap-1.5">
       {appt.is_laptop && (
-        <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
+        <span className="inline-flex w-fit items-center gap-1 rounded-md bg-purple-50 px-2 py-0.5 text-[10px] font-medium text-purple-700">
           <Laptop size={10} /> Laptop
         </span>
       )}
       {appt.is_vehicle && (
-        <span className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
+        <span className="inline-flex w-fit items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-medium text-blue-700">
           <Car size={10} /> Vehicle
         </span>
       )}
@@ -524,36 +531,137 @@ export const pastColumns = [
     header: "Extras",
     cell: ({ row }: any) => <ExtrasCell row={row} />,
   },
-  {
-    accessorKey: "is_preschedule",
-    header: "Type",
-    cell: ({ row }: any) => (
-      <Badge
-        className={
-          row.original.is_preschedule
-            ? "bg-violet-100 text-violet-700 border-0 text-xs"
-            : "bg-cyan-100 text-cyan-700 border-0 text-xs"
-        }
-      >
-        {row.original.is_preschedule ? "Pre-scheduled" : "Walk-in"}
-      </Badge>
-    ),
-    filterFn: (row: any, _: string, value: string) => {
-      if (!value || value === "all") return true;
-      return String(row.original.is_preschedule) === value;
-    },
-  },
   // {
-  //   id: "actions",
-  //   cell: ({ row, table }: any) => (
-  //     <Button
-  //       variant="ghost"
-  //       size="icon"
-  //       className="h-8 w-8"
-  //       onClick={() => table.options.meta?.onView?.(row.original)}
+  //   accessorKey: "is_preschedule",
+  //   header: "Type",
+  //   cell: ({ row }: any) => (
+  //     <Badge
+  //       className={
+  //         row.original.is_preschedule
+  //           ? "bg-violet-100 text-violet-700 border-0 text-xs"
+  //           : "bg-cyan-100 text-cyan-700 border-0 text-xs"
+  //       }
   //     >
-  //       <Eye size={15} />
-  //     </Button>
+  //       {row.original.is_preschedule ? "Pre-scheduled" : "Walk-in"}
+  //     </Badge>
   //   ),
+  //   filterFn: (row: any, _: string, value: string) => {
+  //     if (!value || value === "all") return true;
+  //     return String(row.original.is_preschedule) === value;
+  //   },
   // },
+  {
+  accessorKey: "is_preschedule",
+
+  header: ({ column }: any) => {
+    const current =
+      column.getFilterValue() || "all";
+
+    return (
+      <div className="flex items-center gap-2">
+        <span>Type</span>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 min-w-20 text-[10px]"
+            >
+              {current === "all"
+                ? "All"
+                : current === "true"
+                ? "Pre-scheduled"
+                : "Walk-in"}
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-40 bg-white border shadow-md">
+            <DropdownMenuRadioGroup
+              value={String(current)}
+              onValueChange={(v) =>
+                column.setFilterValue(
+                  v === "all"
+                    ? undefined
+                    : v
+                )
+              }
+            >
+              <DropdownMenuRadioItem
+                value="all"
+                className="text-xs"
+              >
+                All
+              </DropdownMenuRadioItem>
+
+              <DropdownMenuRadioItem
+                value="false"
+                className="text-xs"
+              >
+                Walk-in
+              </DropdownMenuRadioItem>
+
+              <DropdownMenuRadioItem
+                value="true"
+                className="text-xs"
+              >
+                Pre-scheduled
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    );
+  },
+
+  cell: ({ row }: any) => (
+    <Badge
+      className={
+        row.original.is_preschedule
+          ? "bg-violet-100 text-violet-700 border-0 text-xs"
+          : "bg-cyan-100 text-cyan-700 border-0 text-xs"
+      }
+    >
+      {row.original.is_preschedule
+        ? "Pre-scheduled"
+        : "Walk-in"}
+    </Badge>
+  ),
+
+  filterFn: (
+    row: any,
+    _: string,
+    value: string
+  ) => {
+    if (!value || value === "all")
+      return true;
+
+    return (
+      String(
+        row.original.is_preschedule
+      ) === value
+    );
+  },
+},
+  {
+  id: "actions",
+  cell: ({ row, table }: {row: any; table: any}) => {
+    const appointment = row.original;
+
+    return (
+      <Button
+      size="sm"
+          variant="outline"
+          className="h-8 text-xs"
+        onClick={() => {
+          table.options.meta?.setSelectedApp(appointment);
+          table.options.meta?.setOpenDetailSheet(true);
+        }}
+      >
+        <Eye size={12} />
+        View
+      </Button>
+    );
+  },
+}
 ];

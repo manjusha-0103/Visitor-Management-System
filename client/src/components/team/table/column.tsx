@@ -16,8 +16,6 @@ import { getNameInitials } from "@/lib/utils/helperFunctions";
 import { useDeleteEmployeeMutation, type Employee } from "@/lib/features/employee/employeeApi";
 import DeleteModal from "@/components/DeleteModal";
 
-
-
 // ── Actions cell ──────────────────────────────────────────────────────────────
 function ActionsCell({ row, table }: { row: any; table: any }) {
   const member: Employee = row.original;
@@ -140,6 +138,13 @@ export const teamColumns = [
           <div className="-space-y-0.5">
             <p className="font-medium text-sm">{member.full_name}</p>
             <p className="text-xs text-gray-400">{member.email}</p>
+            <p className="text-xs text-gray-400">
+  {member.birth_date && `DOB: ${format(
+        new Date(member.birth_date),
+        "dd MMM yyyy"
+      )}`
+        }
+</p>
           </div>
         </div>
       );
