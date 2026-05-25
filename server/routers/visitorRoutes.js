@@ -21,7 +21,7 @@ router.post(
     )
 router.get("/departments", getAllDepartments)
 router.get("/employees/:dept_id", getEmployees)
-router.get("/visitor/:appointment_id",protect, authorize('super_admin', "receptionist"), visitorInfo)
+router.get("/visitor/:appointment_id",protect, authorize('super_admin', "user"), visitorInfo)
 
 
 

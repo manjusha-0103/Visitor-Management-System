@@ -10,12 +10,14 @@ import {
     getMe,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    changePassword
 } from "../contollers/authController.js";
 
 import {
     registerValidation,
-    loginValidation
+    loginValidation,
+
 } from "../validations/authValidations.js";
 
 const router = express.Router();
@@ -24,5 +26,6 @@ router.get("/me", protect, getMe)
 router.post("/signup", validate, registerValidation, registerUser);
 router.post("/signin", validate, loginValidation, loginUser)
 router.post("/signout", protect, logoutUser);
+router.post("/change-password", protect, changePassword)
 
 export default router;
