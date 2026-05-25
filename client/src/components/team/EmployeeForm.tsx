@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
 import {
   Sheet,
@@ -9,6 +9,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Calendar as CalendarUI } from "@/components/ui/calendar";
+import {
+  X,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import { format } from 'date-fns'
 
 import { Button } from "@/components/ui/button";
 
@@ -23,6 +35,7 @@ import {
 
 import {
   CustomInputField,
+  FormLabel,
   SelectField,
 } from "@/components/form/FormFields";
 
@@ -72,12 +85,13 @@ export default function EmployeeForm({
     handleSubmit,
     reset,
   } = useForm<EmployeeFormValues>({
-     resolver: zodResolver(
-    employeeSchema
-  ),
+    resolver: zodResolver(
+      employeeSchema
+    ),
     defaultValues: {
       first_name: "",
       last_name: "",
+      birth_date: undefined,
       email: "",
       phone: "",
       company: "",
@@ -123,6 +137,9 @@ export default function EmployeeForm({
 
         company:
           employee.company || "",
+        birth_date: employee.birth_date
+          ? new Date(employee.birth_date)
+          : undefined,
 
         department:
           employee.department || "",
@@ -139,6 +156,7 @@ export default function EmployeeForm({
         last_name: "",
         email: "",
         phone: "",
+        birth_date: undefined,
         company: "",
         department: "",
         position: "",
@@ -180,6 +198,11 @@ export default function EmployeeForm({
     }
   };
 
+  const onError = (err: any) => {
+    console.log(err);
+    
+  }
+
   return (
     <Sheet
       open={open}
@@ -188,7 +211,7 @@ export default function EmployeeForm({
       <SheetContent className="w-full sm:max-w-md lg:max-w-xl bg-white p-0 flex flex-col">
         <form
           onSubmit={handleSubmit(
-            onSubmit
+            onSubmit, onError
           )}
           className="h-full flex flex-col"
         >
@@ -248,10 +271,91 @@ export default function EmployeeForm({
                 control={control}
                 icon={Phone}
               />
-            </div>
 
-            {/* Company + Position */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Date of Birth */}
+              <div className="space-y-2">
+                <FormLabel htmlFor={"birth_date"} label="Date of Birth" required={true} />
+
+                <Controller
+                  control={control}
+                  name="birth_date"
+                  render={({ field }) => (
+                    <div className="flex items-center gap-1">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={`justify-start text-left font-normal rounded-md w-full ${!field.value
+                              ? "text-muted-foreground"
+                              : ""
+                              }`}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+
+                            {field.value ? (
+                              format(
+                                field.value,
+                                "dd MMM yyyy"
+                              )
+                            ) : (
+                              <span>Select DOB</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                          className="w-auto p-0"
+                          align="start"
+                        >
+                          <CalendarUI
+                            mode="single"
+                            selected={
+                              field.value || undefined
+                            }
+                            // selected={
+                            //   field.value
+                            //     ? new Date(field.value)
+                            //     : undefined
+                            // }
+                            onSelect={(date) =>
+                              field.onChange(date)
+                            }
+                            // onSelect={(date) =>
+                            //   field.onChange(
+                            //     date
+                            //       ? format(
+                            //         date,
+                            //         "yyyy-MM-dd"
+                            //       )
+                            //       : ""
+                            //   )
+                            // }
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(23, 59, 59, 59);
+                              return date > today
+                            }}
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      {field.value && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          type="button"
+                          onClick={() =>
+                            field.onChange(undefined)
+                          }
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+
               <CustomInputField<EmployeeFormValues>
                 name="company"
                 label="Company"
@@ -259,6 +363,11 @@ export default function EmployeeForm({
                 control={control}
                 icon={Building2}
               />
+            </div>
+
+            {/* Company + Position */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
 
               <CustomInputField<EmployeeFormValues>
                 name="position"
@@ -267,10 +376,7 @@ export default function EmployeeForm({
                 control={control}
                 icon={Briefcase}
               />
-            </div>
 
-            {/* Department + Role */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SelectField<EmployeeFormValues>
                 name="department"
                 label="Department"
@@ -283,6 +389,11 @@ export default function EmployeeForm({
                   })
                 )}
               />
+            </div>
+
+            {/* Department + Role */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
 
               <SelectField<EmployeeFormValues>
                 name="role"

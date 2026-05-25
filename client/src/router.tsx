@@ -109,10 +109,10 @@ const router = createBrowserRouter([
         path: "employee",
         element: <PreSchedule />
     },
-    {
-        path: "ana",
-        element: <DummyAnalytics/>
-    }
+    // {
+    //     path: "ana",
+    //     element: <DummyAnalytics/>
+    // }
 ])
 
 export default router;

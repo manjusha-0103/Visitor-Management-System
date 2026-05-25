@@ -25,7 +25,7 @@ router.post('/add-employees',  upload.single('file'), addEmployees) //protect, a
 router.post('/add-departmemt', protect, authorize('super_admin'), addDepartment)
 router.put('/update-employee/:id', protect, authorize('super_admin'),updateEmployee)
 router.put('/update-user/:id', protect, authorize('super_admin'), updateUser)
-router.delete('/delete-dept/:id',authorize('super_admin'),deleteDeparment)
+router.delete('/delete-dept/:id', protect,authorize('super_admin'),deleteDeparment)
 router.delete('/delete-emp/:id', deleteEmployee)
 
 export default router;
