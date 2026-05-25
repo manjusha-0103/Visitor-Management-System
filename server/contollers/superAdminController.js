@@ -124,6 +124,7 @@ const addEmployees = asyncHandler(async (req, res) => {
             ) {
 
                 failed.push({
+                    row,
                     email,
                     reason: 'Required fields are missing'
                 })
@@ -140,6 +141,7 @@ const addEmployees = asyncHandler(async (req, res) => {
             if (!departmentData) {
 
                 failed.push({
+                    row,
                     email,
                     reason: `Department "${department}" does not exist`
                 })
@@ -156,6 +158,7 @@ const addEmployees = asyncHandler(async (req, res) => {
             if (existingUser.length > 0) {
 
                 failed.push({
+                    row,
                     email,
                     reason: 'Email already exists'
                 })
@@ -275,6 +278,7 @@ const addEmployees = asyncHandler(async (req, res) => {
         } catch (error) {
 
             failed.push({
+                row,
                 email: row.email || null,
                 reason: error.message
             })
