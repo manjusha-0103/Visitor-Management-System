@@ -3,6 +3,34 @@ import sql from "../db/database.js"
 import ApiError from "../utils/ApiError.js"
 import { sendEmail } from "../utils/mailer.js"
 
+const getMeService = async (id) => {
+    const me = await sql`
+        SELECT 
+            u.id,
+            CONCAT(u.first_name, ' ', u.last_name) AS name,
+            u.email,
+            u.phone,
+            u.birth_date,
+            u.role,
+
+            e.position,
+            e.company,
+
+            d.name AS department
+            
+        FROM "Users" u
+
+        LEFT JOIN "Employee" e
+            ON u.id = e.user_id
+
+        LEFT JOIN "Departments" d
+            ON d.id = e.department
+
+        WHERE u.id = ${id}
+    `
+
+    return me
+}
 
 const registerUserService = async (userData) => {
     const { first_name, last_name, email, password, role, phone, birth_date } = userData
@@ -75,8 +103,45 @@ const userExistbyemailService = async (email) =>{
     return userExists
 }
 
+const changePasswordService = async ({old_pass, new_pass}, id) => {
+    
+    const user = await sql`
+        SELECT password
+        FROM "Users"
+        WHERE id = ${id}
+    `
+
+    const isPasswordCorrect = await bcrypt.compare(
+        old_pass,
+        user[0].password
+    )
+
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, "Old password is incorrect")
+    }
+
+    if (old_pass === new_pass) {
+        throw new ApiError(
+            400,
+            "Old and new password should not be the same"
+        )
+    }
+
+    const hashedPassword = await bcrypt.hash(new_pass, 10)
+
+    const user_= await sql`
+        UPDATE "Users"
+        SET password = ${hashedPassword}
+        WHERE id = ${id}
+        RETURNING "first_name", "last_name", "email", "phone"
+    `
+    return user_
+}
+
 export{
     registerUserService,
     userExistbyemailService,
-    loginUserService
+    loginUserService,
+    getMeService,
+    changePasswordService
 }
