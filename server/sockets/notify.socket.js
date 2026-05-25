@@ -7,7 +7,10 @@ const notifyBirthday = async (io, users) => {
 
     for (const user of users) {
 
-        const message = `🎉 Happy Birthday ${user.name}! 🎉`;
+        const message = `
+            🎉Wish Happy Birthday ${user.name}! 🎉 \n
+            (${user.position} - ${user.department})
+        `;
 
         io.emit("birthdayNotification", {
             title: "🎉 Happy Birthday!",

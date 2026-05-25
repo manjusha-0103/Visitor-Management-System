@@ -7,10 +7,10 @@ const getMeService = async (id) => {
     const me = await sql`
         SELECT 
             u.id,
-            CONCAT(u.first_name, ' ', u.last_name) AS name,
+            u.first_name, u.last_name,
             u.email,
             u.phone,
-            u.birth_date,
+            DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
             u.role,
 
             e.position,
@@ -185,7 +185,7 @@ const updateMeService = async (data, id) => {
             CONCAT(u.first_name, ' ', u.last_name) AS name,
             u.email,
             u.phone,
-            u.birth_date,
+            DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
             u.role,
 
             e.position,
