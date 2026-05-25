@@ -3,8 +3,9 @@ import { lazy } from "react";
 import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
-import DummyAnalytics from "./pages/analytics/DummyAnalytics";
+// import DummyAnalytics from "./pages/analytics/DummyAnalytics";
 import CheckIn from "./pages/admin-check-in/CheckIn";
+// import ChangePassword from "./pages/settings/ChangePassword";
 
 const Auth = lazy(() => import("@/pages/Auth"))
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"))
@@ -15,6 +16,8 @@ const ManageAppointment = lazy(() => import("@/pages/appointment/ManageAppointme
 const VisitorCheckIn = lazy(() => import("@/components/visitor/VisitorCheckIn"));
 const PreSchedule = lazy(() => import("@/pages/employee/PreSchedule"))
 const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
+const ChangePassword = lazy(() => import("@/pages/settings/ChangePassword"))
+const Profile = lazy(() => import("@/pages/settings/Profile"))
 // const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
 
 const router = createBrowserRouter([
@@ -68,6 +71,14 @@ const router = createBrowserRouter([
                         path: "analytics",
                         element: <AnalyticsPage />
                     },
+                    {
+                        path: "change-password",
+                        element: <ChangePassword />
+                    },
+                    {
+                        path: "profile",
+                        element: <Profile />
+                    },
                 ]
             }
         ]
@@ -75,10 +86,10 @@ const router = createBrowserRouter([
     },
     //Receptionist Routes
     {
-        element: <ProtectedRoute allowedRoles={[ROLES.receptionist.role]} />,
+        element: <ProtectedRoute allowedRoles={[ROLES.user.role]} />,
         children: [
             {
-                path: '/receptionist',
+                path: '/user',
                 element: <AdminLayout />,
                 children: [
                     {
@@ -93,7 +104,15 @@ const router = createBrowserRouter([
                     {
                         path: "check-in",
                         element: <CheckIn />
-                    }
+                    },
+                    {
+                        path: "change-password",
+                        element: <ChangePassword />
+                    },
+                    {
+                        path: "profile",
+                        element: <Profile />
+                    },
                 ]
             }
         ]

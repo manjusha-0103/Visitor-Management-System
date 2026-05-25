@@ -63,7 +63,7 @@ export default function Auth() {
             if (userData?.data?.role === 'super_admin') {
                 navigate('/admin', { replace: true })
             } else {
-                navigate('/receptionist', { replace: true })
+                navigate('/user', { replace: true })
             }
         } catch (err) {
             console.error('Failed to login:', err);
