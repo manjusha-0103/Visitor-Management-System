@@ -11,7 +11,8 @@ import {
     registerUser,
     loginUser,
     logoutUser,
-    changePassword
+    changePassword,
+    updateMe
 } from "../contollers/authController.js";
 
 import {
@@ -27,5 +28,6 @@ router.post("/signup", validate, registerValidation, registerUser);
 router.post("/signin", validate, loginValidation, loginUser)
 router.post("/signout", protect, logoutUser);
 router.post("/change-password", protect, changePassword)
+router.put("/update-me", protect, updateMe)
 
 export default router;
