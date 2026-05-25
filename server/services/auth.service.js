@@ -138,10 +138,80 @@ const changePasswordService = async ({old_pass, new_pass}, id) => {
     return user_
 }
 
+const updateMeService = async (data, id) => {
+
+    const {
+        first_name = null,
+        last_name = null,
+        phone = null,
+        birth_date = null,
+        position = null,
+        company = null,
+        department = null
+    } = data
+
+    const user = await sql`
+        SELECT id, role
+        FROM "Users"
+        WHERE id = ${id}
+    `
+
+    if (!user.length) {
+        throw new ApiError(404, "User not found")
+    }
+
+    await sql`
+        UPDATE "Users"
+        SET
+            first_name = COALESCE(${first_name}, first_name),
+            last_name = COALESCE(${last_name}, last_name),
+            phone = COALESCE(${phone}, phone),
+            birth_date = COALESCE(${birth_date}, birth_date)
+        WHERE id = ${id}
+    `
+
+    await sql`
+        UPDATE "Employee"
+        SET
+            position = COALESCE(${position}, position),
+            company = COALESCE(${company}, company),
+            department = COALESCE(${department}, department)
+        WHERE user_id = ${id}
+    `
+
+    const profile = await sql`
+        SELECT 
+            u.id,
+            CONCAT(u.first_name, ' ', u.last_name) AS name,
+            u.email,
+            u.phone,
+            u.birth_date,
+            u.role,
+
+            e.position,
+            e.company,
+
+            d.name AS department
+
+        FROM "Users" u
+
+        LEFT JOIN "Employee" e
+            ON u.id = e.user_id
+
+        LEFT JOIN "Departments" d
+            ON d.id = e.department
+
+        WHERE u.id = ${id}
+    `
+
+    return profile[0]
+}
+
 export{
     registerUserService,
     userExistbyemailService,
     loginUserService,
     getMeService,
-    changePasswordService
+    changePasswordService,
+    updateMeService
 }
