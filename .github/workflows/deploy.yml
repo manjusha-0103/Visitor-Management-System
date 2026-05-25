@@ -84,6 +84,19 @@ jobs:
           VITE_SOCKET_URL=${{ vars.APP_URL || secrets.APP_URL || 'https://visitmi.irayva.ai' }}
           EOF
 
+      - name: Prepare deploy directory on host
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -euo pipefail
+            sudo mkdir -p /opt/visitor-management-system
+            sudo chown -R "$(id -un):$(id -gn)" /opt/visitor-management-system
+            sudo chmod 775 /opt/visitor-management-system
+
       - name: Copy app files
         uses: appleboy/scp-action@v0.1.7
         with:
