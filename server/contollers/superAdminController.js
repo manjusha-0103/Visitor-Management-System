@@ -20,6 +20,7 @@ import { request } from "http";
 import fs from 'fs'
 import csv from 'csv-parser'
 import { Readable } from 'stream'
+import { sendEmail } from "../utils/mailer.js";
 
 const parseExcel = (buffer) => {
 
@@ -162,6 +163,12 @@ const addEmployees = asyncHandler(async (req, res) => {
                 continue
             }
 
+            const formattedBirthDate = birth_date
+                ? new Date(birth_date)
+                    .toISOString()
+                    .split('T')[0]
+                : null
+
             const password =
                 Math.random()
                     .toString(36)
@@ -200,7 +207,8 @@ const addEmployees = asyncHandler(async (req, res) => {
                     "last_name",
                     "email",
                     "phone",
-                    "role"
+                    "role",
+                    "birth_date"
                 `
 
                 const [emp] = await sql`
@@ -280,12 +288,12 @@ const addEmployees = asyncHandler(async (req, res) => {
         imported,
         failed
     }
-
+    const message = failed.length === 0?`All records imported successfully`:`${imported.length} records imported successfully, and ${failed.length} failed.`
     sendResponse(
         res,
         200,
         results,
-        'Employees imported successfully'
+        message
     )
 })
 
