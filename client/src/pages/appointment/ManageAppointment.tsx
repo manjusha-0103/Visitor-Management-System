@@ -92,6 +92,15 @@ export default function ManageAppointment() {
               Pre Scheduled
             </TabsTrigger>
 
+            <TabsTrigger value="past" className="
+      text-[#701a40]
+      data-[state=active]:bg-[#701a40]
+      data-[state=active]:text-white
+      data-[state=active]:shadow-none
+    ">
+              Past
+            </TabsTrigger>
+
           </TabsList>
 
           <AppointmentReportDownload/>  

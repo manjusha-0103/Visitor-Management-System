@@ -29,8 +29,8 @@ const initSocket = (server) => {
 
 const getIO = () => io;
 
-cron.schedule("0 9 * * *", async () => {
-// cron.schedule("*/5 * * * * *", async () => {
+// cron.schedule("0 9 * * *", async () => {
+cron.schedule("*/25 * * * * *", async () => {
 
   console.log("Running Birthday Cron");
 
