@@ -54,7 +54,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Visitors",
     icon: UserRound,
     bg: "bg-amber-700 shadow-lg shadow-amber-700/40",
-    path: "/receptionist/visitors",
+    path: "/user/visitors",
   },
 
   {
@@ -62,7 +62,7 @@ export const RECEPTIONIST_TASKS = [
     label: "Check In",
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
-    path: "/receptionist/check-in",
+    path: "/user/check-in",
   },
 
   // {

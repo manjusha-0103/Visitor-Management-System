@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
+import { KeyRound, LogOut, UserRound } from "lucide-react";
 // import logo from "./iravya-logo.png"
 import {
   DropdownMenu,
@@ -23,6 +23,7 @@ import { useSignOutMutation } from "@/lib/features/auth/authApi";
 export default function Header() {
   const user = useSelector(selectUser);
   console.log("Authenticated user", user);
+      const isSuperAdmin = user?.role === "super_admin";
   const [signOut] = useSignOutMutation();
   const navigate = useNavigate();
 
@@ -50,12 +51,12 @@ export default function Header() {
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
           <img src={'/app.png'} width={40} height={40} className='text-center mx-auto mb-2 bg-white rounded-full' />
-          
+
           {/* <div className="w-10 h-10 rounded-full flex items-center justify-center bg-amber-500 text-maroon border-2 border-orange-200 font-bold text-lg shadow-md">
             V
           </div> */}
 
-          <Link to="/admin" className="flex flex-col leading-tight">
+          <Link to={`${isSuperAdmin ? '/admin' : '/user'}`} className="flex flex-col leading-tight">
             <span className="font-bold text-white text-lg">
               iravya
             </span>
@@ -114,11 +115,20 @@ export default function Header() {
             <DropdownMenuSeparator />
             */}
 
-            <DropdownMenuItem>
-                <span>Change Password</span>
-            </DropdownMenuItem>
-                
-            <DropdownMenuSeparator />
+                <Link to={`${isSuperAdmin ? '/admin' : '/user'}/profile`}>
+              <DropdownMenuItem>
+                <span className="flex gap-2 items-center"><UserRound />Profile</span>
+              </DropdownMenuItem>
+              </Link>
+                <DropdownMenuItem>
+              <Link to={`${isSuperAdmin ? '/admin' : '/user'}/change-password`}>
+                  <span className="flex gap-2 items-center"><KeyRound />Change Password</span>
+              </Link>
+                </DropdownMenuItem>
+
+
+
+              <DropdownMenuSeparator />
 
               <DropdownMenuItem
                 onClick={handleLogout}

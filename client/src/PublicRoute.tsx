@@ -16,12 +16,12 @@ export default function PublicRoute() {
       return <Navigate to="/admin" replace />
     }
 
-    if (user.role === "receptionist") {
-      return <Navigate to="/receptionist" replace />
+    if (user.role === "user") {
+      return <Navigate to="/user" replace />
     }
-    if (user.role === "employee") {
-      return <Navigate to="/employee" replace />
-    }
+    // if (user.role === "employee") {
+    //   return <Navigate to="/employee" replace />
+    // }
   }
 
   return <Outlet />
