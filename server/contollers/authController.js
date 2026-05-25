@@ -10,13 +10,17 @@ import crypto from 'crypto';
 
 import { userExistbyemailService,
     registerUserService,
-    loginUserService
+    loginUserService,
+    getMeService,
+    changePasswordService
  } from "../services/auth.service.js";
 
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
-    sendResponse(res, 200, req.user, "")
+    const user = await getMeService(req.user.id)
+    sendResponse(res, 200, user, "")
 })
+
 
 const registerUser = asyncHandler(async (req, res) => {
     console.log(req.body)
@@ -66,10 +70,20 @@ const logoutUser = asyncHandler(async (req, res) => {
     sendResponse(res, 200, {}, "User logged out successfully");
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const user = await changePasswordService(req.body, req.user.id)
+    if(user){
+        sendResponse(res, 200, user, "Password Change")
+    }else{
+        throw new ApiError(400, "Bad request")
+    }
+})
+
 
 export{
     getMe,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    changePassword
 }
