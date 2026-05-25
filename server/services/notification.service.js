@@ -1,12 +1,10 @@
-import bcrypt from "bcryptjs"
-import sql from "../db/database.js"
-import ApiError from "../utils/ApiError.js"
-import { sendEmail } from "../utils/mailer.js"
-
+import bcrypt from "bcryptjs";
+import sql from "../db/database.js";
+import ApiError from "../utils/ApiError.js";
+import { sendEmail } from "../utils/mailer.js";
 
 const processtBirthdayService = async () => {
-    
-    const users = await sql`
+  const users = await sql`
         SELECT 
             u.id,
             CONCAT(u.first_name, ' ', u.last_name) AS name,
@@ -23,16 +21,9 @@ const processtBirthdayService = async () => {
             EXTRACT(DAY FROM birth_date) = EXTRACT(DAY FROM CURRENT_DATE)
             AND
             EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE)
-<<<<<<< Updated upstream
         AND role='user'
-=======
+    `;
+  return users;
+};
 
-        AND role = 'user'
->>>>>>> Stashed changes
-    `
-    return users
-}
-
-export{
-    processtBirthdayService
-}
+export { processtBirthdayService };

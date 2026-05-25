@@ -14,6 +14,7 @@ import {
 import { getIO } from "../config/socket.js";
 import { userExistbyemailService } from "../services/auth.service.js";
 import { sendEmail } from "../utils/mailer.js";
+import escapeHtml from "../utils/escapeHtml.js";
 
 const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
     const super_admin = await allSuperAdminService()
@@ -115,7 +116,7 @@ const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
 
                         ${Object.values(employee).map(value => `
 
-                            <p>${value}</p>
+                            <p>${escapeHtml(value)}</p>
 
                         `).join('')}
                         
@@ -427,27 +428,27 @@ const chekIsApprove = asyncHandler(async (req, res) => {
 
                 <div class="info-row">
                     <div class="label">Full Name</div>
-                    <div class="value">${appoinment.visitor.full_name}</div>
+                    <div class="value">${escapeHtml(appoinment.visitor.full_name)}</div>
                 </div>
 
                 <div class="info-row">
                     <div class="label">Email</div>
-                    <div class="value">${appoinment.visitor.email}</div>
+                    <div class="value">${escapeHtml(appoinment.visitor.email)}</div>
                 </div>
 
                 <div class="info-row">
                     <div class="label">Phone</div>
-                    <div class="value">${appoinment.visitor.phone}</div>
+                    <div class="value">${escapeHtml(appoinment.visitor.phone)}</div>
                 </div>
 
                 <div class="info-row">
                     <div class="label">Company</div>
-                    <div class="value">${appoinment.visitor.company}</div>
+                    <div class="value">${escapeHtml(appoinment.visitor.company)}</div>
                 </div>
 
                 <div class="info-row">
                     <div class="label">Position</div>
-                    <div class="value">${appoinment.visitor.position}</div>
+                    <div class="value">${escapeHtml(appoinment.visitor.position)}</div>
                 </div>
 
                 </div>
@@ -607,7 +608,7 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
 const preSchedule = asyncHandler(async (req, res) => {
     const { employee_email } = req.body;
-    console.log(employee_email);
+    // removed debug log for employee_email
     
         const appoinment = await preScheduleService(req.body)
         if (appoinment) {

@@ -3,7 +3,8 @@
 When you're ready, start your application by running:
 `docker compose up --build`.
 
-Your application will be available at http://localhost:5000.
+Your application will be available at http://localhost:5000 for local development.
+In production use: https://visitmi.irayva.ai (ensure `APP_URL` and `BACKEND_URL` are set to your production domain in `.env.production`).
 
 ### Deploying your application to the cloud
 
@@ -19,4 +20,5 @@ Consult Docker's [getting started](https://docs.docker.com/go/get-started-sharin
 docs for more detail on building and pushing.
 
 ### References
-* [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)
+
+- [Docker's Node.js guide](https://docs.docker.com/language/nodejs/)

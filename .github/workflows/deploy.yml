@@ -1,0 +1,134 @@
+name: Deploy Visitor Management System
+
+on:
+  push:
+    branches: [production]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build and Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Build client
+        working-directory: ./client
+        env:
+          VITE_SERVER_URL: /api/v1
+        run: npm run build
+
+      - name: Install server dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Syntax check server files
+        shell: bash
+        run: |
+          find server -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n1 node --check
+
+  deploy:
+    name: Deploy to Production Host
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: verify
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare production env file
+        shell: bash
+        run: |
+          mkdir -p .deploy
+          cat > .deploy/.env.production <<'EOF'
+          NODE_ENV=production
+          PORT=5000
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          APP_URL=${{ vars.APP_URL || secrets.APP_URL || 'https://visitmi.irayva.ai' }}
+          BACKEND_URL=${{ vars.BACKEND_URL || secrets.BACKEND_URL || 'https://visitmi.irayva.ai/api' }}
+          BACKEND_DEV_URL=${{ vars.BACKEND_DEV_URL || secrets.BACKEND_DEV_URL || 'http://backend:5000' }}
+          ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS || secrets.ALLOWED_ORIGINS || 'https://visitmi.irayva.ai' }}
+          JWT_SECRET=${{ secrets.JWT_SECRET || 'change_me' }}
+          SMTP_HOST=${{ secrets.SMTP_HOST || secrets.EMAIL_HOST || 'smtp.gmail.com' }}
+          SMTP_PORT=${{ secrets.SMTP_PORT || secrets.EMAIL_PORT || '587' }}
+          SMTP_SECURE=${{ secrets.SMTP_SECURE || secrets.EMAIL_SECURE || 'false' }}
+          SMTP_USER=${{ secrets.SMTP_USER || secrets.EMAIL_USER || '' }}
+          SMTP_PASS=${{ secrets.SMTP_PASS || secrets.EMAIL_PASS || '' }}
+          SUPABASE_URL=${{ secrets.SUPABASE_URL || '' }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY || '' }}
+          VITE_SERVER_URL=/api/v1
+          VITE_SOCKET_URL=${{ vars.APP_URL || secrets.APP_URL || 'https://visitmi.irayva.ai' }}
+          EOF
+
+      - name: Copy app files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "compose.yaml,client,server,infra/nginx/sites-available/visitmi.conf"
+          target: "/opt/visitor-management-system"
+          strip_components: 0
+
+      - name: Copy production env file
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: ".deploy/.env.production"
+          target: "/opt/visitor-management-system"
+          strip_components: 1
+
+      - name: Cleanup deploy file
+        if: always()
+        run: rm -rf .deploy
+
+      - name: Deploy stack on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            set -euo pipefail
+            cd /opt/visitor-management-system
+            # Install VisitMi nginx site if provided
+            if [ -f infra/nginx/sites-available/visitmi.conf ]; then
+              sudo mkdir -p /etc/nginx/sites-available
+              sudo cp infra/nginx/sites-available/visitmi.conf /etc/nginx/sites-available/visitmi.conf
+              sudo ln -sfn /etc/nginx/sites-available/visitmi.conf /etc/nginx/sites-enabled/visitmi.conf
+              sudo nginx -t && sudo systemctl reload nginx || true
+            fi
+            docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
+            docker compose ps
+            curl -fsS http://127.0.0.1/health
+            echo
+            curl -fsS http://127.0.0.1/api/v1/health

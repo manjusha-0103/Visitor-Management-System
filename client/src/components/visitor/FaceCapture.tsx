@@ -1,5 +1,4 @@
 import Webcam from "react-webcam";
-import * as faceapi from "face-api.js";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -20,11 +19,45 @@ interface Props {
     onBack?: () => void;
 }
 
+declare global {
+    interface Window {
+        faceapi?: any;
+    }
+}
+
+const FACE_API_CDN = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js";
+
+const loadFaceApiScript = () => {
+    if (window.faceapi) return Promise.resolve(window.faceapi);
+
+    return new Promise<any>((resolve, reject) => {
+        const existingScript = document.querySelector<HTMLScriptElement>(
+            `script[data-face-api="true"]`
+        );
+
+        if (existingScript) {
+            existingScript.addEventListener("load", () => resolve(window.faceapi));
+            existingScript.addEventListener("error", () => reject(new Error("Failed to load face-api.js")));
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = FACE_API_CDN;
+        script.async = true;
+        script.defer = true;
+        script.dataset.faceApi = "true";
+        script.onload = () => resolve(window.faceapi);
+        script.onerror = () => reject(new Error("Failed to load face-api.js"));
+        document.head.appendChild(script);
+    });
+};
+
 export default function FaceCapture({
     onComplete,
     onBack,
 }: Props) {
     const webcamRef = useRef<Webcam>(null);
+    const faceApiRef = useRef<any>(null);
 
     const [modelsLoaded, setModelsLoaded] = useState(false);
 
@@ -40,6 +73,10 @@ export default function FaceCapture({
     useEffect(() => {
         const loadModels = async () => {
             try {
+                const faceapi = await loadFaceApiScript();
+
+                faceApiRef.current = faceapi;
+
                 await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
 
                 setModelsLoaded(true);
@@ -53,7 +90,7 @@ export default function FaceCapture({
 
     // Face detection loop
     useEffect(() => {
-        if (!modelsLoaded) return;
+        if (!modelsLoaded || !faceApiRef.current) return;
 
         let interval: NodeJS.Timeout;
 
@@ -69,9 +106,9 @@ export default function FaceCapture({
             try {
                 setIsDetecting(true);
 
-                const detection = await faceapi.detectSingleFace(
+                const detection = await faceApiRef.current.detectSingleFace(
                     video,
-                    new faceapi.TinyFaceDetectorOptions()
+                    new faceApiRef.current.TinyFaceDetectorOptions()
                 );
 
                 if (!detection) {
