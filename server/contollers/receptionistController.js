@@ -54,7 +54,7 @@ const checkOut = asyncHandler(async (req, res) => {
 const checkIsApprove = asyncHandler(async (req, res) => {
 
     const is_approve = req.body.is_approve //=== "true"
-    console.log("is_approve", req.body.is_approve);
+    // approval flag logging removed
     
     const {appointment_id} = req.params
     const appoinment = await chekIsApproveService(is_approve, appointment_id)
