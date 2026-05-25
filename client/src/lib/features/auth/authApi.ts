@@ -1,6 +1,42 @@
 import { api } from "../api";
 import { clearUser } from "./authSlice";
 
+
+export interface ChangePasswordPayload {
+    old_pass: string;
+    new_pass: string;
+}
+
+export interface UpdateMePayload {
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    birth_date?: string | null;
+    position?: string;
+    company?: string;
+    department?: string;
+}
+
+export interface ProfileResponse {
+    statusCode: number;
+    success: boolean;
+    message: string;
+
+    data: {
+        id: string;
+        name: string;
+        email: string;
+        phone: string;
+        birth_date: string | null;
+        role: string;
+
+        position?: string;
+        company?: string;
+        department?: string;
+    };
+}
+
+
 export const authApi = api.injectEndpoints({
     endpoints: (builder) => ({
         signIn: builder.mutation({
@@ -38,13 +74,32 @@ export const authApi = api.injectEndpoints({
 
         }),
 
-        changePassword: builder.mutation({
-            query: ({ id, old_pass, new_pass }) => ({
-                url: `/api/v1/auth/reset_pass/${id}`,
+        // CHANGE PASSWORD
+        changePassword: builder.mutation<
+            ProfileResponse,
+            ChangePasswordPayload
+        >({
+            query: (body) => ({
+                url: "/api/v1/auth/change-password",
                 method: "POST",
-                body: { old_pass, new_pass },
+                body,
             }),
         }),
+
+        // UPDATE PROFILE
+        updateMe: builder.mutation<
+            ProfileResponse,
+            UpdateMePayload
+        >({
+            query: (body) => ({
+                url: "/api/v1/auth/update-me",
+                method: "PUT",
+                body,
+            }),
+            invalidatesTags: ['Auth']
+        }),
+
+
     })
 })
 
@@ -52,5 +107,6 @@ export const {
     useSignInMutation,
     useGetMeQuery,
     useSignOutMutation,
-    useChangePasswordMutation
+    useChangePasswordMutation,
+    useUpdateMeMutation
 } = authApi

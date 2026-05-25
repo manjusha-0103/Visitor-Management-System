@@ -174,6 +174,17 @@ export default function EmployeeForm({
   const onSubmit = async (
     values: EmployeeFormValues
   ) => {
+     const payload = {
+    ...values,
+
+    birth_date:
+      values.birth_date
+        ? format(
+            values.birth_date,
+            "yyyy-MM-dd"
+          )
+        : null,
+  };
     try {
       if (
         isEdit &&
@@ -182,11 +193,11 @@ export default function EmployeeForm({
         await updateEmployee({
           employee_id:
             employee.id,
-          ...values,
+          ...payload,
         }).unwrap();
       } else {
         await addEmployee(
-          values
+          payload
         ).unwrap();
       }
 

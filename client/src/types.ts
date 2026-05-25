@@ -63,8 +63,13 @@ export interface User {
     email: string;
     phone: string;
     password?: string;
-    role: "super_admin" | "receptionist";
-    last_login: Date | string | null
+    role: "super_admin" | "user";
+    last_login: Date | string | null;
+    company?: string;
+    department?: string;
+    department_id?: string;
+    position?: string;
+    birth_date?: string;
 }
 
 export interface AuthInitialState {

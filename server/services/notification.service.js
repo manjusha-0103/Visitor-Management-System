@@ -23,7 +23,12 @@ const processtBirthdayService = async () => {
             EXTRACT(DAY FROM birth_date) = EXTRACT(DAY FROM CURRENT_DATE)
             AND
             EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE)
+<<<<<<< Updated upstream
         AND role='user'
+=======
+
+        AND role = 'user'
+>>>>>>> Stashed changes
     `
     return users
 }
