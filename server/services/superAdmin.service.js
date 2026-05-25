@@ -23,6 +23,7 @@ const getALLEmployeesservice = async ({
             u.phone,
             u.birth_date,
             u.last_login,
+            DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
 
             CONCAT(u.first_name, ' ', u.last_name) AS full_name,
 
