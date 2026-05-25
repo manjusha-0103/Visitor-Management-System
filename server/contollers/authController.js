@@ -12,13 +12,23 @@ import { userExistbyemailService,
     registerUserService,
     loginUserService,
     getMeService,
-    changePasswordService
+    changePasswordService,
+    updateMeService
  } from "../services/auth.service.js";
 
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
     const user = await getMeService(req.user.id)
     sendResponse(res, 200, user, "")
+})
+
+const updateMe = asyncHandler(async (req, res) => {
+    const profile = await updateMeService(req.body, req.user.id)
+    if(profile){
+        sendResponse(res, 200, profile, "Data is updated successfully")
+    }else{
+        throw new  ApiError(400, 'Bad request')
+    }
 })
 
 
@@ -85,5 +95,6 @@ export{
     registerUser,
     loginUser,
     logoutUser,
-    changePassword
+    changePassword,
+    updateMe
 }
