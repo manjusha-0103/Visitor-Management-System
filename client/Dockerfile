@@ -19,7 +19,33 @@ FROM nginx:1.27-alpine AS runtime
 
 RUN apk add --no-cache curl
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN cat <<'EOF' > /etc/nginx/conf.d/default.conf
+server {
+	listen 80;
+	listen [::]:80;
+	server_name _;
+
+	root /usr/share/nginx/html;
+	index index.html;
+
+	location = /health {
+		access_log off;
+		add_header Content-Type text/plain always;
+		return 200 "healthy\n";
+	}
+
+	location /assets/ {
+		expires 1y;
+		add_header Cache-Control "public, immutable" always;
+		try_files $uri =404;
+	}
+
+	location / {
+		try_files $uri $uri/ /index.html;
+	}
+}
+EOF
+
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
