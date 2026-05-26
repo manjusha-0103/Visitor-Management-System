@@ -4,6 +4,7 @@ x-service-defaults: &service-defaults
   stop_grace_period: 30s
   networks:
     - app-network
+    
 
 services:
   backend:
