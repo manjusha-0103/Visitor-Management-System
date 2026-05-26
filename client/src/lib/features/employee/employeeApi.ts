@@ -92,12 +92,7 @@ export const employeeApi = api.injectEndpoints({
       GetAllEmployeesResponse,
       GetAllEmployeesParams
     >({
-      query: ({
-        page = 1,
-        limit = 10,
-        search,
-        department,
-      }) => ({
+      query: ({ page = 1, limit = 10, search, department }) => ({
         url: "/api/v1/super-admin/employees",
         method: "GET",
         params: {
@@ -112,12 +107,11 @@ export const employeeApi = api.injectEndpoints({
         },
       }),
       extraOptions: {
-        skipToast: true
+        skipToast: true,
       },
 
       providesTags: ["Employees"],
     }),
-
 
     addEmployee: builder.mutation({
       query: (body) => ({
@@ -139,12 +133,9 @@ export const employeeApi = api.injectEndpoints({
       invalidatesTags: ["Employees"],
     }),
 
-    addDepartment: builder.mutation<
-      Department,
-      AddDepartmentPayload
-    >({
+    addDepartment: builder.mutation<Department, AddDepartmentPayload>({
       query: (body) => ({
-        url: "api/v1/super-admin/add-departmemt",
+        url: "/api/v1/super-admin/add-departmemt",
         method: "POST",
         body,
       }),
@@ -152,19 +143,13 @@ export const employeeApi = api.injectEndpoints({
       invalidatesTags: ["Department"],
     }),
 
-    deleteDepartment: builder.mutation<
-      DeleteDepartmentResponse,
-      string
-    >({
+    deleteDepartment: builder.mutation<DeleteDepartmentResponse, string>({
       query: (id) => ({
         url: `/api/v1/super-admin/delete-dept/${id}`,
         method: "DELETE",
       }),
 
-      invalidatesTags: [
-        "Department",
-        "Employees",
-      ],
+      invalidatesTags: ["Department", "Employees"],
     }),
 
     deleteEmployee: builder.mutation({
@@ -176,10 +161,7 @@ export const employeeApi = api.injectEndpoints({
       invalidatesTags: ["Employees"],
     }),
 
-    importEmployees: builder.mutation<
-      ImportEmployeeResponse,
-      FormData
-    >({
+    importEmployees: builder.mutation<ImportEmployeeResponse, FormData>({
       query: (formData) => ({
         url: "/api/v1/super-admin/add-employees",
         method: "POST",
@@ -198,5 +180,5 @@ export const {
   useAddDepartmentMutation,
   useDeleteDepartmentMutation,
   useDeleteEmployeeMutation,
-  useImportEmployeesMutation
+  useImportEmployeesMutation,
 } = employeeApi;
