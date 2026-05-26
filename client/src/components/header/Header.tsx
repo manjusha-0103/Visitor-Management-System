@@ -58,7 +58,7 @@ export default function Header() {
 
           <Link to={`${isSuperAdmin ? '/admin' : '/user'}`} className="flex flex-col leading-tight">
             <span className="font-bold text-white text-lg">
-              iravya
+              Iravya
             </span>
           </Link>
         </div>

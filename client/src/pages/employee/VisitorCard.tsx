@@ -80,6 +80,7 @@ export default function VisitorCard({
                     label="Position"
                     placeholder="Software Engineer"
                     control={control}
+                    required={false}
                 />
             </div>
 

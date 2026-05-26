@@ -197,6 +197,7 @@ export default function CheckInForm({
 
                                                     return date < today || date > maxDate;
                                                 }}
+                                                captionLayout="dropdown"
                                             />
                                         </PopoverContent>
 
