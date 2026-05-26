@@ -1,5 +1,6 @@
 import Webcam from "react-webcam";
-import * as faceapi from "face-api.js";
+import type * as FaceApi from "face-api.js";
+// import * as faceapi from "face-api.js";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -25,7 +26,7 @@ export default function FaceCapture({
     onBack,
 }: Props) {
     const webcamRef = useRef<Webcam>(null);
-
+    const faceApiRef = useRef<typeof FaceApi | null>(null);
     const [modelsLoaded, setModelsLoaded] = useState(false);
 
     const [faceInside, setFaceInside] = useState(false);
@@ -40,6 +41,8 @@ export default function FaceCapture({
     useEffect(() => {
         const loadModels = async () => {
             try {
+                const faceapi = await import("face-api.js");
+                faceApiRef.current = faceapi;
                 await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
 
                 setModelsLoaded(true);
@@ -69,10 +72,11 @@ export default function FaceCapture({
             try {
                 setIsDetecting(true);
 
-                const detection = await faceapi.detectSingleFace(
-                    video,
-                    new faceapi.TinyFaceDetectorOptions()
-                );
+                const detection =
+    await faceApiRef.current?.detectSingleFace(
+        video,
+        new faceApiRef.current.TinyFaceDetectorOptions()
+    );
 
                 if (!detection) {
                     setFaceInside(false);

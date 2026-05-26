@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
@@ -28,7 +28,6 @@ import {
 } from "@/lib/features/visitor-check-in/visitorApi";
 
 import { useWatch } from "react-hook-form";
-import { visitorSchema } from "@/schema";
 import {
     Tabs,
     TabsContent,
@@ -39,8 +38,9 @@ import CheckInForm from "./CheckInForm";
 import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
-import FaceCapture from "../visitor/FaceCapture";
-
+import { visitorSchema } from "@/schema/visitorSchema";
+// import FaceCapture from "../visitor/FaceCapture";
+const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 
 
 type AppointmentFormValues = z.infer<
@@ -397,6 +397,13 @@ export default function AppointmentForm({
                                 <TabsContent value="walkin" className="mt-4">
                                     {
                                         walkinStep === "camera" ? (
+                                            <Suspense
+        fallback={
+            <div className="flex items-center justify-center py-10">
+                Loading camera...
+            </div>
+        }
+    >
                                             <FaceCapture
                                                 onComplete={(file, image) => {
                                                     setCapturedImage(image);
@@ -404,6 +411,7 @@ export default function AppointmentForm({
                                                     setWalkinStep("form");
                                                 }}
                                             />
+                                            </Suspense>
                                         ) : (
                                             <div className="space-y-4">
                                                 {/* Captured preview */}
@@ -530,6 +538,13 @@ export default function AppointmentForm({
                         ) : (
 
                             walkinStep === "camera" ? (
+                                    <Suspense
+                                        fallback={
+                                            <div className="flex items-center justify-center py-10">
+                                                Loading camera...
+                                            </div>
+                                        }
+                                    >
                                 <FaceCapture
                                     onComplete={(file, image) => {
                                         setCapturedImage(image);
@@ -537,6 +552,7 @@ export default function AppointmentForm({
                                         setWalkinStep("form");
                                     }}
                                 />
+                                </Suspense>
                             ) : (
                                 <div className="mt-4">
                                     <CheckInForm

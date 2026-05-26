@@ -7,12 +7,8 @@ const getMeService = async (id) => {
     const me = await sql`
         SELECT 
             u.id,
-<<<<<<< Updated upstream
-            u.first_name, u.last_name,
-=======
             u.first_name, 
             u.last_name,
->>>>>>> Stashed changes
             u.email,
             u.last_login,
             u.created_at,

@@ -49,7 +49,7 @@ import type { Department } from "@/lib/features/visitor-check-in/visitorApi";
 import { z } from "zod";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { employeeSchema } from "@/schema";
+import { employeeSchema } from "@/schema/employeeSchema";
 
 
 type EmployeeFormValues =
