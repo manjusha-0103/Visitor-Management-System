@@ -82,6 +82,30 @@ export interface ImportEmployeeResponse {
   success: boolean;
 }
 
+
+export interface SearchEmployee {
+  employee_id: string;
+  // user_id: string;
+
+  first_name: string;
+  last_name: string;
+
+  email: string;
+  phone: string;
+
+  position: string;
+
+  department_id: string | null;
+  department_name: string | null;
+}
+
+export interface SearchEmployeeResponse {
+  statusCode: number;
+  data: SearchEmployee[];
+  message: string;
+  success: boolean;
+}
+
 // ─────────────────────────────────────
 // API
 // ─────────────────────────────────────
@@ -170,6 +194,26 @@ export const employeeApi = api.injectEndpoints({
 
       invalidatesTags: ["Employees"],
     }),
+
+
+    searchEmployees: builder.query<
+  SearchEmployeeResponse,
+  string
+>({
+  query: (search = "") => ({
+    url: "/api/v1/super-admin/employee",
+    method: "GET",
+    params: {
+      search,
+    },
+  }),
+
+  extraOptions: {
+    skipToast: true,
+  },
+
+  providesTags: ["Employees"],
+}),
   }),
 });
 
@@ -181,4 +225,5 @@ export const {
   useDeleteDepartmentMutation,
   useDeleteEmployeeMutation,
   useImportEmployeesMutation,
+  useSearchEmployeesQuery
 } = employeeApi;
