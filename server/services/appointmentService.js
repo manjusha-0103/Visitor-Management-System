@@ -169,7 +169,10 @@ export const getAppointmentsService = async ({
       AND ${appointmentDate} = ${today}
       AND a.is_preschedule = false
     `;
-    orderClause = sql`a.created_at DESC`;
+    orderClause = sql`
+      CASE WHEN a.check_out IS NULL THEN 0 ELSE 1 END,
+      a.created_at DESC
+    `;
   }
 
   if (type === "all") {
