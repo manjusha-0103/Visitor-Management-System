@@ -13,7 +13,7 @@ const normalizeOrigin = (value) => {
 };
 
 export const getPublicAppUrl = () =>
-  trimTrailingSlash(process.env.APP_URL || "https://visitmi.irayva.ai");
+  trimTrailingSlash(process.env.APP_URL || "https://visitmi.iravya.ai");
 
 export const getBackendUrl = () =>
   trimTrailingSlash(
@@ -34,9 +34,9 @@ export const getAllowedOrigins = () => {
     .filter(Boolean);
 
   const defaults = [
-    "https://visitmi.irayva.ai",
-    "https://visitmi.irayva.ai:443",
-    "http://visitmi.irayva.ai",
+    "https://visitmi.iravya.ai",
+    "https://visitmi.iravya.ai:443",
+    "http://visitmi.iravya.ai",
     "http://localhost:3000",
     "http://localhost:5173",
   ].map(normalizeOrigin);
