@@ -47,7 +47,7 @@ interface DashHomeCardProp {
 export default function DashHomeCard({ tasks = [] }: DashHomeCardProp) {
     return (
         <main className="flex-1 flex items-center justify-center lg:px-6 pb-6">
-            <div className="w-full max-w-100 grid gap-3 lg:gap-5 grid-cols-2">
+            <div className="w-full max-w-180 grid gap-3 lg:gap-5 grid-cols-2 md:grid-cols-3">
                 {tasks.map((item) => (
                     <MenuCard key={item.key} item={item} />
                 ))}

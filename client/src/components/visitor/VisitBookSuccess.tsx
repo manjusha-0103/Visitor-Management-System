@@ -36,7 +36,7 @@ export default function VisitBookSuccess({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.35 }}
-            className="flex min-h-[70vh] flex-col items-center justify-center text-center"
+            className="flex flex-col items-center justify-center text-center"
         >
 
             {/* Success Icon */}

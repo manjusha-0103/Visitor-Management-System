@@ -1,6 +1,7 @@
 import {
   CalendarClock,
   ChartNoAxesCombined,
+  Settings,
   // Settings,
   UserRound,
   UsersRound,
@@ -38,14 +39,13 @@ export const SUPER_ADMIN_TASKS = [
     bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40",
     path: "/admin/analytics",
   },
-
-  // {
-  //   key: "settings",
-  //   label: "Settings",
-  //   icon: Settings,
-  //   bg: "bg-green-500 shadow-lg shadow-green-500/40",
-  //   path: "/admin/settings",
-  // },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: Settings,
+    bg: "bg-green-500 shadow-lg shadow-green-500/40",
+    path: "/admin/settings",
+  },
 ] as const;
 
 export const RECEPTIONIST_TASKS = [
@@ -63,6 +63,13 @@ export const RECEPTIONIST_TASKS = [
     icon: CalendarClock,
     bg: "bg-cyan-700 shadow-lg shadow-cyan-700/40",
     path: "/user/check-in",
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: Settings,
+    bg: "bg-green-500 shadow-lg shadow-green-500/40",
+    path: "/user/settings",
   },
 
   // {

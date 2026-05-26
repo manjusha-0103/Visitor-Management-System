@@ -3,9 +3,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 // import FaceCapture from "@/components/visitor/FaceCapture";
 const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 import CheckInForm from "@/components/appointment/CheckInForm";
-import { useGetDepartmentsQuery, useGetEmployeesQuery, usePreScheduleVisitorMutation, useSendOtpMutation, useVerifyOtpMutation, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
+import {usePreScheduleVisitorMutation, useSendOtpMutation, useVerifyOtpMutation, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
 import z from "zod";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
 import { Input } from "@/components/ui/input";
 import { visitorSchema } from "@/schema/visitorSchema";
+import { type SearchEmployee } from "@/lib/features/employee/employeeApi";
+// import EmployeeSearchSelect from "@/components/EmployeeSearchSelect";
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema
@@ -34,6 +36,10 @@ export default function CheckIn() {
     const [time, setTime] = useState("");
     const [resendLoading, setResendLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
+    // const [employeeSearch, setEmployeeSearch] = useState("");
+     const [selectedEmployee, setSelectedEmployee] =
+    useState<SearchEmployee | null>(null);
+        // const [debounced, setDebounced] = useState("");
 
     const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
     const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
@@ -46,6 +52,7 @@ export default function CheckIn() {
         handleSubmit,
         reset,
         control,
+        setValue,
         watch,
         formState: { isValid }
     } = useForm<AppointmentFormValues>({
@@ -71,37 +78,58 @@ export default function CheckIn() {
         },
     });
 
-    const selectedDepartment = useWatch({
-        control,
-        name: "department_id",
-    });
+    // const selectedDepartment = useWatch({
+    //     control,
+    //     name: "department_id",
+    // });
 
     const hasLaptop = watch("is_laptop") ?? false;
     const hasVehicle = watch("is_vehicle") ?? false;
 
-    const {
-        data: departments = [],
-        isLoading: deptLoading,
-    } = useGetDepartmentsQuery();
 
-    const {
-        data: employees = [],
-        isLoading: empLoading,
-    } = useGetEmployeesQuery(
-        selectedDepartment,
-        {
-            skip: !selectedDepartment,
-        }
-    );
+    // const { data, isLoading: empSearchLoading } =
+    //         useSearchEmployeesQuery(debounced, {
+    //             skip: !debounced.trim()
+    //         });
+    
+        //   console.log(data);
+    
+        // const employees = data?.data || [];
 
-    const selectedDepartmentData = departments.find((d) => String(d.id) === selectedDepartment);
-    const selectedEmployeeData = employees.find((e) => String(e.id) === watch("employee_id"));
+    // const {
+    //     data: departments = [],
+    //     isLoading: deptLoading,
+    // } = useGetDepartmentsQuery();
 
-    const departmentOptions = departments.map((d) => ({ label: d.name, value: String(d.id) }));
-    const employeeOptions = employees.map((e) => ({
-        label: `${e.first_name} ${e.last_name}`,
-        value: String(e.id),
-    }));
+    // const {
+    //     data: employees = [],
+    //     isLoading: empLoading,
+    // } = useGetEmployeesQuery(
+    //     selectedDepartment,
+    //     {
+    //         skip: !selectedDepartment,
+    //     }
+    // );
+
+    // const selectedDepartmentData = departments.find((d) => String(d.id) === selectedDepartment);
+    // const selectedEmployeeData = employees.find((e) => String(e.id) === watch("employee_id"));
+
+    // const departmentOptions = departments.map((d) => ({ label: d.name, value: String(d.id) }));
+    // const employeeOptions = employees.map((e) => ({
+    //     label: `${e.first_name} ${e.last_name}`,
+    //     value: String(e.id),
+    // }));
+
+
+    // useEffect(() => {
+    //         if (selectedEmployee) return;
+    
+    //         const timer = setTimeout(() => {
+    //             setDebounced(employeeSearch);
+    //         }, 300);
+    
+    //         return () => clearTimeout(timer);
+    //     }, [employeeSearch, selectedEmployee]);
 
     const resetForm = () => {
         reset({
@@ -225,7 +253,7 @@ export default function CheckIn() {
 
                     const payload = {
                         date_time,
-                        employee_email: selectedEmployeeData?.email ?? "",
+                        employee_email: selectedEmployee?.email ?? "",
                         visitors: [
                             {
                                 first_name: data.first_name,
@@ -251,10 +279,10 @@ export default function CheckIn() {
 
     const handleSendOtp = async () => {
         try {
-            if (!selectedEmployeeData?.email) return;
+            if (!selectedEmployee?.email) return;
 
             await sendOtp({
-                employee_email: selectedEmployeeData.email,
+                employee_email: selectedEmployee.email,
             }).unwrap();
 
             setOtpSent(true);
@@ -269,7 +297,7 @@ export default function CheckIn() {
             setResendLoading(true);
 
             await sendOtp({
-                employee_email: selectedEmployeeData?.email ?? "",
+                employee_email: selectedEmployee?.email ?? "",
             }).unwrap();
 
             // reset otp boxes
@@ -297,7 +325,7 @@ export default function CheckIn() {
             const enteredOtp = otp.join("");
 
             await verifyOtp({
-                email: selectedEmployeeData?.email ?? "",
+                email: selectedEmployee?.email ?? "",
                 otp: enteredOtp,
             }).unwrap();
 
@@ -307,11 +335,6 @@ export default function CheckIn() {
             console.error(err);
         }
     };
-
-    // const isWalkinReady =
-    //     walkinStep === "form" &&
-    //     capturedFile &&
-    //     isValid;
 
     const isPrescheduleReady =
         isValid &&
@@ -423,18 +446,42 @@ export default function CheckIn() {
                                                     </div>
                                                 )}
 
+                                                {/* Whom To Meet */}
+                                                
+                                                                    {/* <div className="border border-gray-200 p-4 rounded-xl">
+                                                                        <h3 className="font-semibold text-sm mb-1">
+                                                                            Whom To Meet
+                                                                        </h3>
+                                                
+                                                                        <EmployeeSearchSelect<AppointmentFormValues>
+                                                                            employees={employees}
+                                                                            isLoading={empSearchLoading}
+                                                                            setValue={setValue}
+                                                                            employeeSearch={employeeSearch}
+                                                                            setEmployeeSearch={setEmployeeSearch}
+                                                                            selectedEmployee={selectedEmployee}
+                                                                            setSelectedEmployee={setSelectedEmployee}
+                                                                            debounced={debounced}
+                                                                            setDebounced={setDebounced}
+                                                                        />
+                                                
+                                                                    </div> */}
+
                                                 <CheckInForm
                                                     control={control}
                                                     register={register}
-                                                    deptLoading={deptLoading}
-                                                    empLoading={empLoading}
-                                                    selectedDepartment={selectedDepartment}
+                                                    setValue={setValue}
+                                                    // deptLoading={deptLoading}
+                                                    // empLoading={empLoading}
+                                                    // selectedDepartment={selectedDepartment}
                                                     hasLaptop={hasLaptop}
                                                     hasVehicle={hasVehicle}
-                                                    departmentOptions={departmentOptions}
-                                                    employeeOptions={employeeOptions}
-                                                    selectedDepartmentData={selectedDepartmentData}
-                                                    selectedEmployeeData={selectedEmployeeData}
+                                                    selectedEmployee={selectedEmployee}
+    setSelectedEmployee={setSelectedEmployee}
+                                                    // departmentOptions={departmentOptions}
+                                                    // employeeOptions={employeeOptions}
+                                                    // selectedDepartmentData={selectedDepartmentData}
+                                                    // selectedEmployeeData={selectedEmployeeData}
                                                 />
 
                                                 <Button
@@ -458,18 +505,42 @@ export default function CheckIn() {
                             {/* PRESCHEDULE CONTENT */}
                             {activeTab === "preschedule" && (
                                 <div className="">
+
+                                    {/* Whom To Meet */}
+                                    
+                                                        {/* <div className="border border-gray-200 p-4 rounded-xl">
+                                                            <h3 className="font-semibold text-sm mb-1">
+                                                                Whom To Meet
+                                                            </h3>
+                                    
+                                                        <EmployeeSearchSelect<AppointmentFormValues>
+                                                                            employees={employees}
+                                                                            isLoading={empSearchLoading}
+                                                                            setValue={setValue}
+                                                                            employeeSearch={employeeSearch}
+                                                                            setEmployeeSearch={setEmployeeSearch}
+                                                                            selectedEmployee={selectedEmployee}
+                                                                            setSelectedEmployee={setSelectedEmployee}
+                                                                            debounced={debounced}
+                                                                            setDebounced={setDebounced}
+                                                                        />
+                                    
+                                                        </div> */}
                                     <CheckInForm
                                         control={control}
                                         register={register}
-                                        deptLoading={deptLoading}
-                                        empLoading={empLoading}
-                                        selectedDepartment={selectedDepartment}
+                                        // deptLoading={deptLoading}
+                                        setValue={setValue}
+                                        // empLoading={empLoading}
+                                        // selectedDepartment={selectedDepartment}
                                         hasLaptop={hasLaptop}
                                         hasVehicle={hasVehicle}
-                                        departmentOptions={departmentOptions}
-                                        employeeOptions={employeeOptions}
-                                        selectedDepartmentData={selectedDepartmentData}
-                                        selectedEmployeeData={selectedEmployeeData}
+                                        selectedEmployee={selectedEmployee}
+    setSelectedEmployee={setSelectedEmployee}
+                                        // departmentOptions={departmentOptions}
+                                        // employeeOptions={employeeOptions}
+                                        // selectedDepartmentData={selectedDepartmentData}
+                                        // selectedEmployeeData={selectedEmployeeData}
                                         showScheduleFields={true}
                                         date={date}
                                         setDate={setDate}
@@ -589,6 +660,7 @@ export default function CheckIn() {
 
 
                             {/* Footer */}
+                            {(activeTab === "preschedule" || walkinStep === "form") && (
                             <div className={`border-t border-gray-200 max-w-xl mt-4 py-4 flex gap-2`}>
 
                                 {/* PRESCHEDULE SEND OTP BUTTON */}
@@ -657,6 +729,7 @@ export default function CheckIn() {
                                     Cancel
                                 </Button>
                             </div>
+                            )}
 
                         </div>
 
