@@ -133,15 +133,20 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/visitor-management-system
-            # Install VisitMi nginx site if provided
+
             if [ -f infra/nginx/sites-available/visitmi.conf ]; then
               sudo mkdir -p /etc/nginx/sites-available
               sudo cp infra/nginx/sites-available/visitmi.conf /etc/nginx/sites-available/visitmi.conf
               sudo ln -sfn /etc/nginx/sites-available/visitmi.conf /etc/nginx/sites-enabled/visitmi.conf
               sudo nginx -t && sudo systemctl reload nginx || true
             fi
-            docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
+
+             docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
+
             docker compose ps
-            curl -fsS http://127.0.0.1/health
-            echo
-            curl -fsS http://127.0.0.1/api/v1/health
+
+           echo "Checking frontend..."
+         curl -fsS http://127.0.0.1:3003
+
+      echo "Checking backend..."
+      curl -fsS http://127.0.0.1:8003/api/v1/health
