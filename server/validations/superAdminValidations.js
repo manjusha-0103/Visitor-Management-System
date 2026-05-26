@@ -50,6 +50,6 @@ export const addEmployeeValidator = [
         .trim()
         .notEmpty()
         .withMessage("Role is required")
-        .isIn(["employee", "visitor", "receptionist", "super_admin"])
+        .isIn(["employee", "visitor", "user", "super_admin"])
         .withMessage("Invalid role")
 ];

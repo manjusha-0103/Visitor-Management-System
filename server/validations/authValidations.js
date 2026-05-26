@@ -30,7 +30,7 @@ const registerValidation = [
 
     body("role")
         .optional()
-        .isIn(["super_admin", "employee", "receptionist","visitor"])
+        .isIn(["super_admin", "employee", "user","visitor"])
         .withMessage("Invalid role"),
 
     // body("status")
