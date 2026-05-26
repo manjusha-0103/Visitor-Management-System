@@ -2,9 +2,7 @@ name: Deploy Visitor Management System
 
 on:
   push:
-    branches:
-      - main
-      - production
+    branches: [production]
   workflow_dispatch:
 
 concurrency:
