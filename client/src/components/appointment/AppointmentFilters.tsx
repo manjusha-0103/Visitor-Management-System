@@ -122,6 +122,7 @@ export default function AppointmentFilters({
                       : ""
                   )
                 }
+                captionLayout="dropdown"
                 // initialFocus
               />
             </PopoverContent>
