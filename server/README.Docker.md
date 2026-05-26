@@ -4,7 +4,7 @@ When you're ready, start your application by running:
 `docker compose up --build`.
 
 Your application will be available at http://localhost:5000 for local development.
-In production use: https://visitmi.irayva.ai (ensure `APP_URL` and `BACKEND_URL` are set to your production domain in `.env.production`).
+In production use: https://visitmi.iravya.ai (ensure `APP_URL` and `BACKEND_URL` are set to your production domain in `.env.production`).
 
 ### Deploying your application to the cloud
 
