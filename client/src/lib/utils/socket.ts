@@ -1,14 +1,14 @@
 import { io, Socket } from "socket.io-client";
 
-const API_URL =
-  import.meta.env.VITE_SERVER_URL ?? "http://192.168.0.163:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? window.location.origin;
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (socket) return socket;
 
-  socket = io(API_URL, {
+  socket = io(SOCKET_URL, {
+    path: "/socket.io",
     transports: ["websocket"],
     reconnection: true,
     reconnectionDelay: 2000,

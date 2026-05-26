@@ -19,7 +19,7 @@ import { userExistbyemailService,
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
     const user = await getMeService(req.user.id)
-    console.log("getMe", user);
+    // removed getMe debug log
     
     sendResponse(res, 200, user[0], "")
 })
@@ -35,7 +35,7 @@ const updateMe = asyncHandler(async (req, res) => {
 
 
 const registerUser = asyncHandler(async (req, res) => {
-    console.log(req.body)
+    // removed request body debug log
     const { email, password } = req.body
 
     const userExists = await userExistbyemailService(email)

@@ -11,7 +11,6 @@ import { setPassIdService,
 
 import { getIO } from "../config/socket.js";
 import { chekIsApproveService } from "../services/employeeServices.js";
-import { send } from "process";
 
 
 const setPassId = asyncHandler(async (req, res) => {
@@ -54,7 +53,7 @@ const checkOut = asyncHandler(async (req, res) => {
 const checkIsApprove = asyncHandler(async (req, res) => {
 
     const is_approve = req.body.is_approve //=== "true"
-    console.log("is_approve", req.body.is_approve);
+    // approval flag logging removed
     
     const {appointment_id} = req.params
     const appoinment = await chekIsApproveService(is_approve, appointment_id)

@@ -1,28 +1,55 @@
-version: '3.8'
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  init: true
+  stop_grace_period: 30s
+  networks:
+    - app-network
 
 services:
-  #PostgreSQL Database
-  # PostgreSQL Database
-  database:
-    image: postgres:15-alpine
-    container_name: my-postgres-db
-    restart: unless-stopped
+  backend:
+    <<: *service-defaults
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mysecurepassword
-      POSTGRES_DB: myappdb
-    volumes:
-      # Persist data even if container stops
-      - postgres_data:/var/lib/postgresql/data
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: ${DATABASE_URL}
+      APP_URL: ${APP_URL:-https://visitmi.iravya.ai}
+      BACKEND_URL: ${BACKEND_URL:-https://visitmi.iravya.ai/api}
+      BACKEND_DEV_URL: ${BACKEND_DEV_URL:-http://backend:5000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://visitmi.iravya.ai}
+    expose:
+      - "5000"
     ports:
-      - "5432:5432"
-    networks:
-      - app-network
+      - "127.0.0.1:8003:5000"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser"]
-      interval: 10s
+      test: [ "CMD-SHELL", "node --input-type=module -e \"const res = await fetch('http://127.0.0.1:5000/health'); if (!res.ok) process.exit(1);\"" ]
+      interval: 15s
       timeout: 5s
-      retries: 5
-  
-  #Backend Service
-      
+      retries: 10
+
+  frontend:
+    <<: *service-defaults
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-/api/v1}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-https://visitmi.iravya.ai}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3003:80"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://127.0.0.1/health >/dev/null" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+networks:
+  app-network:
+    driver: bridge
