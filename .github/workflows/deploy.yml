@@ -123,7 +123,9 @@ jobs:
         if: always()
         run: rm -rf .deploy
 
-            - name: Deploy stack on server
+      # FIX 1: Indentation was wrong — this step was a child of "Cleanup deploy file"
+      #         and was silently skipped. Now correctly indented as a sibling step.
+      - name: Deploy stack on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -134,6 +136,7 @@ jobs:
             set -euo pipefail
             cd /opt/visitor-management-system
 
+            # Install/update nginx site config if present
             if [ -f infra/nginx/sites-available/visitmi.conf ]; then
               sudo mkdir -p /etc/nginx/sites-available
               sudo cp infra/nginx/sites-available/visitmi.conf /etc/nginx/sites-available/visitmi.conf
@@ -144,6 +147,11 @@ jobs:
             docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
 
             docker compose ps
+
+            # FIX 2: Health checks now target the actual container ports (3003/8003)
+            #         instead of port 80 (host nginx), which returned an empty reply.
+            echo "Waiting for containers to be ready..."
+            sleep 5
 
             echo "Checking frontend..."
             curl -fsS http://127.0.0.1:3003
