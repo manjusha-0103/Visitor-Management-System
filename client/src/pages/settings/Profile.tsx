@@ -433,6 +433,7 @@ export default function Profile() {
                                                                                 : ""
                                                                         );
                                                                     }}
+                                                                    captionLayout="dropdown"
 
                                                                     disabled={(
                                                                         date

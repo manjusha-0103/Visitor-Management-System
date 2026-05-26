@@ -346,6 +346,7 @@ export default function EmployeeForm({
                               today.setHours(23, 59, 59, 59);
                               return date > today
                             }}
+                            captionLayout="dropdown"
                           />
                         </PopoverContent>
                       </Popover>
