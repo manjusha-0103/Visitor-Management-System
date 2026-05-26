@@ -9,10 +9,12 @@ import {
     RefreshCcw,
     ArrowLeft,
     Loader2,
+    QrCode,
 } from "lucide-react";
 
 interface Props {
     isSuperAdmin?: boolean;
+    centered?: boolean;
     onComplete: (
         file: File,
         preview: string
@@ -23,6 +25,7 @@ interface Props {
 
 export default function FaceCapture({
     onComplete,
+    centered = false,
     onBack,
 }: Props) {
     const webcamRef = useRef<Webcam>(null);
@@ -73,10 +76,10 @@ export default function FaceCapture({
                 setIsDetecting(true);
 
                 const detection =
-    await faceApiRef.current?.detectSingleFace(
-        video,
-        new faceApiRef.current.TinyFaceDetectorOptions()
-    );
+                    await faceApiRef.current?.detectSingleFace(
+                        video,
+                        new faceApiRef.current.TinyFaceDetectorOptions()
+                    );
 
                 if (!detection) {
                     setFaceInside(false);
@@ -151,10 +154,37 @@ export default function FaceCapture({
     };
 
     return (
-        <div className={`space-y-5`}>
+        <div
+            className={`
+        space-y-5
+        ${centered
+                    ? "flex h-full flex-col items-center justify-start text-center"
+                    : ""
+                }
+    `}
+        >
+            {onBack && (
+    <div className={centered ? "w-full flex justify-center" : ""}>
+        <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            className="
+                rounded-full border-gray-300
+                px-4 py-2 text-sm text-gray-700
+                hover:bg-gray-50
+                flex items-center gap-2
+            "
+        >
+            <ArrowLeft className="h-4 w-4" />
+            Scan QR
+            <QrCode className="h-4 w-4" />
+        </Button>
+    </div>
+)}
 
             {/* Header */}
-            <div className="">
+            <div className={centered ? "text-center" : ""}>
                 <h2 className="text-xl font-bold text-gray-900">
                     Capture Visitor Photo
                 </h2>
@@ -166,13 +196,27 @@ export default function FaceCapture({
 
             {/* Camera / Preview */}
             {!capturedImage ? (
-                <div className="space-y-4">
-                    <div className="relative w-76 overflow-hidden rounded-3xl bg-black shadow-xl">
+                <div
+                    className={`
+        space-y-4
+        ${centered ? "flex flex-col items-center" : ""}
+    `}
+                >
+                    <div
+                        className={`
+        relative overflow-hidden rounded-3xl bg-black shadow-xl w-full max-w-sm
+    
+    `}
+                    >
                         <Webcam
                             ref={webcamRef}
                             screenshotFormat="image/jpeg"
                             mirrored
-                            className="h-full w-full object-cover"
+                            className="
+    h-full
+    w-full
+    object-cover
+"
                             videoConstraints={{
                                 facingMode: "user",
                             }}
@@ -185,7 +229,7 @@ export default function FaceCapture({
                         <div
                             className={`
                                 absolute left-1/2 top-1/2
-                                h-56 w-56
+                                h-56 w-56 md:h-70 md:w-70
                                 -translate-x-1/2 -translate-y-1/2
                                 rounded-[100px]
                                 border-2
@@ -226,8 +270,13 @@ export default function FaceCapture({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-3">
-                        {onBack && (
+                    <div
+                        className={`
+        flex items-center gap-3
+        ${centered ? "justify-center" : ""}
+    `}
+                    >
+                        {/* {onBack && (
                             <Button
                                 type="button"
                                 variant="outline"
@@ -236,7 +285,7 @@ export default function FaceCapture({
                             >
                                 <ArrowLeft className="h-4 w-4" />
                             </Button>
-                        )}
+                        )} */}
 
                         <Button
                             type="button"
@@ -260,12 +309,12 @@ export default function FaceCapture({
                         src={capturedImage}
                         alt="Captured"
                         className="
-                            w-60
-                            rounded-3xl border shadow-lg
-                        "
+    w-full max-w-md
+    rounded-3xl border shadow-lg
+"
                     />
 
-                    <div className="flex gap-3">
+                    <div className={`flex ${centered ? 'justify-center' : 'justify-start'} gap-3`}>
                         <Button
                             type="button"
                             variant="outline"

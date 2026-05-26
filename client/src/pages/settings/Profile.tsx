@@ -250,9 +250,9 @@ export default function Profile() {
 
     return (
 
-        <div className="min-h-screen bg-muted/30 p-4 lg:p-8">
+        <div className="bg-muted/30 rounded-xl max-w-5xl">
 
-            <div className="max-w-6xl mx-auto space-y-6">
+            <div className="w-full space-y-6">
 
                 {/* HEADER */}
 
@@ -266,11 +266,11 @@ export default function Profile() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 2xl:grid-cols-3 gap-6">
 
                     {/* FORM */}
 
-                    <div className="xl:col-span-2">
+                    <div className="2xl:col-span-2 min-w-0">
 
                         <Card className="border-0 shadow-sm">
 
@@ -300,7 +300,7 @@ export default function Profile() {
 
                                             {/* NAME */}
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                                                 <CustomInputField<ProfileFormValues>
                                                     name="first_name"
@@ -322,7 +322,7 @@ export default function Profile() {
 
                                             {/* EMAIL + PHONE */}
 
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                                                 <div className="space-y-2">
 
@@ -456,7 +456,7 @@ export default function Profile() {
                                                     <>
                                                         {/* COMPANY + POSITION */}
 
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                                                             <CustomInputField<ProfileFormValues>
                                                                 name="company"
@@ -547,7 +547,7 @@ export default function Profile() {
 
                     <div>
 
-                        <Card className="border-0 shadow-sm sticky top-6 gap-3">
+                        <Card className="border-0 shadow-sm gap-3 lg:sticky lg:top-6">
 
                             <CardHeader>
 

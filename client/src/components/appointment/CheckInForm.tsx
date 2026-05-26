@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import type {
     UseFormRegister,
     Control,
+    UseFormSetValue,
 } from "react-hook-form";
 
 import z from "zod";
@@ -44,6 +45,8 @@ import {
     SelectField,
 } from "../form/FormFields";
 import { visitorSchema } from "@/schema/visitorSchema";
+import { useSearchEmployeesQuery, type SearchEmployee } from "@/lib/features/employee/employeeApi";
+import EmployeeSearchSelect from "../EmployeeSearchSelect";
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema
@@ -72,29 +75,30 @@ type CheckInFormProps = {
 
     register: UseFormRegister<AppointmentFormValues>;
 
-    //   watch: UseFormWatch<AppointmentFormValues>;
+     setValue: UseFormSetValue<AppointmentFormValues>;
+     selectedEmployee: SearchEmployee | null;
 
-    //   departments: Department[];
+setSelectedEmployee: React.Dispatch<
+    React.SetStateAction<SearchEmployee | null>
+>;
 
-    //   employees: Employee[];
+    // deptLoading: boolean;
 
-    deptLoading: boolean;
+    // empLoading: boolean;
 
-    empLoading: boolean;
-
-    selectedDepartment?: string;
+    // selectedDepartment?: string;
 
     hasLaptop: boolean;
 
     hasVehicle: boolean;
 
-    departmentOptions: Option[];
+    // departmentOptions: Option[];
 
-    employeeOptions: Option[];
+    // employeeOptions: Option[];
 
-    selectedDepartmentData?: Department;
+    // selectedDepartmentData?: Department;
 
-    selectedEmployeeData?: Employee;
+    // selectedEmployeeData?: Employee;
 
     showScheduleFields?: boolean;
 
@@ -114,19 +118,22 @@ type CheckInFormProps = {
 export default function CheckInForm({
     control,
     register,
-    selectedDepartment,
+    // selectedDepartment,
     hasLaptop,
     hasVehicle,
-    deptLoading,
-    empLoading,
+    setValue,
+    // deptLoading,
+    // empLoading,
 
-    departmentOptions,
-    employeeOptions,
+    // departmentOptions,
+    // employeeOptions,
 
-    selectedDepartmentData,
-    selectedEmployeeData,
+    // selectedDepartmentData,
+    // selectedEmployeeData,
 
     showScheduleFields = false,
+    selectedEmployee,
+    setSelectedEmployee,
 
     date,
     setDate,
@@ -134,6 +141,30 @@ export default function CheckInForm({
     time,
     setTime,
 }: CheckInFormProps) {
+
+    const [employeeSearch, setEmployeeSearch] = useState("");
+
+
+const [debounced, setDebounced] = useState("");
+
+
+useEffect(() => {
+    if (selectedEmployee) return;
+
+    const timer = setTimeout(() => {
+        setDebounced(employeeSearch);
+    }, 300);
+
+    return () => clearTimeout(timer);
+}, [employeeSearch, selectedEmployee]);
+
+
+const { data, isLoading: empSearchLoading } =
+    useSearchEmployeesQuery(debounced, {
+        skip: !debounced.trim(),
+    });
+
+const employees = data?.data || [];
     return (
         <FieldGroup className="max-w-xl">
             <FieldSet>
@@ -289,7 +320,19 @@ export default function CheckInForm({
                             Whom To Meet
                         </h3>
 
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mb-2">
+                        <EmployeeSearchSelect<AppointmentFormValues>
+        employees={employees}
+        isLoading={empSearchLoading}
+        setValue={setValue}
+        employeeSearch={employeeSearch}
+        setEmployeeSearch={setEmployeeSearch}
+        selectedEmployee={selectedEmployee}
+        setSelectedEmployee={setSelectedEmployee}
+        debounced={debounced}
+        setDebounced={setDebounced}
+    />
+
+                        {/* <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mb-2">
 
                             <div className="space-y-3 ">
 
@@ -360,7 +403,7 @@ export default function CheckInForm({
                                     </div>
                                 )}
                             </div>
-                        </div>
+                        </div> */}
 
                     </div>
 

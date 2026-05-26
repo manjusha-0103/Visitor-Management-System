@@ -62,7 +62,8 @@ export default function DashHome() {
   }, []);
 
   return (
-    <div className="min-h-screen  p-6"
+    <div className="min-h-screen p-6"
+    // <div className="min-h-screen p-6 flex flex-col justify-center items-center"
       style={{
         background: `
     radial-gradient(

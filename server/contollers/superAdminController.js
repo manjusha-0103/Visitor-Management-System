@@ -16,6 +16,7 @@ import {
   updateUserService,
   deleteDeparmentService,
   deleteEmployeeService,
+  getEmpbySearchService
 } from "../services/superAdmin.service.js";
 import { request } from "http";
 import fs from "fs";
@@ -339,6 +340,18 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
+
+
+const getEmpbySearch = asyncHandler(async (req, res) => {
+  const { search = null } = req.query;
+  if(!search){
+    throw new ApiError(400, 'Please provide Employee name, email or number to search')
+  }
+
+  const users = await getEmpbySearchService(search)
+    sendResponse(res, 200, users, 'Got the searched employee.')
+})
+
 export {
   addEmployee,
   getALLEmployees,
@@ -349,4 +362,5 @@ export {
   deleteDeparment,
   deleteEmployee,
   addEmployees,
+  getEmpbySearch
 };

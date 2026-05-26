@@ -3,6 +3,7 @@ import { lazy } from "react";
 import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import Settings from "./pages/settings/Settings";
 // import DummyAnalytics from "./pages/analytics/DummyAnalytics";
 // import CheckIn from "./pages/admin-check-in/CheckIn";
 // import ChangePassword from "./pages/settings/ChangePassword";
@@ -59,10 +60,10 @@ const router = createBrowserRouter([
             path: "team",
             element: <ManageTeam />,
           },
-          // {
-          //     path: "new-check-in",
-          //     element: <CheckIn/>
-          // },
+          {
+              path: "settings",
+              element: <Settings/>
+          },
           {
             path: "check-in",
             element: <CheckIn />,
@@ -111,6 +112,10 @@ const router = createBrowserRouter([
           {
             path: "profile",
             element: <Profile />,
+          },
+          {
+              path: "settings",
+              element: <Settings/>
           },
         ],
       },

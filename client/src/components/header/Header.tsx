@@ -22,7 +22,7 @@ import { useSignOutMutation } from "@/lib/features/auth/authApi";
 
 export default function Header() {
   const user = useSelector(selectUser);
-      const isSuperAdmin = user?.role === "super_admin";
+  const isSuperAdmin = user?.role === "super_admin";
   const [signOut] = useSignOutMutation();
   const navigate = useNavigate();
 
@@ -114,20 +114,20 @@ export default function Header() {
             <DropdownMenuSeparator />
             */}
 
-                <Link to={`${isSuperAdmin ? '/admin' : '/user'}/profile`}>
-              <DropdownMenuItem>
-                <span className="flex gap-2 items-center"><UserRound />Profile</span>
-              </DropdownMenuItem>
-              </Link>
+              {/* <Link to={`${isSuperAdmin ? '/admin' : '/user'}/profile`}>
                 <DropdownMenuItem>
-              <Link to={`${isSuperAdmin ? '/admin' : '/user'}/change-password`}>
-                  <span className="flex gap-2 items-center"><KeyRound />Change Password</span>
-              </Link>
+                  <span className="flex gap-2 items-center"><UserRound />Profile</span>
                 </DropdownMenuItem>
+              </Link>
+              <DropdownMenuItem>
+                <Link to={`${isSuperAdmin ? '/admin' : '/user'}/change-password`}>
+                  <span className="flex gap-2 items-center"><KeyRound />Change Password</span>
+                </Link>
+              </DropdownMenuItem> */}
 
 
 
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuSeparator /> */}
 
               <DropdownMenuItem
                 onClick={handleLogout}

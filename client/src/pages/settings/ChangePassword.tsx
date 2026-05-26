@@ -204,9 +204,9 @@ export default function ChangePassword() {
 
   return (
 
-    <div className="min-h-screen flex items-start justify-center p-4">
+    <div className="w-full flex">
 
-      <Card className="w-full max-w-lg shadow-sm border-0 gap-2">
+      <Card className="w-full max-w-xl shadow-sm border-0 gap-2">
 
         <CardHeader>
 
@@ -220,7 +220,7 @@ export default function ChangePassword() {
 
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
 
           {/* REQUIREMENTS */}
 
