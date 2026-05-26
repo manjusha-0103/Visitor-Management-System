@@ -50,6 +50,7 @@ jobs:
         run: |
           find server -name '*.js' -not -path '*/node_modules/*' -print0 | xargs -0 -n1 node --check
 
+
   deploy:
     name: Deploy to Production Host
     runs-on: ubuntu-latest
