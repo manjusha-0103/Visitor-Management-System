@@ -7,11 +7,18 @@ import {
 import { showErrorToast, showSuccessToast } from "../utils/toasts";
 
 const normalizeBaseUrl = (url: string | undefined) => {
-  if (!url) return "/api/v1";
+  if (!url) return "";
+
   let v = url.trim().replace(/\/+$/, "");
-  // remove trailing /api or /api/v1 if user mistakenly included it
+
+  // If env is set to /api or /api/v1, endpoints already include /api/v1.
+  if (/^\/?api(\/v\d+)?$/i.test(v)) {
+    return "";
+  }
+
+  // If env is a full origin ending in /api or /api/v1, keep only the origin.
   v = v.replace(/\/api(\/v\d+)?$/i, "");
-  return v || "/api/v1";
+  return v;
 };
 
 const baseQuery = fetchBaseQuery({
