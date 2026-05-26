@@ -7,8 +7,6 @@ import {
     useSendOtpMutation,
     useVerifyOtpMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
-
-import { visitorSchema } from "@/schema";
 import z from "zod";
 import { useEffect, useState } from "react";
 
@@ -40,6 +38,7 @@ import { FormLabel } from "@/components/form/FormFields";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import VisitorCard from "./VisitorCard";
+import { visitorSchema } from "@/schema/visitorSchema";
 
 
 const singleVisitorSchema = visitorSchema.pick({

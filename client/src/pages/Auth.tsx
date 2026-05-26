@@ -8,10 +8,10 @@ import { useSignInMutation } from "@/lib/features/auth/authApi"
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/lib/features/auth/authSlice';
 import { CREDENTIALS } from '@/contants';
-import { signInSchema } from '@/schema';
 import { Button } from '@/components/ui/button';
 // import logo from "iravya-logo.png"
 import { CustomInputField } from '@/components/form/FormFields';
+import { signInSchema } from '@/schema/signInSchema';
 
 type SignFormValues = z.infer<typeof signInSchema>;
 type UseMeCred = {

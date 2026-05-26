@@ -20,7 +20,6 @@ import {
     Loader2,
 } from "lucide-react";
 import { format } from "date-fns"
-import { visitorSchema } from "@/schema";
 import { Button } from "../ui/button";
 import { CustomInputField, FormLabel, SelectField } from "../form/FormFields";
 import { Calendar } from "@/components/ui/calendar"
@@ -44,6 +43,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { visitorSchema } from "@/schema/visitorSchema";
 
 type VisitorFormValues = z.infer<typeof visitorSchema>;
 
