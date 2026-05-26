@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import {
     ArrowRight,
     // Building2,
@@ -8,15 +8,23 @@ import VisitorForm from "./VisitorForm";
 import { Button } from "../ui/button";
 import VisitBookSuccess from "./VisitBookSuccess";
 import CheckInQRCode from "./CheckInQRCode";
-import FaceCapture from "./FaceCapture";
+// import FaceCapture from "./FaceCapture";
+const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 
 const CHECK_IN_URL =
     (import.meta as any).env?.VITE_CHECKIN_URL ?? window.location.href;
 
 export default function VisitorCheckIn() {
-    const isMobile =
-        window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    // const isMobile =
+    //     window.innerWidth < 768 || /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 
+    const [isMobile] = useState(
+        () =>
+            window.innerWidth < 768 ||
+            /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+                navigator.userAgent
+            )
+    );
     const [phase, setPhase] = useState<
         "qr" | "camera" | "form" | "done"
     >(
@@ -180,15 +188,23 @@ export default function VisitorCheckIn() {
                         )}
 
                         {phase === "camera" && (
-                            <FaceCapture
-                                onComplete={(file, preview) => {
-                                    setCapturedFile(file);
+                            <Suspense
+                                fallback={
+                                    <div className="flex items-center justify-center py-10">
+                                        Loading camera...
+                                    </div>
+                                }
+                            >
+                                <FaceCapture
+                                    onComplete={(file, preview) => {
+                                        setCapturedFile(file);
 
-                                    setCapturedImage(preview);
+                                        setCapturedImage(preview);
 
-                                    setPhase("form");
-                                }}
-                            />
+                                        setPhase("form");
+                                    }}
+                                />
+                            </Suspense>
                         )}
 
                         {phase === "form" && <VisitorForm

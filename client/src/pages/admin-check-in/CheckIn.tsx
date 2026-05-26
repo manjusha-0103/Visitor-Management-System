@@ -1,8 +1,8 @@
 import AdminSubHeader from "@/components/AdminSubHeader";
-import { useEffect, useState } from "react";
-import FaceCapture from "@/components/visitor/FaceCapture";
+import { lazy, Suspense, useEffect, useState } from "react";
+// import FaceCapture from "@/components/visitor/FaceCapture";
+const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 import CheckInForm from "@/components/appointment/CheckInForm";
-import { visitorSchema } from "@/schema";
 import { useGetDepartmentsQuery, useGetEmployeesQuery, usePreScheduleVisitorMutation, useSendOtpMutation, useVerifyOtpMutation, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
 import z from "zod";
 import { useForm, useWatch } from "react-hook-form";
@@ -13,6 +13,7 @@ import { Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
 import { Input } from "@/components/ui/input";
+import { visitorSchema } from "@/schema/visitorSchema";
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema
@@ -319,10 +320,10 @@ export default function CheckIn() {
         time;
 
     useEffect(() => {
-    if (!isSuperAdmin) {
-        setActiveTab("walkin");
-    }
-}, [isSuperAdmin]);
+        if (!isSuperAdmin) {
+            setActiveTab("walkin");
+        }
+    }, [isSuperAdmin]);
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -347,40 +348,39 @@ export default function CheckIn() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
                 <div
-    className={`grid gap-6 items-start ${
-        isSuperAdmin
-            ? "grid-cols-1 sm:grid-cols-[190px_1fr] md:grid-cols-[190px_1fr]"
-            : "grid-cols-1"
-    }`}
->
-                    
+                    className={`grid gap-6 items-start ${isSuperAdmin
+                            ? "grid-cols-1 sm:grid-cols-[190px_1fr] md:grid-cols-[190px_1fr]"
+                            : "grid-cols-1"
+                        }`}
+                >
+
                     {/* Custom Tabs */}
                     {isSuperAdmin && (
-                    <div className="sticky top-20 z-8999 flex sm:flex-col gap-2 rounded-xl border bg-white p-3 shadow-sm space-y-2 h-fit">
+                        <div className="sticky top-20 z-8999 flex sm:flex-col gap-2 rounded-xl border bg-white p-3 shadow-sm space-y-2 h-fit">
 
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("walkin")}
-                            className={`w-full flex items-center justify-start rounded-md h-9 px-4 text-sm font-medium transition-all ${activeTab === "walkin"
-                                ? "bg-[#701a40] text-white shadow-sm"
-                                : "text-[#701a40] bg-muted"
-                                }`}
-                        >
-                            Walk-In
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("walkin")}
+                                className={`w-full flex items-center justify-start rounded-md h-9 px-4 text-sm font-medium transition-all ${activeTab === "walkin"
+                                    ? "bg-[#701a40] text-white shadow-sm"
+                                    : "text-[#701a40] bg-muted"
+                                    }`}
+                            >
+                                Walk-In
+                            </button>
 
-                        <button
-                            type="button"
-                            onClick={() => setActiveTab("preschedule")}
-                            className={`w-full flex items-center justify-start rounded-md px-4 h-9 text-sm font-medium transition-all ${activeTab === "preschedule"
-                                ? "bg-[#701a40] text-white shadow-sm"
-                                : "text-[#701a40] bg-muted"
-                                }`}
-                        >
-                            Pre-Schedule
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("preschedule")}
+                                className={`w-full flex items-center justify-start rounded-md px-4 h-9 text-sm font-medium transition-all ${activeTab === "preschedule"
+                                    ? "bg-[#701a40] text-white shadow-sm"
+                                    : "text-[#701a40] bg-muted"
+                                    }`}
+                            >
+                                Pre-Schedule
+                            </button>
 
-                    </div>
+                        </div>
                     )}
 
                     <form
@@ -394,14 +394,22 @@ export default function CheckIn() {
                                 <div className="">
                                     {
                                         walkinStep === "camera" ? (
-                                            <FaceCapture
-                                                isSuperAdmin={isSuperAdmin}
-                                                onComplete={(file, image) => {
-                                                    setCapturedImage(image);
-                                                    setCapturedFile(file);
-                                                    setWalkinStep("form");
-                                                }}
-                                            />
+                                            <Suspense
+                                                fallback={
+                                                    <div className="flex items-center justify-center py-10">
+                                                        Loading camera...
+                                                    </div>
+                                                }
+                                            >
+                                                <FaceCapture
+                                                    isSuperAdmin={isSuperAdmin}
+                                                    onComplete={(file, image) => {
+                                                        setCapturedImage(image);
+                                                        setCapturedFile(file);
+                                                        setWalkinStep("form");
+                                                    }}
+                                                />
+                                            </Suspense>
                                         ) : (
                                             <div className="space-y-4">
                                                 {/* Captured preview */}
