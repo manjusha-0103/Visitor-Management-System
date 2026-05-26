@@ -67,17 +67,17 @@ jobs:
           cat > .deploy/.env.production <<'EOF'
           NODE_ENV=production
           PORT=5000
-          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          DATABASE_URL=${{ replace(secrets.DATABASE_URL, '$', '$$') }}
           APP_URL=${{ vars.APP_URL || secrets.APP_URL || 'https://visitmi.irayva.ai' }}
           BACKEND_URL=${{ vars.BACKEND_URL || secrets.BACKEND_URL || 'https://visitmi.irayva.ai/api' }}
           BACKEND_DEV_URL=${{ vars.BACKEND_DEV_URL || secrets.BACKEND_DEV_URL || 'http://backend:5000' }}
           ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS || secrets.ALLOWED_ORIGINS || 'https://visitmi.irayva.ai' }}
-          JWT_SECRET=${{ secrets.JWT_SECRET || 'change_me' }}
+          JWT_SECRET=${{ replace(secrets.JWT_SECRET || 'change_me', '$', '$$') }}
           SMTP_HOST=${{ secrets.SMTP_HOST || secrets.EMAIL_HOST || 'smtp.gmail.com' }}
           SMTP_PORT=${{ secrets.SMTP_PORT || secrets.EMAIL_PORT || '587' }}
           SMTP_SECURE=${{ secrets.SMTP_SECURE || secrets.EMAIL_SECURE || 'false' }}
           SMTP_USER=${{ secrets.SMTP_USER || secrets.EMAIL_USER || '' }}
-          SMTP_PASS=${{ secrets.SMTP_PASS || secrets.EMAIL_PASS || '' }}
+          SMTP_PASS=${{ replace(secrets.SMTP_PASS || secrets.EMAIL_PASS || '', '$', '$$') }}
           SUPABASE_URL=${{ secrets.SUPABASE_URL || '' }}
           SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY || '' }}
           VITE_SERVER_URL=/api/v1
@@ -146,7 +146,7 @@ jobs:
 
             docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
 
-            docker compose ps
+            docker compose -f compose.yaml --env-file .env.production ps
 
             # FIX 2: Health checks now target the actual container ports (3003/8003)
             #         instead of port 80 (host nginx), which returned an empty reply.
@@ -154,8 +154,8 @@ jobs:
             sleep 5
 
             echo "Checking frontend..."
-            curl -fsS http://127.0.0.1:3003
+            curl -fsS http://127.0.0.1:3003/health
 
             echo ""
             echo "Checking backend..."
-            curl -fsS http://127.0.0.1:8003/api/v1/health
+            curl -fsS http://127.0.0.1:8003/health
