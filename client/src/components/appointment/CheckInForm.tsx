@@ -38,13 +38,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { visitorSchema } from "@/schema";
-
 import {
     CustomInputField,
     FormLabel,
     SelectField,
 } from "../form/FormFields";
+import { visitorSchema } from "@/schema/visitorSchema";
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema

@@ -4,7 +4,7 @@ import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 // import DummyAnalytics from "./pages/analytics/DummyAnalytics";
-import CheckIn from "./pages/admin-check-in/CheckIn";
+// import CheckIn from "./pages/admin-check-in/CheckIn";
 // import ChangePassword from "./pages/settings/ChangePassword";
 
 const Auth = lazy(() => import("@/pages/Auth"))
@@ -18,6 +18,7 @@ const PreSchedule = lazy(() => import("@/pages/employee/PreSchedule"))
 const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
 const ChangePassword = lazy(() => import("@/pages/settings/ChangePassword"))
 const Profile = lazy(() => import("@/pages/settings/Profile"))
+const CheckIn = lazy(() => import("@/pages/admin-check-in/CheckIn"))
 // const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
 
 const router = createBrowserRouter([
