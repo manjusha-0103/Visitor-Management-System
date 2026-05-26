@@ -299,6 +299,7 @@ export default function PreSchedule() {
 
                                                     return date < today || date > maxDate;
                                                 }}
+                                                captionLayout="dropdown"
                                             />
                                         </PopoverContent>
                                     </Popover>

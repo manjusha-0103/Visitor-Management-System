@@ -278,7 +278,13 @@ export const getAppointmentsService = async ({
     JOIN "Users" eu ON eu.id = e.user_id
     JOIN "Users" vu ON vu.id = v.user_id
     WHERE ${whereClause}
-    ORDER BY a.date_time ASC
+     ORDER BY
+    CASE
+      WHEN a.check_out IS NOT NULL THEN 1
+      ELSE 0
+    END ASC,
+
+    a.created_at DESC
     LIMIT ${limit}
     OFFSET ${offset}
   `;

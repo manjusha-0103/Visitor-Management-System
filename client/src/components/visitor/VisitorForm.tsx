@@ -456,6 +456,7 @@ export default function VisitorForm({ setPhase,
 
                                                             return date < today;
                                                         }}
+                                                        captionLayout="dropdown"
                                                     />
                                                 </PopoverContent>
                                             </Popover>

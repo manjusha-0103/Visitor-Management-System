@@ -248,6 +248,7 @@ export default function AppointmentReportDownload() {
                                             }
                                         )
                                     }
+                                    captionLayout="dropdown"
                                 />
                             </PopoverContent>
 
@@ -320,6 +321,7 @@ export default function AppointmentReportDownload() {
                                             }
                                         )
                                     }
+                                    captionLayout="dropdown"
                                 />
                             </PopoverContent>
 

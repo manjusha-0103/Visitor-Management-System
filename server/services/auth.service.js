@@ -13,7 +13,7 @@ const getMeService = async (id) => {
             u.last_login,
             u.created_at,
             u.phone,
-            DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata'),
+            DATE(u.birth_date AT TIME ZONE 'Asia/Kolkata') AS birth_date,
             u.role,
 
             e.position,
