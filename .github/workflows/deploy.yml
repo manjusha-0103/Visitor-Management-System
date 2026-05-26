@@ -123,7 +123,7 @@ jobs:
         if: always()
         run: rm -rf .deploy
 
-      - name: Deploy stack on server
+            - name: Deploy stack on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -141,12 +141,13 @@ jobs:
               sudo nginx -t && sudo systemctl reload nginx || true
             fi
 
-             docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
+            docker compose -f compose.yaml --env-file .env.production up -d --build --remove-orphans
 
             docker compose ps
 
-           echo "Checking frontend..."
-         curl -fsS http://127.0.0.1:3003
+            echo "Checking frontend..."
+            curl -fsS http://127.0.0.1:3003
 
-      echo "Checking backend..."
-      curl -fsS http://127.0.0.1:8003/api/v1/health
+            echo ""
+            echo "Checking backend..."
+            curl -fsS http://127.0.0.1:8003/api/v1/health
