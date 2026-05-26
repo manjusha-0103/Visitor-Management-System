@@ -1,22 +1,24 @@
-import bcrypt from "bcryptjs"
-import sql from "../db/database.js"
-import ApiError from "../utils/ApiError.js"
-import { sendEmail } from "../utils/mailer.js"
-import { userExistbyemailService } from "./auth.service.js"
+import bcrypt from "bcryptjs";
+import sql from "../db/database.js";
+import ApiError from "../utils/ApiError.js";
+import { sendEmail } from "../utils/mailer.js";
+import { userExistbyemailService } from "./auth.service.js";
 
 const chekIsApproveService = async (is_approve, appointment_id) => {
-    console.log(is_approve, appointment_id)
-    const [amp] = await sql`
+  const [amp] = await sql`
         UPDATE "Appointments"
         SET 
             "is_approve" = ${is_approve},
             "is_rejected" = ${!is_approve}
         WHERE "id" = ${appointment_id}
         RETURNING *
-    `
-    console.log(amp);
-    
-    const [visitor] = await sql`
+    `;
+
+  if (!amp) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  const [visitor] = await sql`
         SELECT 
             CONCAT(u.first_name, ' ', u.last_name) AS full_name,
             u.email,
@@ -27,17 +29,20 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
         JOIN "Visitors" v
             ON v.user_id = u.id
         WHERE  v.id = ${amp.visitor_id}
-    `
+    `;
 
-    return {amp, visitor}
-}
+  if (!visitor) {
+    throw new ApiError(404, "Visitor not found");
+  }
+
+  return { amp, visitor };
+};
 
 const preScheduleService = async ({ visitors, date_time, employee_email }) => {
-    
-    let amp = [];
-    let vs = [];
+  let amp = [];
+  let vs = [];
 
-    const [employee] = await sql`
+  const [employee] = await sql`
         SELECT
             e.id AS employee_id,
             e.user_id,
@@ -55,26 +60,37 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
         WHERE u.email = ${employee_email}
     `;
 
-    if (!employee) {
-        throw new ApiError(404, "Employee not found");
-    }
+  if (!employee) {
+    throw new ApiError(404, "Employee not found");
+  }
 
-    for (let v of visitors) {
+  for (let v of visitors) {
+    const visitorexist = await userExistbyemailService(v.email);
 
-        const visitorexist = await userExistbyemailService(v.email);
+    // visitorexist logging removed
 
-        console.log(visitorexist);
-
-        // Existing visitor
-        if (visitorexist.length) {
-
-            let [existingVisitor] = await sql`
+    // Existing visitor
+    if (visitorexist.length) {
+      let [existingVisitor] = await sql`
                 SELECT * FROM "Visitors"
                 WHERE "user_id" = ${visitorexist[0].id}
             `;
 
+      if (!existingVisitor) {
+        const [createdVisitor] = await sql`
+                    INSERT INTO "Visitors"
+                    ("position", "company", "user_id")
+                    VALUES (
+                        ${v.position},
+                        ${v.company},
+                        ${visitorexist[0].id}
+                    )
+                    RETURNING *
+                `;
+        existingVisitor = createdVisitor;
+      }
 
-            let [ampp] = await sql`
+      let [ampp] = await sql`
                 INSERT INTO "Appointments"
                 ("employee_id", "visitor_id", "is_preschedule", "date_time", "is_approve", "visitor_company", "visitor_position")
                 VALUES (
@@ -89,21 +105,19 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
                 RETURNING *
             `;
 
-            amp.push(ampp);
+      amp.push(ampp);
 
-            vs.push(existingVisitor);
-
-        } else {
-
-            // Create user
-            const [user] = await sql`
+      vs.push(existingVisitor);
+    } else {
+      // Create user
+      const [user] = await sql`
                 INSERT INTO "Users"
                 ("email", "first_name", "last_name", "role", "phone")
                 VALUES (
                     ${v.email},
                     ${v.first_name},
                     ${v.last_name},
-                    ${'visitor'},
+                    ${"visitor"},
                     ${v.phone}
                 )
                 RETURNING
@@ -115,8 +129,8 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
                     "phone"
             `;
 
-            // Create visitor
-            const [visitor] = await sql`
+      // Create visitor
+      const [visitor] = await sql`
                 INSERT INTO "Visitors"
                 ("position", "company", "user_id")
                 VALUES (
@@ -127,8 +141,8 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
                 RETURNING *
             `;
 
-            // Create appointment
-            let [ampp] = await sql`
+      // Create appointment
+      let [ampp] = await sql`
                 INSERT INTO "Appointments"
                 ("employee_id", "visitor_id", "is_preschedule", "date_time","is_approve", "visitor_company", "visitor_position")
                 VALUES (
@@ -143,22 +157,22 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
                 RETURNING *
             `;
 
-            amp.push(ampp);
+      amp.push(ampp);
 
-            // FIXED HERE
-            vs.push(visitor);
-        }
+      // FIXED HERE
+      vs.push(visitor);
     }
+  }
 
-    return {
-        amp,
-        employee,
-        vs
-    };
+  return {
+    amp,
+    employee,
+    vs,
+  };
 };
 
 const employeeEsistService = async (email) => {
-    const [emp] = await sql`
+  const [emp] = await sql`
         SELECT 
             u.*,
             e.*
@@ -167,20 +181,20 @@ const employeeEsistService = async (email) => {
         JOIN "Employee" e
             ON e.user_id = u.id
         WHERE u.email = ${email} AND u.role = 'employee'
-    `
-    return emp
-}
+    `;
+  return emp;
+};
 
 const allSuperAdminService = async () => {
-    const super_admin = await sql`
+  const super_admin = await sql`
         SELECT * FROM "Users"
         WHERE role = 'super_admin'
-    `
-    return super_admin
-}
-export{
-    chekIsApproveService,
-    preScheduleService,
-    allSuperAdminService,
-    employeeEsistService
-}
+    `;
+  return super_admin;
+};
+export {
+  chekIsApproveService,
+  preScheduleService,
+  allSuperAdminService,
+  employeeEsistService,
+};

@@ -1,40 +1,38 @@
-import bcrypt from "bcryptjs"
-import sql from "../db/database.js"
-import ApiError from "../utils/ApiError.js"
-import { assign } from "nodemailer/lib/shared/index.js"
-import asyncHandler from "../utils/asyncHandler.js"
-
+import sql from "../db/database.js";
+import ApiError from "../utils/ApiError.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 const setPassIdService = async (appointment_id, data) => {
-    const {pass_id} = data
-    const amp = await sql `
+  const { pass_id } = data;
+  const [amp] = await sql`
         UPDATE "Appointments" 
         SET "pass_id" = ${pass_id}
         WHERE id = ${appointment_id}
         RETURNING *
-    `
-    return amp
-}
+    `;
+
+  if (!amp) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  return amp;
+};
 
 const checkOutService = asyncHandler(async (appointment_id) => {
-    const date_time = new Date();
+  const date_time = new Date();
 
-    const [amp] = await sql`
+  const [amp] = await sql`
         UPDATE "Appointments" 
         SET "check_out" = ${date_time}
         WHERE id = ${appointment_id}
         RETURNING *
     `;
 
-    if (!amp) {
-        throw new ApiError(404, "Appointment not found");
-    }
+  if (!amp) {
+    throw new ApiError(404, "Appointment not found");
+  }
 
-    return amp;
-    
-})
+  return amp;
+});
 
-export{
-    setPassIdService,
-    checkOutService
-}
+export { setPassIdService, checkOutService };

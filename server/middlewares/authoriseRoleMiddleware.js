@@ -4,7 +4,7 @@ export const authorize = (...roles) => {
     return asyncHandler(async (req, res, next) => {
 
         const userRole = req.user.role.toLowerCase()
-        console.log(userRole)
+        // userRole logging removed
 
         const allowedRoles = roles.map(role => role.toLowerCase())
 

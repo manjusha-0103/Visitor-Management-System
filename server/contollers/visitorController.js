@@ -15,10 +15,9 @@ import { getIO } from "../config/socket.js";
 
 
 const checkIn = asyncHandler(async (req, res) => {
-    console.log(req.file);
+    // file info logged in dev only previously; removed for production
     const appointment = await checkInService(req.body, req.file)
-
-    console.log(appointment)
+    // appointment info removed from logs
 
     if (appointment) {
         const io = getIO();

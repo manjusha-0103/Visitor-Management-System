@@ -1,6 +1,5 @@
 import sql from "../db/database.js";
 
-
 // export const getAppointmentsService = async ({
 //   type,
 //   page = 1,
@@ -159,15 +158,27 @@ export const getAppointmentsService = async ({
   `;
 
   let whereClause = sql`1=1`;
+  let orderClause = sql`a.date_time ASC`;
 
   // -------------------
   // TYPE FILTER
   // -------------------
+  if (type === "walkin") {
+    whereClause = sql`
+      ${whereClause}
+      AND ${appointmentDate} = ${today}
+      AND a.is_preschedule = false
+    `;
+    orderClause = sql`
+      CASE WHEN a.check_out IS NULL THEN 0 ELSE 1 END,
+      a.created_at DESC
+    `;
+  }
+
   if (type === "all") {
     whereClause = sql`
       ${whereClause}
       AND ${appointmentDate} = ${today}
-      
     `;
   }
 
@@ -278,13 +289,7 @@ export const getAppointmentsService = async ({
     JOIN "Users" eu ON eu.id = e.user_id
     JOIN "Users" vu ON vu.id = v.user_id
     WHERE ${whereClause}
-     ORDER BY
-    CASE
-      WHEN a.check_out IS NOT NULL THEN 1
-      ELSE 0
-    END ASC,
-
-    a.created_at DESC
+    ORDER BY ${orderClause}
     LIMIT ${limit}
     OFFSET ${offset}
   `;

@@ -22,7 +22,6 @@ import { useSignOutMutation } from "@/lib/features/auth/authApi";
 
 export default function Header() {
   const user = useSelector(selectUser);
-  console.log("Authenticated user", user);
       const isSuperAdmin = user?.role === "super_admin";
   const [signOut] = useSignOutMutation();
   const navigate = useNavigate();
