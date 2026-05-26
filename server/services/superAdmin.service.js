@@ -367,6 +367,54 @@ const deleteEmployeeService = async (id) => {
 
   return emp;
 };
+
+
+const getEmpbySearchService = async(search) => {
+  const page = 1, limit = 10;
+  const offset = (page - 1) * limit;
+
+  const users = await sql`
+    SELECT
+      u.first_name,
+      u.last_name,
+      u.email,
+      u.phone,
+      e.position,
+      e.id AS employee_id,
+      e.department AS department_id,
+      d.name AS department_name
+    FROM "Users" u
+
+    INNER JOIN "Employee" e
+      ON e.user_id = u.id
+    
+    LEFT JOIN "Departments" d
+      ON d.id = e.department 
+
+    WHERE
+      u.role = 'employee'
+            AND (
+                CONCAT(u.first_name, ' ', u.last_name)
+                    ILIKE ${`%${search}%`}
+
+                OR u.first_name ILIKE ${`%${search}%`}
+
+                OR u.last_name ILIKE ${`%${search}%`}
+
+                OR u.email ILIKE ${`%${search}%`}
+
+                OR CAST(u.phone AS TEXT)
+                    ILIKE ${`%${search}%`}
+            )
+
+        ORDER BY u.first_name ASC
+
+        LIMIT ${limit}
+        OFFSET ${offset}
+  `
+
+  return users;
+}
 export {
   getALLEmployeesservice,
   getAllUserService,
@@ -376,4 +424,5 @@ export {
   updateUserService,
   deleteDeparmentService,
   deleteEmployeeService,
+  getEmpbySearchService
 };

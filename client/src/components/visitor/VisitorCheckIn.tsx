@@ -39,9 +39,9 @@ export default function VisitorCheckIn() {
     return (
         <section
             className="
-                relative flex min-h-screen items-center justify-center overflow-hidden
-                px-4 py-8
-            "
+    relative flex min-h-screen items-center justify-center
+    overflow-hidden px-3 py-3 sm:px-4 sm:py-6
+"
             style={{
                 background: `
     radial-gradient(
@@ -61,36 +61,26 @@ export default function VisitorCheckIn() {
 
             {/* Main Card */}
             <div
-                className="
-                    relative z-10 w-full max-w-lg min-h-[90vh] overflow-hidden bg-white rounded-xl
-                    border border-gray-200 shadow-2xl
-                "
-            >
-                <div className="max-w-lg">
+    className="
+        relative z-10
+        flex h-[80vh] md:h-[70vh] w-full max-w-xl flex-col
+        overflow-hidden rounded-2xl border border-gray-200
+        bg-white shadow-2xl
+    "
+>
+                <div className="flex h-full flex-col">
                     {/* Top Header */}
                     <div
-                        className="
-                        flex items-center justify-between
-                        border-b border-gray-100 px-6 py-3
-                    "
-                    >
+    className="
+    shrink-0
+    flex items-center justify-between
+    border-b border-gray-100
+    p-2 md:p-4
+    bg-white
+"
+>
                         <div className="flex items-center gap-2">
                             <img src={'/iravya-logo.png'} width={100} height={100} className='text-center mx-auto' />
-                            {/* <div
-                                className="
-                                flex h-10 w-10 items-center justify-center rounded-full
-                                bg-linear-to-br from-[#8b1a30] to-[#6b1223]
-                                text-white shadow-lg
-                            "
-                            >
-                                <Building2 size={18} />
-                            </div>
-
-                            <div>
-                                <h2 className="text-base font-bold text-gray-900">
-                                    VisitMi
-                                </h2>
-                            </div> */}
                         </div>
 
                         <div
@@ -105,9 +95,20 @@ export default function VisitorCheckIn() {
                     </div>
 
                     {/* Content */}
-                    <div className="h-full overflow-y-auto p-4">
+                    <div
+    className="
+    flex-1 overflow-y-auto overflow-x-hidden
+    px-4 py-6 sm:px-6
+"
+>
                         {phase === "qr" && (
-                            <div className="space-y-3">
+                            <div
+    className="
+    flex min-h-full flex-col
+    items-center justify-center
+    space-y-5
+"
+>
                                 {/* Hero */}
                                 <div className="text-center">
                                     <p className="text-sm font-medium text-[#8b1a30]">
@@ -196,6 +197,7 @@ export default function VisitorCheckIn() {
                                 }
                             >
                                 <FaceCapture
+                                onBack={() => setPhase("qr")}
                                     onComplete={(file, preview) => {
                                         setCapturedFile(file);
 
@@ -203,6 +205,7 @@ export default function VisitorCheckIn() {
 
                                         setPhase("form");
                                     }}
+                                    centered
                                 />
                             </Suspense>
                         )}
