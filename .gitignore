@@ -17,3 +17,5 @@ dist/
 tmp/
 # Ignore VS Code workspace settings
 .vscode/
+
+gooleApis.json
