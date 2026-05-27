@@ -5,7 +5,9 @@ import validate from "../middlewares/validate.js";
 import { checkIn, 
     getAllDepartments, 
     getEmployees,
-    visitorInfo
+    visitorInfo,
+    verifyOtp,
+    sendOtp   
  } from "../contollers/visitorController.js";
 import { checkInValidations } from "../validations/visitorValidations.js";
 import upload from "../utils/upload.js";
@@ -22,6 +24,8 @@ router.post(
 router.get("/departments", getAllDepartments)
 router.get("/employees/:dept_id", getEmployees)
 router.get("/visitor/:appointment_id",protect, authorize('super_admin', "user"), visitorInfo)
+router.post("/send-otp", sendOtp)
+router.post("/verify-otp", verifyOtp)
 
 
 

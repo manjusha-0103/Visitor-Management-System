@@ -13,6 +13,112 @@ import { checkInService,
 } from "../services/visitorService.js";
 import { getIO } from "../config/socket.js";
 
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+const sendOtp = asyncHandler(async (req, res) => {
+
+    const { email } = req.body;
+
+    
+
+        const otp = generateOTP();
+
+        await sql`
+
+            INSERT INTO email_otp
+            (
+                email,
+                otp,
+                expires_at
+            )
+
+            VALUES
+            (
+                ${email},
+                ${otp},
+                NOW() + INTERVAL '5 minutes'
+            )
+
+            ON CONFLICT (email)
+
+            DO UPDATE SET
+                otp = EXCLUDED.otp,
+                expires_at = EXCLUDED.expires_at
+
+        `;
+
+        await sendEmail({
+            to: email,
+            subject: "OTP for check-in appointment",
+            html: `
+                <div style="
+                    font-family: Arial;
+                    max-width:500px;
+                    margin:auto;
+                    padding:30px;
+                    text-align:center;
+                    border:1px solid #ddd;
+                    border-radius:10px;
+                ">
+
+                    <h2>Email Verification</h2>
+
+                    <p>Your OTP is:</p>
+
+                    <h1 style="
+                        letter-spacing:5px;
+                        color:#2563eb;
+                    ">
+                        ${otp}
+                    </h1>
+
+                    <p>
+                        Valid for 5 minutes
+                    </p>
+
+                </div>
+            `
+        });
+
+        sendResponse(
+            res,
+            200,
+            [],
+            "OTP sent successfully"
+        );
+});
+
+
+const verifyOtp = asyncHandler(async (req, res) => {
+    const {otp, email} = req.body
+
+    const result = await sql`
+
+        SELECT *
+
+        FROM email_otp
+
+        WHERE email = ${email}
+
+        AND otp = ${otp}
+
+        AND expires_at > NOW()
+
+        LIMIT 1
+    `;
+
+    if(result.length === 0){
+        
+        throw new ApiError( 401, "OTP is invalid or Expired")
+        
+    }
+    else{
+        sendResponse(res,200, result,"OTP is verified" )
+    }
+})
+
 
 const checkIn = asyncHandler(async (req, res) => {
     // file info logged in dev only previously; removed for production
@@ -63,5 +169,7 @@ export{
     checkIn,
     getAllDepartments,
     getEmployees,
+    verifyOtp,
+    sendOtp,
     visitorInfo
 }
