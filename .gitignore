@@ -19,3 +19,5 @@ tmp/
 .vscode/
 
 gooleApis.json
+server/tokens.json
+client_secret.json
