@@ -12,6 +12,8 @@ import appointmentRoutes from "./routers/appointmentRoutes.js";
 import analyticsRoutes from "./routers/analyticsRoutes.js";
 import superAdminsRoutes from "./routers/superAdminsRoutes.js";
 import { getAllowedOrigins } from "./config/runtimeUrls.js";
+import { oauth2Client } from "./config/googleCalender.js";
+import fs from 'fs'
 
 const app = express();
 const allowedOrigins = getAllowedOrigins();
@@ -26,6 +28,7 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
@@ -42,6 +45,37 @@ app.use("/api/v1/appointments", appointmentRoutes);
 app.use("/api/v1/receptionist", receptionistRoutes);
 app.use("/api/v1/super-admin", superAdminsRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
+
+
+app.get('/', (req, res) => {
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['https://www.googleapis.com/auth/calendar'],
+    prompt: 'consent',
+  });
+
+  res.redirect(authUrl);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  try {
+    const code = req.query.code;
+
+    const { tokens } = await oauth2Client.getToken(code);
+
+    oauth2Client.setCredentials(tokens);
+    fs.writeFileSync('tokens.json', JSON.stringify(tokens));
+
+    console.log(tokens);
+
+    res.send('Success');
+
+  } catch (err) {
+    console.error(err);
+    res.send('OAuth failed');
+  }
+});
+
 
 app.use(globalErrorHandler);
 

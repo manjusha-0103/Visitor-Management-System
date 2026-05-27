@@ -3,6 +3,7 @@ import sql from "../db/database.js";
 import ApiError from "../utils/ApiError.js";
 import { sendEmail } from "../utils/mailer.js";
 import { userExistbyemailService } from "./auth.service.js";
+import { scheduleEvent } from "../config/googleCalender.js";
 
 const chekIsApproveService = async (is_approve, appointment_id) => {
   const [amp] = await sql`
@@ -164,10 +165,46 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
     }
   }
 
+  const descriptions = `
+    Visitor Details:
+
+    ${visitors.map((visitor, index) => `
+      Visitor ${index + 1}:
+
+      Name: ${visitor.first_name} ${visitor.last_name}
+      Email: ${visitor.email}
+      Phone: ${visitor.phone}
+      Company: ${visitor.company}
+    `).join('\n')}
+`;
+
+  const event = {
+    summary: 'Visitor Meeting',
+
+    description: descriptions,
+
+    startDateTime: new Date(date_time).toISOString(),
+
+    endDateTime: new Date(
+      new Date(date_time).getTime() + 30 * 60000
+    ).toISOString(),
+
+    attendees: [
+      // Employee
+      employee_email,
+
+      // Visitors
+      ...visitors.map(visitor => visitor.email),
+    ],
+  };
+
+  const response = await scheduleEvent(event);
+
   return {
     amp,
     employee,
     vs,
+    response
   };
 };
 
