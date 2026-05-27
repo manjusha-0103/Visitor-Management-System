@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 
 import { FormLabel } from "@/components/form/FormFields";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import VisitorCard from "./VisitorCard";
 import { visitorSchema } from "@/schema/visitorSchema";
@@ -67,6 +67,8 @@ export default function PreSchedule() {
     // const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
+    const [searchParams] = useSearchParams();
+    const isSuccess = searchParams.get("isSuccess");
     const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
     const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
 
@@ -116,7 +118,7 @@ export default function PreSchedule() {
                 employee_email: empEmail,
                 visitors: data.visitors,
             }).unwrap();
-          
+
             reset();
         } catch (err) {
             console.log(err);
@@ -144,9 +146,9 @@ export default function PreSchedule() {
         try {
             setResendLoading(true);
 
-             await sendOtp({
-            employee_email: empEmail,
-        }).unwrap();
+            await sendOtp({
+                employee_email: empEmail,
+            }).unwrap();
 
             // reset otp boxes
             setOtp(["", "", "", "", "", ""]);
@@ -520,6 +522,59 @@ export default function PreSchedule() {
                                 </div>
 
                             </div>
+                        )}
+
+
+                        {otpVerified && (
+                            <>
+                                 {
+                            isSuccess === "true" && (
+                                <div className="rounded-md bg-green-100 text-green-700 p-3 text-sm">
+                                    Google Calendar connected successfully, now all future appointments will be directly available on your calender with reminders.
+                                </div>
+                            )
+                        }
+
+                        {
+                            isSuccess === "false" && (
+                                <div className="rounded-md bg-red-100 text-red-700 p-3 text-sm">
+                                    Failed to connect Google Calendar, but you can still schedule appointment.
+                                </div>
+                            )
+                        }
+
+                        <div className="rounded-2xl border bg-white p-5 space-y-4">
+
+                            <div>
+                                <h3 className="font-semibold text-lg">
+                                    Connect Google Calendar
+                                </h3>
+
+                                <p className="text-sm text-muted-foreground">
+                                    Connect your Google Calendar to automatically receive
+                                    meeting reminders and future visitor schedules.
+                                </p>
+                            </div>
+
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    window.location.href =
+                                        //   `http://localhost:5000`;
+                                        `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
+                                }}
+                                disabled={isSuccess === 'true'}
+                                className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
+                            //   className="bg-[#4285F4] hover:bg-[#3367d6]"
+                            >
+                                Connect Google Calendar
+                            </Button>
+
+                        </div>
+                            
+                            </>
+
+                        
                         )}
 
                         {/* Footer */}

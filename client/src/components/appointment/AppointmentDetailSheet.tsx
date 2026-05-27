@@ -4,6 +4,8 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,13 +47,13 @@ function DetailRow({
     value: React.ReactNode;
 }) {
     return (
-        <div className="flex items-start gap-3 py-3 border-b last:border-0">
-            <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                <Icon size={16} className="text-gray-600" />
+       <div className="flex items-start gap-3 py-3 border-b last:border-0">
+            <div className="w-9 h-9 rounded-lg bg-gold flex items-center justify-center shrink-0">
+                <Icon size={16} className="text-white" />
             </div>
 
             <div className="flex-1 min-w-0">
-                <p className="text-xs uppercase tracking-wider text-gray-400 mb-1">
+                <p className="text-xs uppercase tracking-wider text-maroon font-bold mb-1">
                     {label}
                 </p>
 
@@ -70,22 +72,30 @@ export default function AppointmentDetailSheet({
 }: Props) {
     if (!appointment) return null;
 
+    const printRef = useRef<HTMLDivElement>(null);
+
     const visitorName = `${appointment.visitor_first_name} ${appointment.visitor_last_name}`;
 
     const employeeName = `${appointment.employee_first_name} ${appointment.employee_last_name}`;
 
 
-    function handleImageClick(url: string){
+    function handleImageClick(url: string) {
         window.open(
-                    url,
-                    "_blank"
-                );
+            url,
+            "_blank"
+        );
     }
+
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        documentTitle: 'Appointment Details'
+
+    })
 
     return (
         <Sheet open={open} onOpenChange={onClose}>
-            <SheetContent className="w-full sm:max-w-xl p-0 bg-white overflow-y-auto">
-
+            <SheetContent className="sheet-print w-full sm:max-w-xl p-0 bg-white overflow-y-auto">
+                <div ref={printRef}>
                 {/* HEADER */}
                 <SheetHeader className="border-b p-4">
                     <div className="flex items-center gap-4">
@@ -121,8 +131,8 @@ export default function AppointmentDetailSheet({
                         </Badge>
                     </div>
 
-                    {/* QUICK STATS */} 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+                    {/* QUICK STATS */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5">
 
                         <div className="rounded-xl border bg-gray-50 p-3">
                             <p className="text-xs text-gray-400 mb-1">
@@ -168,22 +178,22 @@ export default function AppointmentDetailSheet({
                     </div>
                 </SheetHeader>
 
-                <div className="p-4 space-y-8">
+                <div className="p-4 bg-white">
 
                     {/* VISITOR */}
-                    <section>
+                    <section  className="print-section mb-6">
                         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                             Visitor Information
                         </h3>
 
-                        <div className="rounded-2xl border bg-white p-4">
+                        <div className="rounded-2xl border bg-white p-4 print-card">
                             {
-                                appointment.visitor_img && 
-                                <img 
-                                    src={appointment.visitor_img} 
-                                    width={100} 
-                                    height={100}
-                                    onClick={() => handleImageClick(appointment.visitor_img)} 
+                                appointment.visitor_img &&
+                                <img
+                                    src={appointment.visitor_img}
+                                    width={200}
+                                    height={200}
+                                    onClick={() => handleImageClick(appointment.visitor_img)}
                                     className="border border-gray-200 rounded-md cursor-pointer"
                                 />
                             }
@@ -221,12 +231,12 @@ export default function AppointmentDetailSheet({
                     </section>
 
                     {/* HOST */}
-                    <section>
+                    <section  className="print-section mb-6">
                         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                             Host Information
                         </h3>
 
-                        <div className="rounded-2xl border bg-white px-4">
+                        <div className="rounded-2xl border bg-white px-4 print-card">
 
                             <DetailRow
                                 icon={User}
@@ -261,7 +271,7 @@ export default function AppointmentDetailSheet({
                     </section>
 
                     {/* VISIT INFO */}
-                    <section>
+                    <section  className="print-section mb-6">
                         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                             Visit Information
                         </h3>
@@ -336,12 +346,12 @@ export default function AppointmentDetailSheet({
 
                     {/* ASSETS */}
                     {(appointment.is_laptop || appointment.is_vehicle) && (
-                        <section>
+                        <section className="print-section mb-6">
                             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
                                 Assets
                             </h3>
 
-                            <div className="rounded-2xl border bg-white px-4">
+                            <div className="rounded-2xl border bg-white px-4 print-card">
 
                                 {appointment.is_laptop && (
                                     <>
@@ -377,12 +387,20 @@ export default function AppointmentDetailSheet({
                     )}
 
                 </div>
+                </div>
 
                 {/* FOOTER */}
-                <div className="sticky bottom-0 border-t bg-white p-4">
+                <div className="sticky bottom-0 border-t bg-white p-4 flex gap-3">
                     <Button
                         variant="outline"
-                        className="w-full"
+                        className="flex-1 bg-maroon text-white hover:bg-maroon-dark hover:text-white"
+                        onClick={handlePrint}
+                    >
+                        Print / Download
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="flex-1"
                         onClick={() => onClose(false)}
                     >
                         Close

@@ -106,7 +106,7 @@ export default function VisitorForm({ setPhase,
         watch,
         trigger,
         setValue,
-        formState: { isSubmitting },
+        formState: { isSubmitting, errors },
     } = useForm<VisitorFormValues>({
         resolver: zodResolver(visitorSchema),
         defaultValues: {
@@ -116,6 +116,7 @@ export default function VisitorForm({ setPhase,
             email: "",
             position: "",
             company: "",
+            purpose: "",
             is_laptop: false,
             make: "",
             model: "",
@@ -123,9 +124,12 @@ export default function VisitorForm({ setPhase,
             is_vehicle: false,
             vehicle_no: "",
             employee_id: "",
-            department_id: "",
+            // department_id: "",
         },
     });
+
+    console.log(errors);
+    
 
     const hasLaptop = watch("is_laptop");
     const hasVehicle = watch("is_vehicle");
@@ -171,7 +175,7 @@ export default function VisitorForm({ setPhase,
     const nextStep = async () => {
 
         const fieldMap: Record<number, (keyof VisitorFormValues)[]> = {
-            0: ["department_id", "employee_id"],
+            0: ["employee_id", "purpose"],
             1: ["first_name", "last_name", "phone", "email"],
             2: ["company"]
         };
@@ -201,6 +205,7 @@ export default function VisitorForm({ setPhase,
             formData.append("phone", data.phone);
             formData.append("company", data.company || "");
             formData.append("position", data.position || "");
+            formData.append("purpose", data.purpose || "");
 
             // Employee
             formData.append("employee_id", data.employee_id);
@@ -280,22 +285,27 @@ export default function VisitorForm({ setPhase,
                             >
                                 <SectionHeader
                                     icon={User}
-                                    heading="Whom to Meet"
-                                    description="Select the department and employee you're visiting"
+                                    heading="Whom to Meet & Purpose"
+                                    description="Select the person to meet and purpose of the meet"
                                     color="bg-gradient-to-br from-[#8b1a30] to-[#6b1223]"
                                 />
 
-<EmployeeSearchSelect<VisitorFormValues>
-    employees={employees}
-    isLoading={isLoading}
-    setValue={setValue}
-    employeeSearch={employeeSearch}
-    setEmployeeSearch={setEmployeeSearch}
-    selectedEmployee={selectedEmployee}
-    setSelectedEmployee={setSelectedEmployee}
-    debounced={debounced}
-    setDebounced={setDebounced}
-/>
+                                <EmployeeSearchSelect<VisitorFormValues>
+                                    employees={employees}
+                                    isLoading={isLoading}
+                                    setValue={setValue}
+                                    employeeSearch={employeeSearch}
+                                    setEmployeeSearch={setEmployeeSearch}
+                                    selectedEmployee={selectedEmployee}
+                                    setSelectedEmployee={setSelectedEmployee}
+                                    debounced={debounced}
+                                    setDebounced={setDebounced}
+                                    errorMsg={errors?.employee_id?.message ?? null}
+                                />
+
+                            <div className="mt-4">
+                                <CustomInputField<VisitorFormValues> name="purpose" label="Purpose of visit" placeholder="Meeting with local clients" control={control} />
+</div>
                                 {/* <div className="space-y-4">
                                     <div className="relative">
                                         <input

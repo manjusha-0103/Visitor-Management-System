@@ -63,7 +63,7 @@ export default function VisitorCheckIn() {
             <div
     className="
         relative z-10
-        flex h-[80vh] md:h-[70vh] w-full max-w-xl flex-col
+        flex h-[80vh] md:h-[90vh] w-full max-w-xl flex-col
         overflow-hidden rounded-2xl border border-gray-200
         bg-white shadow-2xl
     "
@@ -75,7 +75,7 @@ export default function VisitorCheckIn() {
     shrink-0
     flex items-center justify-between
     border-b border-gray-100
-    p-2 md:p-4
+    p-2
     bg-white
 "
 >

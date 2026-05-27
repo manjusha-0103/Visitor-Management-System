@@ -36,10 +36,7 @@ export default function CheckIn() {
     const [time, setTime] = useState("");
     const [resendLoading, setResendLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
-    // const [employeeSearch, setEmployeeSearch] = useState("");
-     const [selectedEmployee, setSelectedEmployee] =
-    useState<SearchEmployee | null>(null);
-        // const [debounced, setDebounced] = useState("");
+    const [selectedEmployee, setSelectedEmployee] = useState<SearchEmployee | null>(null);
 
     const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
     const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
@@ -54,7 +51,7 @@ export default function CheckIn() {
         control,
         setValue,
         watch,
-        formState: { isValid }
+        formState: { isValid, errors }
     } = useForm<AppointmentFormValues>({
         resolver: zodResolver(
             visitorSchema
@@ -67,6 +64,7 @@ export default function CheckIn() {
             email: "",
             position: "",
             company: "",
+            purpose: "",
             is_laptop: false,
             make: "",
             model: "",
@@ -74,14 +72,9 @@ export default function CheckIn() {
             is_vehicle: false,
             vehicle_no: "",
             employee_id: "",
-            department_id: "",
+            // department_id: "",
         },
     });
-
-    // const selectedDepartment = useWatch({
-    //     control,
-    //     name: "department_id",
-    // });
 
     const hasLaptop = watch("is_laptop") ?? false;
     const hasVehicle = watch("is_vehicle") ?? false;
@@ -138,6 +131,7 @@ export default function CheckIn() {
             phone: "",
             email: "",
             position: "",
+            purpose: "",
             company: "",
             is_laptop: false,
             make: "",
@@ -146,7 +140,7 @@ export default function CheckIn() {
             is_vehicle: false,
             vehicle_no: "",
             employee_id: "",
-            department_id: "",
+            // department_id: "",
         });
 
         setDate(undefined);
@@ -181,6 +175,7 @@ export default function CheckIn() {
                 formData.append("last_name", data.last_name);
                 formData.append("email", data.email);
                 formData.append("phone", data.phone);
+                formData.append("purpose", data.purpose || "")
 
                 formData.append("company", data.company || "");
                 formData.append("position", data.position || "");
@@ -254,6 +249,7 @@ export default function CheckIn() {
                     const payload = {
                         date_time,
                         employee_email: selectedEmployee?.email ?? "",
+                        // purpose: data.purpose,
                         visitors: [
                             {
                                 first_name: data.first_name,
@@ -446,27 +442,6 @@ export default function CheckIn() {
                                                     </div>
                                                 )}
 
-                                                {/* Whom To Meet */}
-                                                
-                                                                    {/* <div className="border border-gray-200 p-4 rounded-xl">
-                                                                        <h3 className="font-semibold text-sm mb-1">
-                                                                            Whom To Meet
-                                                                        </h3>
-                                                
-                                                                        <EmployeeSearchSelect<AppointmentFormValues>
-                                                                            employees={employees}
-                                                                            isLoading={empSearchLoading}
-                                                                            setValue={setValue}
-                                                                            employeeSearch={employeeSearch}
-                                                                            setEmployeeSearch={setEmployeeSearch}
-                                                                            selectedEmployee={selectedEmployee}
-                                                                            setSelectedEmployee={setSelectedEmployee}
-                                                                            debounced={debounced}
-                                                                            setDebounced={setDebounced}
-                                                                        />
-                                                
-                                                                    </div> */}
-
                                                 <CheckInForm
                                                     control={control}
                                                     register={register}
@@ -478,6 +453,7 @@ export default function CheckIn() {
                                                     hasVehicle={hasVehicle}
                                                     selectedEmployee={selectedEmployee}
     setSelectedEmployee={setSelectedEmployee}
+    errorMsg={errors?.employee_id?.message ?? null}
                                                     // departmentOptions={departmentOptions}
                                                     // employeeOptions={employeeOptions}
                                                     // selectedDepartmentData={selectedDepartmentData}
@@ -506,26 +482,6 @@ export default function CheckIn() {
                             {activeTab === "preschedule" && (
                                 <div className="">
 
-                                    {/* Whom To Meet */}
-                                    
-                                                        {/* <div className="border border-gray-200 p-4 rounded-xl">
-                                                            <h3 className="font-semibold text-sm mb-1">
-                                                                Whom To Meet
-                                                            </h3>
-                                    
-                                                        <EmployeeSearchSelect<AppointmentFormValues>
-                                                                            employees={employees}
-                                                                            isLoading={empSearchLoading}
-                                                                            setValue={setValue}
-                                                                            employeeSearch={employeeSearch}
-                                                                            setEmployeeSearch={setEmployeeSearch}
-                                                                            selectedEmployee={selectedEmployee}
-                                                                            setSelectedEmployee={setSelectedEmployee}
-                                                                            debounced={debounced}
-                                                                            setDebounced={setDebounced}
-                                                                        />
-                                    
-                                                        </div> */}
                                     <CheckInForm
                                         control={control}
                                         register={register}
@@ -537,6 +493,7 @@ export default function CheckIn() {
                                         hasVehicle={hasVehicle}
                                         selectedEmployee={selectedEmployee}
     setSelectedEmployee={setSelectedEmployee}
+    errorMsg={errors?.employee_id?.message ?? null}
                                         // departmentOptions={departmentOptions}
                                         // employeeOptions={employeeOptions}
                                         // selectedDepartmentData={selectedDepartmentData}
