@@ -22,9 +22,15 @@ const checkInService = async (
     is_vehicle,
     vehicle_no,
     employee_id,
+    purpose,
+    loggedin_user
   },
   file,
+  
 ) => {
+  // console.log("loggedin_user", loggedin_user);
+  const loggedInUserId = loggedin_user ?? null;
+  
   const [visitorexist] = await userExistbyemailService(email);
   const date_time = new Date();
   const photo_url = await uploadFile(file, "visitor_photos");
@@ -48,26 +54,31 @@ const checkInService = async (
   if (!employee) {
     throw new ApiError(404, "Employee not found");
   }
+  
   let appointment, visitor;
+  
   if (visitorexist) {
     visitor = await sql`
-            UPDATE "Visitors"
-            SET "is_laptop" = ${is_laptop},
-                "laptop_make" = ${make},
-                "laptop_model" = ${model},
-                "laptop_serial_no" = ${serial_no},
-                "is_vehicle" = ${is_vehicle},
-                "vehicle_no" = ${vehicle_no},
-                "position" = ${position},
-                "company" = ${company},
-                "photo" = ${photo_url}
-            WHERE "user_id" = ${visitorexist.id}
-            RETURNING *
-        `;
+        UPDATE "Visitors"
+        SET "is_laptop" = ${is_laptop},
+            "laptop_make" = ${make},
+            "laptop_model" = ${model},
+            "laptop_serial_no" = ${serial_no},
+            "is_vehicle" = ${is_vehicle},
+            "vehicle_no" = ${vehicle_no},
+            "position" = ${position},
+            "company" = ${company},
+            "photo" = ${photo_url}
+        WHERE "user_id" = ${visitorexist.id}
+        RETURNING *
+    `;
 
+    
+    
+    
     appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img")
-            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url} )
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img", "purpose", "schedule_by")
+            values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url}, ${purpose}, ${loggedInUserId} )
             RETURNING *
         `;
 
@@ -79,7 +90,12 @@ const checkInService = async (
       html: `
                 <p>Hi ${escapeHtml(employee.first_name)} ${escapeHtml(employee.last_name)}</p>
                 <p>${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)}) wants to meet</p>
+                <p>Name: ${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)})</p>
+                <p>Email: ${escapeHtml(email)}</p>
+                <p>Phone: ${escapeHtml(phone)}</p>
+                <img src=${photo_url}>
                 <div style="text-align:center; margin-top:25px;">
+
 
                 <a href="${escapeHtml(backendUrl)}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
                 style="
@@ -112,6 +128,7 @@ const checkInService = async (
                 
             `,
     });
+
     return { visitorexist, visitor, appointment, employee };
   } else {
     const user = await sql`
@@ -120,6 +137,20 @@ const checkInService = async (
             RETURNING "id", "first_name", "last_name", "email", "role", "phone"
         `;
     // user logging removed
+    console.log(user);
+    
+    const backendUrl = getBackendUrl();
+    // if (!user || !user[0]) {
+    //   throw new ApiError(500, "Failed to create user");
+    // }
+
+    // if (!visitor || !visitor[0]) {
+    //   throw new ApiError(500, "Failed to create visitor");
+    // }
+
+    // if (!appointment || !appointment[0]) {
+    //   throw new ApiError(500, "Failed to create appointment");
+    // }
 
     visitor = await sql`
             INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id", "photo")
@@ -128,22 +159,11 @@ const checkInService = async (
         `;
     // console.log(visitor)
     appointment = await sql`
-            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img")
-            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url})
+            INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img", "schedule_by")
+            values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url}, ${loggedInUserId})
             RETURNING *
         `;
-    const backendUrl = getBackendUrl();
-    if (!user || !user[0]) {
-      throw new ApiError(500, "Failed to create user");
-    }
-
-    if (!visitor || !visitor[0]) {
-      throw new ApiError(500, "Failed to create visitor");
-    }
-
-    if (!appointment || !appointment[0]) {
-      throw new ApiError(500, "Failed to create appointment");
-    }
+    
 
     await sendEmail({
       to: employee.email,
@@ -151,6 +171,10 @@ const checkInService = async (
       html: `
                 <p>Hi ${escapeHtml(employee.first_name)} ${escapeHtml(employee.last_name)}</p>
                 <p>${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)}) wants to meet</p>
+                <p>Name: ${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)})</p>
+                <p>Email: ${escapeHtml(email)}</p>
+                <p>Phone: ${escapeHtml(phone)}</p>
+                <img src=${photo_url}>
                 <div style="text-align:center; margin-top:25px;">
 
                 <a href="${escapeHtml(backendUrl)}/api/v1/employee/is-approve/${appointment[0].id}?is_approve=true"
