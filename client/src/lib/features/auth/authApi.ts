@@ -100,6 +100,17 @@ export const authApi = api.injectEndpoints({
         }),
 
 
+        // connectGoogleCalendar: builder.mutation<
+        //     { url: string },
+        //     string
+        // >({
+        //     query: (empEmail) => ({
+        //         url: `/?email=${empEmail}`,
+        //         method: "GET",
+        //     }),
+        // }),
+
+
     })
 })
 
@@ -108,5 +119,6 @@ export const {
     useGetMeQuery,
     useSignOutMutation,
     useChangePasswordMutation,
-    useUpdateMeMutation
+    useUpdateMeMutation,
+    // useConnectGoogleCalendarMutation
 } = authApi

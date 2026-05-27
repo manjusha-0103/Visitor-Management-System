@@ -1,5 +1,6 @@
 import {google} from 'googleapis'
 import fs from 'fs'
+import sql from '../db/database.js';
 
 // const auth = new google.auth.GoogleAuth({
 //   credentials: {
@@ -27,11 +28,22 @@ export const scheduleEvent = async ({summary,
       description,
       startDateTime,
       endDateTime,
-      attendees}) => {
+      attendees}, employeeId) => {
 
-    const tokens = JSON.parse(fs.readFileSync('tokens.json'));
 
-    oauth2Client.setCredentials(tokens);
+        const [employee] = await sql`
+  SELECT *
+  FROM "Employee"
+  WHERE id = ${employeeId}
+`;
+
+    // const tokens = JSON.parse(fs.readFileSync('tokens.json'));
+
+    oauth2Client.setCredentials({
+  access_token: employee.google_access_token,
+  refresh_token: employee.google_refresh_token,
+  expiry_date: employee.google_token_expiry,
+});
 
     // const client = await oauth2Client.getClient();
 

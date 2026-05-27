@@ -42,7 +42,7 @@ import {
 import {
     CustomInputField,
     FormLabel,
-    SelectField,
+    // SelectField,
 } from "../form/FormFields";
 import { visitorSchema } from "@/schema/visitorSchema";
 import { useSearchEmployeesQuery, type SearchEmployee } from "@/lib/features/employee/employeeApi";
@@ -52,35 +52,35 @@ type AppointmentFormValues = z.infer<
     typeof visitorSchema
 >;
 
-type Department = {
-    id: string | number;
-    name: string;
-};
+// type Department = {
+//     id: string | number;
+//     name: string;
+// };
 
-type Employee = {
-    id: string | number;
-    first_name: string;
-    last_name: string;
-    position?: string;
-    email?: string;
-};
+// type Employee = {
+//     id: string | number;
+//     first_name: string;
+//     last_name: string;
+//     position?: string;
+//     email?: string;
+// };
 
-type Option = {
-    label: string;
-    value: string;
-};
+// type Option = {
+//     label: string;
+//     value: string;
+// };
 
 type CheckInFormProps = {
     control: Control<AppointmentFormValues>;
 
     register: UseFormRegister<AppointmentFormValues>;
 
-     setValue: UseFormSetValue<AppointmentFormValues>;
-     selectedEmployee: SearchEmployee | null;
+    setValue: UseFormSetValue<AppointmentFormValues>;
+    selectedEmployee: SearchEmployee | null;
 
-setSelectedEmployee: React.Dispatch<
-    React.SetStateAction<SearchEmployee | null>
->;
+    setSelectedEmployee: React.Dispatch<
+        React.SetStateAction<SearchEmployee | null>
+    >;
 
     // deptLoading: boolean;
 
@@ -113,6 +113,8 @@ setSelectedEmployee: React.Dispatch<
     setTime?: React.Dispatch<
         React.SetStateAction<string>
     >;
+
+    errorMsg?: string | null;
 };
 
 export default function CheckInForm({
@@ -140,31 +142,32 @@ export default function CheckInForm({
 
     time,
     setTime,
+    errorMsg
 }: CheckInFormProps) {
 
     const [employeeSearch, setEmployeeSearch] = useState("");
 
 
-const [debounced, setDebounced] = useState("");
+    const [debounced, setDebounced] = useState("");
 
 
-useEffect(() => {
-    if (selectedEmployee) return;
+    useEffect(() => {
+        if (selectedEmployee) return;
 
-    const timer = setTimeout(() => {
-        setDebounced(employeeSearch);
-    }, 300);
+        const timer = setTimeout(() => {
+            setDebounced(employeeSearch);
+        }, 300);
 
-    return () => clearTimeout(timer);
-}, [employeeSearch, selectedEmployee]);
+        return () => clearTimeout(timer);
+    }, [employeeSearch, selectedEmployee]);
 
 
-const { data, isLoading: empSearchLoading } =
-    useSearchEmployeesQuery(debounced, {
-        skip: !debounced.trim(),
-    });
+    const { data, isLoading: empSearchLoading } =
+        useSearchEmployeesQuery(debounced, {
+            skip: !debounced.trim(),
+        });
 
-const employees = data?.data || [];
+    const employees = data?.data || [];
     return (
         <FieldGroup className="max-w-xl">
             <FieldSet>
@@ -321,16 +324,17 @@ const employees = data?.data || [];
                         </h3>
 
                         <EmployeeSearchSelect<AppointmentFormValues>
-        employees={employees}
-        isLoading={empSearchLoading}
-        setValue={setValue}
-        employeeSearch={employeeSearch}
-        setEmployeeSearch={setEmployeeSearch}
-        selectedEmployee={selectedEmployee}
-        setSelectedEmployee={setSelectedEmployee}
-        debounced={debounced}
-        setDebounced={setDebounced}
-    />
+                            employees={employees}
+                            isLoading={empSearchLoading}
+                            setValue={setValue}
+                            employeeSearch={employeeSearch}
+                            setEmployeeSearch={setEmployeeSearch}
+                            selectedEmployee={selectedEmployee}
+                            setSelectedEmployee={setSelectedEmployee}
+                            debounced={debounced}
+                            setDebounced={setDebounced}
+                            errorMsg={errorMsg}
+                        />
 
                         {/* <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 mb-2">
 
@@ -406,6 +410,28 @@ const employees = data?.data || [];
                         </div> */}
 
                     </div>
+
+
+
+                      {/* Purpose of Visit */}
+                    {
+                        !showScheduleFields && (
+                             <div className="border border-gray-200 p-4 rounded-xl">
+                        <h3 className="font-semibold text-sm mb-1">
+                            Purpose of visit
+                        </h3>
+
+                            <CustomInputField<AppointmentFormValues>
+                                name="purpose"
+                                label=""
+                                placeholder="Meeting with local clients"
+                                control={control}
+                            />
+
+                        </div>
+                        )
+                    }
+
 
                     <div className="border border-gray-200 p-4 rounded-xl">
                         <h3 className="font-semibold text-sm mb-1">

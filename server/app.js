@@ -14,6 +14,8 @@ import superAdminsRoutes from "./routers/superAdminsRoutes.js";
 import { getAllowedOrigins } from "./config/runtimeUrls.js";
 import { oauth2Client } from "./config/googleCalender.js";
 import fs from 'fs'
+import sendResponse from "./utils/sendResponse.js";
+import sql from "./db/database.js";
 
 const app = express();
 const allowedOrigins = getAllowedOrigins();
@@ -48,31 +50,68 @@ app.use("/api/v1/analytics", analyticsRoutes);
 
 
 app.get('/', (req, res) => {
+  const {email} = req.query;
+
+  console.log("akjfdsf",email);
+  
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/calendar'],
     prompt: 'consent',
+    state: email
   });
 
   res.redirect(authUrl);
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
+  let url = 'http://localhost:5173/employee';
+  // isSuccess = false;
   try {
     const code = req.query.code;
+    const email = req.query.state;
 
     const { tokens } = await oauth2Client.getToken(code);
 
-    oauth2Client.setCredentials(tokens);
-    fs.writeFileSync('tokens.json', JSON.stringify(tokens));
+ const [employee] = await sql`
+      SELECT e.id
+      FROM "Employee" e
+      JOIN "Users" u ON u.id = e.user_id
+      WHERE u.email = ${email}
+    `;
 
-    console.log(tokens);
+    if (!employee) {
+      throw new Error("Employee not found");
+    }
 
-    res.send('Success');
+
+    await sql`
+      UPDATE "Employee"
+      SET
+        google_access_token = ${tokens.access_token},
+        google_refresh_token = ${tokens.refresh_token},
+        google_token_expiry = ${tokens.expiry_date},
+        google_calendar_connected = ${true}
+      WHERE id = ${employee.id}
+    `;
+
+    // oauth2Client.setCredentials(tokens);
+    // fs.writeFileSync('tokens.json', JSON.stringify(tokens));
+
+    // console.log(tokens);
+
+    // isSuccess = true
+    // res.redirect(`http://localhost:5173/employee`)
+
+    // sendResponse(res, 200, null, "token created.")
 
   } catch (err) {
     console.error(err);
-    res.send('OAuth failed');
+    // isSuccess = false
+    // res.send('OAuth failed');
+  }finally {
+    res.redirect(`${url}`)
+    // res.redirect(`${url}?isSuccess=${isSuccess}`)
   }
 });
 

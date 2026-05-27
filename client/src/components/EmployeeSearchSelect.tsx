@@ -34,6 +34,8 @@ type Props<T extends FieldValues> = {
     >;
 
     placeholder?: string;
+
+    errorMsg?: string | null;
 };
 
 export default function EmployeeSearchSelect<
@@ -53,6 +55,7 @@ export default function EmployeeSearchSelect<
     setDebounced,
 
     placeholder = "Search employee by name, email or phone",
+    errorMsg = null
 }: Props<T>) {
     const [showDropdown, setShowDropdown] =
         useState(false);
@@ -92,14 +95,22 @@ export default function EmployeeSearchSelect<
                         setShowDropdown(true);
                     }}
                     placeholder={placeholder}
-                    className="
-                        h-12 w-full rounded-xl border border-gray-200
+                    className={`
+                        h-10 w-full rounded-lg border border-gray-200
                         bg-white px-4 text-sm outline-none
                         transition-all
-                        focus:border-[#8b1a30]
+                        ${errorMsg ? "border-red-500" : "border-[#e8e8f0]"}
+                        
                         focus:ring-4 focus:ring-[#8b1a30]/10
-                    "
+                    `}
                 />
+
+
+                {errorMsg && (
+              <p className=" text-red-500 text-xs ml-1 mt-0.5">
+                {errorMsg}
+              </p>
+            )}
             </div>
 
             {showDropdown && (

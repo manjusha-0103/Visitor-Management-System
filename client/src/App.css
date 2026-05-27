@@ -31,3 +31,74 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(122, 27, 69, 0.8);
 }
+
+
+/* @media print {
+
+  .print-section {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .print-card {
+    display: block !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+  }
+
+  .detail-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+} */
+
+
+
+@media print {
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sheet-print {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    height: auto !important;
+    box-shadow: none !important;
+  }
+
+  /* KEEP SECTIONS TOGETHER */
+  .print-section,
+  .print-card {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin: 20mm;
+  }
+
+  /* ALLOW ROWS TO FLOW NORMALLY */
+  /* .detail-row {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  } */
+
+  /* REMOVE FIXED HEIGHT ISSUES */
+  .sticky {
+    display: none !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 20mm;
+}

@@ -198,7 +198,7 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
     ],
   };
 
-  const response = await scheduleEvent(event);
+  const response = await scheduleEvent(event, employee.employee_id);
 
   return {
     amp,

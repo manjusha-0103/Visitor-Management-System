@@ -11,12 +11,12 @@ export const visitorSchema = z.object({
   position: z.string(),
   company: z.string().min(1, "Company is required"),
   is_laptop: z.boolean(),
-
+  purpose: z.string().min(1, "Purpose is required"),
   make: z.string().optional(),
   model: z.string().optional(),
   serial_no: z.string().optional(),
   is_vehicle: z.boolean().optional(),
   vehicle_no: z.string().optional(),
-  department_id: z.string().min(1, "Department is required"),
+  // department_id: z.string().min(1, "Department is required"),
   employee_id: z.string().min(1, "Employee is required"),
 });

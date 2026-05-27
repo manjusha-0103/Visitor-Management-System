@@ -6,7 +6,8 @@ import validate from "../middlewares/validate.js";
 import { chekIsApprove,
     preSchedule,
     sendOtp,
-    verifyOtp
+    verifyOtp,
+    // calenderStatus
  } from "../contollers/employeeController.js";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
 router.get("/is-approve/:appointment_id", chekIsApprove)
 router.post("/preschedule", preSchedule)
 router.post("/send-otp", sendOtp)
-router.post("/verify-otp", verifyOtp)
+router.post("/verify-otp", verifyOtp);
+// router.get("/calender-status", calenderStatus)
 export default router;
 
