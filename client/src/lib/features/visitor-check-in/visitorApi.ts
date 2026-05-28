@@ -75,6 +75,11 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
+interface VerifyOtpResponse {
+  otpVerified: boolean;
+  google_calendar_connected: boolean;
+}
+
 export const visitorApi = api.injectEndpoints({
   endpoints: (builder) => ({
 
@@ -139,7 +144,7 @@ export const visitorApi = api.injectEndpoints({
     }),
 
      // SEND OTP
-    sendOtp: builder.mutation<
+    empoyeeSendOtp: builder.mutation<
       ApiResponse,
       SendOtpPayload
     >({
@@ -151,8 +156,8 @@ export const visitorApi = api.injectEndpoints({
     }),
 
     // VERIFY OTP
-    verifyOtp: builder.mutation<
-      ApiResponse,
+    empoyeeVerifyOtp: builder.mutation<
+      ApiResponse<VerifyOtpResponse>,
       VerifyOtpPayload
     >({
       query: (body) => ({
@@ -170,6 +175,6 @@ export const {
   useGetEmployeesQuery,
   useVisitorCheckInMutation,
   usePreScheduleVisitorMutation,
-  useSendOtpMutation,
-  useVerifyOtpMutation
+  useEmpoyeeSendOtpMutation,
+  useEmpoyeeVerifyOtpMutation
 } = visitorApi;

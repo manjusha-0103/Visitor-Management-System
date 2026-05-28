@@ -36,6 +36,21 @@ export interface ProfileResponse {
     };
 }
 
+export interface VerifyOtpPayload {
+    email: string;
+    otp: string;
+}
+
+export interface SendOtpPayload {
+    email: string;
+}
+
+export interface SendOtpResponse {
+    statusCode: number;
+    success: boolean;
+    message: string;
+    data: [];
+}
 
 export const authApi = api.injectEndpoints({
     endpoints: (builder) => ({
@@ -74,6 +89,19 @@ export const authApi = api.injectEndpoints({
 
         }),
 
+         verifyOtp: builder.mutation<
+            any,
+            VerifyOtpPayload
+        >({
+            query: (body) => ({
+                url: "/api/v1/auth/verify-otp",
+                method: "POST",
+                body,
+            }),
+
+            invalidatesTags: ['Auth']
+        }),
+
         // CHANGE PASSWORD
         changePassword: builder.mutation<
             ProfileResponse,
@@ -100,6 +128,18 @@ export const authApi = api.injectEndpoints({
         }),
 
 
+        sendOtp: builder.mutation<
+    SendOtpResponse,
+    SendOtpPayload
+>({
+    query: (body) => ({
+        url: "/api/v1/auth/send-otp",
+        method: "POST",
+        body,
+    }),
+}),
+
+
         // connectGoogleCalendar: builder.mutation<
         //     { url: string },
         //     string
@@ -120,5 +160,7 @@ export const {
     useSignOutMutation,
     useChangePasswordMutation,
     useUpdateMeMutation,
+    useVerifyOtpMutation,
+    useSendOtpMutation
     // useConnectGoogleCalendarMutation
 } = authApi

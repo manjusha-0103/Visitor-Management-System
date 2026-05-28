@@ -15,6 +15,7 @@ import { userExistbyemailService,
     changePasswordService,
     updateMeService
  } from "../services/auth.service.js";
+import { sendEmail } from "../utils/mailer.js";
 
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
@@ -50,26 +51,107 @@ const registerUser = asyncHandler(async (req, res) => {
 
 })
 
+const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
 const loginUser = asyncHandler(async (req, res) => {
-    const { email, password } = req.body
-    const userExists = await userExistbyemailService(email)
-    if (!userExists.length) {
-        throw new ApiError(401, "We couldn't find that account.")
+
+    const { email, password } = req.body;
+
+    // CHECK USER
+    const [userExists] = await userExistbyemailService(email);
+
+    if (!userExists) {
+        throw new ApiError(
+            401,
+            "We couldn't find that account."
+        );
     }
-    const user = await loginUserService(email, password)
-    // let responseData = await buildUserResponse(user)
-    const token = generateToken(user.id)
-    const options = {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'None',
-        path: "/",
-        maxAge: 24 * 60 * 60 * 1000
+
+    // VALIDATE PASSWORD
+    const user = await loginUserService(email, password);
+
+    if (!user) {
+        throw new ApiError(
+            401,
+            "Invalid credentials"
+        );
     }
-    res.cookie("token", token, options)
-    // console.log("responseData",responseData);
-    sendResponse(res, 200, user, `Welcome back, ${user.first_name}`)
-})
+
+    // GENERATE OTP
+    const otp = generateOTP();
+
+    // SAVE OTP
+    await sql`
+
+        INSERT INTO email_otp
+        (
+            email,
+            otp,
+            expires_at
+        )
+
+        VALUES
+        (
+            ${email},
+            ${otp},
+            NOW() + INTERVAL '5 minutes'
+        )
+
+        ON CONFLICT (email)
+
+        DO UPDATE SET
+            otp = EXCLUDED.otp,
+            expires_at = EXCLUDED.expires_at
+
+    `;
+
+    // SEND EMAIL
+    await sendEmail({
+        to: email,
+        subject: "Login Verification OTP",
+        html: `
+            <div style="
+                font-family: Arial;
+                max-width:500px;
+                margin:auto;
+                padding:30px;
+                text-align:center;
+                border:1px solid #ddd;
+                border-radius:10px;
+            ">
+
+                <h2>Login Verification</h2>
+
+                <p>Your OTP is:</p>
+
+                <h1 style="
+                    letter-spacing:5px;
+                    color:#2563eb;
+                ">
+                    ${otp}
+                </h1>
+
+                <p>
+                    Valid for 5 minutes
+                </p>
+
+            </div>
+        `
+    });
+
+    // RETURN OTP REQUIRED
+    sendResponse(
+        res,
+        200,
+        {
+            otpRequired: true,
+            email
+        },
+        "OTP sent successfully"
+    );
+});
 
 const logoutUser = asyncHandler(async (req, res) => {
     res.clearCookie("token", {
@@ -92,102 +174,137 @@ const changePassword = asyncHandler(async (req, res) => {
 })
 
 
-const generateOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-};
+
 
 const sendOtp = asyncHandler(async (req, res) => {
 
     const { email } = req.body;
 
+    // CHECK USER
     const [userExist] =
         await userExistbyemailService(email);
 
-    if(userExist){
+    if (!userExist) {
 
-        const otp = generateOTP();
-
-        await sql`
-
-            INSERT INTO email_otp
-            (
-                email,
-                otp,
-                expires_at
-            )
-
-            VALUES
-            (
-                ${email},
-                ${otp},
-                NOW() + INTERVAL '5 minutes'
-            )
-
-            ON CONFLICT (email)
-
-            DO UPDATE SET
-                otp = EXCLUDED.otp,
-                expires_at = EXCLUDED.expires_at
-
-        `;
-
-        await sendEmail({
-            to: email,
-            subject: "OTP for verification",
-            html: `
-                <div style="
-                    font-family: Arial;
-                    max-width:500px;
-                    margin:auto;
-                    padding:30px;
-                    text-align:center;
-                    border:1px solid #ddd;
-                    border-radius:10px;
-                ">
-
-                    <h2>Email Verification</h2>
-
-                    <p>Your OTP is:</p>
-
-                    <h1 style="
-                        letter-spacing:5px;
-                        color:#2563eb;
-                    ">
-                        ${otp}
-                    </h1>
-
-                    <p>
-                        Valid for 5 minutes
-                    </p>
-
-                </div>
-            `
-        });
-
-        sendResponse(
-            res,
-            200,
-            [],
-            "OTP sent successfully"
-        );
-
-    }
-    else{
-
-        sendResponse(
-            res,
+        throw new ApiError(
             404,
-            [],
-            "User not exist"
+            "User not found"
         );
     }
 
+    // GENERATE OTP
+    const otp =
+        generateOTP();
+
+    // SAVE OTP
+    await sql`
+
+        INSERT INTO email_otp
+        (
+            email,
+            otp,
+            expires_at
+        )
+
+        VALUES
+        (
+            ${email},
+            ${otp},
+            NOW() + INTERVAL '5 minutes'
+        )
+
+        ON CONFLICT (email)
+
+        DO UPDATE SET
+            otp = EXCLUDED.otp,
+            expires_at = EXCLUDED.expires_at
+
+    `;
+
+    // SEND EMAIL
+    await sendEmail({
+
+        to: email,
+
+        subject: "Resend OTP",
+
+        html: `
+            <div style="
+                font-family: Arial;
+                max-width:500px;
+                margin:auto;
+                padding:30px;
+                text-align:center;
+                border:1px solid #ddd;
+                border-radius:10px;
+            ">
+
+                <h2>
+                    OTP Verification
+                </h2>
+
+                <p>
+                    Your OTP is:
+                </p>
+
+                <h1 style="
+                    letter-spacing:5px;
+                    color:#8b1a30;
+                ">
+                    ${otp}
+                </h1>
+
+                <p>
+                    Valid for 5 minutes
+                </p>
+
+            </div>
+        `
+    });
+
+    sendResponse(
+        res,
+        200,
+        [],
+        "OTP resent successfully"
+    );
 });
 
 
-const verifyOtp = asyncHandler(async (req, res) => {
-    const {otp, email} = req.body
+// const verifyOtp = asyncHandler(async (req, res) => {
+//     const {otp, email} = req.body
 
+//     const result = await sql`
+
+//         SELECT *
+
+//         FROM email_otp
+
+//         WHERE email = ${email}
+
+//         AND otp = ${otp}
+
+//         AND expires_at > NOW()
+
+//         LIMIT 1
+//     `;
+
+//     if(result.length === 0){
+        
+        
+//         throw new ApiError( 401, "OTP is invalid or Expired")
+        
+//     }
+//     else{
+//         sendResponse(res,200, result,"OTP is verified" )
+//     }
+// })
+
+const verifyOtp = asyncHandler(async (req, res) => {
+
+    const { otp, email } = req.body;
+
+    // VERIFY OTP
     const result = await sql`
 
         SELECT *
@@ -201,18 +318,56 @@ const verifyOtp = asyncHandler(async (req, res) => {
         AND expires_at > NOW()
 
         LIMIT 1
+
     `;
 
-    if(result.length === 0){
-        
-        
-        throw new ApiError( 401, "OTP is invalid or Expired")
-        
+    if (result.length === 0) {
+
+        throw new ApiError(
+            401,
+            "OTP is invalid or expired"
+        );
     }
-    else{
-        sendResponse(res,200, result,"OTP is verified" )
+
+    // GET USER
+    const [user] = await userExistbyemailService(email);
+
+    if (!user) {
+        throw new ApiError(
+            404,
+            "User not found"
+        );
     }
-})
+
+    // GENERATE TOKEN
+    const token = generateToken(user.id);
+
+    // COOKIE OPTIONS
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        path: "/",
+        maxAge: 24 * 60 * 60 * 1000
+    };
+
+    // SET COOKIE
+    res.cookie("token", token, options);
+
+    // DELETE OTP AFTER SUCCESS
+    await sql`
+        DELETE FROM email_otp
+        WHERE email = ${email}
+    `;
+
+    // SUCCESS RESPONSE
+    sendResponse(
+        res,
+        200,
+        user,
+        `Welcome back, ${user.first_name}`
+    );
+});
 
 
 
