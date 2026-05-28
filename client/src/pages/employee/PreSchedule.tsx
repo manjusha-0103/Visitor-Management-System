@@ -10,6 +10,14 @@ import {
     // useVerifyOtpMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+
 import z from "zod";
 import { useEffect, useState } from "react";
 
@@ -43,6 +51,7 @@ import { Input } from "@/components/ui/input";
 import VisitorCard from "./VisitorCard";
 import { visitorSchema } from "@/schema/visitorSchema";
 import OTPVerification from "@/components/OTPVerification";
+import { useGetGoogleCalendarStatusQuery } from "@/lib/features/employee/employeeApi";
 
 
 const singleVisitorSchema = visitorSchema.pick({
@@ -67,16 +76,40 @@ export default function PreSchedule() {
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [otpSent, setOtpSent] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
-    // const [sendOtpLoading, setSendOtpLoading] = useState(false);
-    // const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
-    const [googleConnected, setGoogleConnected] = useState(false);
-    const [googleConnectionFailed, setGoogleConnectionFailed] = useState(false);
+    const [debouncedEmail, setDebouncedEmail] = useState("");
     const [resendTimer, setResendTimer] = useState(30);
-    const [searchParams] = useSearchParams();
-    const status = searchParams.get("status");
+    // const [searchParams] = useSearchParams();
+    // const status = searchParams.get("status");a
     const [sendOtp, { isLoading: sendOtpLoading }] = useEmpoyeeSendOtpMutation();
     const [verifyOtp, { isLoading: verifyOtpLoading }] = useEmpoyeeVerifyOtpMutation();
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedEmail(empEmail);
+        }, 700);
+
+        return () => clearTimeout(timer);
+    }, [empEmail]);
+
+    const isValidEmail =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(debouncedEmail);
+
+    const {
+        data: googleStatus,
+        isLoading: googleStatusLoading,
+        error: googleStatusError,
+    } = useGetGoogleCalendarStatusQuery(debouncedEmail, {
+        skip: !isValidEmail,
+    });
+
+    const isGoogleConnected =
+        googleStatus?.data?.google_calendar_connected;
+
+    const isEmployeeNotFound =
+        googleStatusError &&
+        "status" in googleStatusError &&
+        googleStatusError.status === 404;
 
     const {
         control,
@@ -123,9 +156,22 @@ export default function PreSchedule() {
                 date_time,
                 employee_email: empEmail,
                 visitors: data.visitors,
+                login_user: ""
             }).unwrap();
 
             reset();
+
+            setDate(undefined);
+            setTime("");
+            setEmpEmail("");
+            setDebouncedEmail("");
+
+            setOtp(["", "", "", "", "", ""]);
+            setOtpSent(false);
+            setOtpVerified(false);
+
+            setResendTimer(30);
+
         } catch (err) {
             console.log(err);
         }
@@ -185,16 +231,13 @@ export default function PreSchedule() {
                 otp: enteredOtp,
             }).unwrap();
             setOtpVerified(true);
-            setGoogleConnected(
-                response.data.google_calendar_connected
-            );
-             setGoogleConnectionFailed(false);
 
 
         } catch (error) {
             console.log(error);
         }
     };
+
 
     useEffect(() => {
         let interval: NodeJS.Timeout;
@@ -209,23 +252,9 @@ export default function PreSchedule() {
     }, [otpSent, resendTimer]);
 
 
-    useEffect(() => {
-    // const status = searchParams.get("status");
-
-    if (status === "success") {
-        setGoogleConnected(true);
-        setGoogleConnectionFailed(false);
-    }
-
-    if (status === "failed") {
-        setGoogleConnected(false);
-        setGoogleConnectionFailed(true);
-    }
-}, [status]);
-
-// const canSchedule =
-//     otpVerified && (googleConnected || googleConnectionFailed);
-
+    const canSchedule =
+        otpVerified &&
+        isGoogleConnected;
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -338,6 +367,7 @@ export default function PreSchedule() {
                                 </div>
 
                                 {/* Time */}
+                                {/* Time */}
                                 <div className="space-y-2">
                                     <FormLabel
                                         htmlFor="visit-time"
@@ -345,11 +375,10 @@ export default function PreSchedule() {
                                         required
                                     />
 
-                                    <Select value={time} onValueChange={setTime}>
+                                    <Select value={time || ""} onValueChange={setTime}>
                                         <SelectTrigger className="h-11 w-full rounded-md">
                                             <div className="flex items-center gap-2">
                                                 <Clock3 className="h-4 w-4 text-[#8b1a30]" />
-
                                                 <SelectValue placeholder="Select time" />
                                             </div>
                                         </SelectTrigger>
@@ -357,34 +386,14 @@ export default function PreSchedule() {
                                         <SelectContent className="max-h-72">
                                             {Array.from({ length: 48 }).map((_, index) => {
                                                 const hour = Math.floor(index / 2);
-
-                                                const minute =
-                                                    index % 2 === 0 ? "00" : "30";
-
-                                                const time24 = `${String(hour).padStart(
-                                                    2,
-                                                    "0"
-                                                )}:${minute}`;
-
-                                                const hour12 =
-                                                    hour === 0
-                                                        ? 12
-                                                        : hour > 12
-                                                            ? hour - 12
-                                                            : hour;
-
-                                                const ampm =
-                                                    hour >= 12 ? "PM" : "AM";
+                                                const minute = index % 2 === 0 ? "00" : "30";
+                                                const time24 = `${String(hour).padStart(2, "0")}:${minute}`;
+                                                const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+                                                const ampm = hour >= 12 ? "PM" : "AM";
 
                                                 return (
-                                                    <SelectItem
-                                                        key={time24}
-                                                        value={time24}
-                                                    >
-                                                        {`${String(hour12).padStart(
-                                                            2,
-                                                            "0"
-                                                        )}:${minute} ${ampm}`}
+                                                    <SelectItem key={time24} value={time24}>
+                                                        {`${String(hour12).padStart(2, "0")}:${minute} ${ampm}`}
                                                     </SelectItem>
                                                 );
                                             })}
@@ -404,11 +413,72 @@ export default function PreSchedule() {
                                         className="rounded-md text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200 border border-[#e8e8f0]"
                                     />
 
+                                    <div className="min-h-5">
+
+                                        {/* LOADING */}
+                                        {
+                                            debouncedEmail &&
+                                            googleStatusLoading && (
+                                                <p className="text-xs text-muted-foreground">
+                                                    Checking Google Calendar status...
+                                                </p>
+                                            )
+                                        }
+
+                                        {/* EMPLOYEE NOT FOUND */}
+                                        {
+                                            debouncedEmail &&
+                                            !googleStatusLoading &&
+                                            isEmployeeNotFound && (
+                                                <div className="flex items-center gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                                                    <div className="h-2 w-2 rounded-full bg-red-600" />
+
+                                                    <span>
+                                                        Employee not found
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+
+                                        {/* GOOGLE CONNECTED */}
+                                        {
+                                            debouncedEmail &&
+                                            !googleStatusLoading &&
+                                            !isEmployeeNotFound &&
+                                            isGoogleConnected && (
+                                                <div className="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                                                    <div className="h-2 w-2 rounded-full bg-green-600" />
+
+                                                    <span>
+                                                        Google Calendar Connected
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+
+                                        {/* GOOGLE NOT CONNECTED */}
+                                        {
+                                            debouncedEmail &&
+                                            !googleStatusLoading &&
+                                            !isEmployeeNotFound &&
+                                            googleStatus &&
+                                            !isGoogleConnected && (
+                                                <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                                                    <div className="h-2 w-2 rounded-full bg-amber-500" />
+
+                                                    <span>
+                                                        Google Calendar Not Connected
+                                                    </span>
+                                                </div>
+                                            )
+                                        }
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
 
-                        {date && time && empEmail && (
+                        {date && time && empEmail && isGoogleConnected && (
                             <div className="space-y-5">
                                 {fields.map((field, index) => (
                                     <VisitorCard
@@ -443,116 +513,6 @@ export default function PreSchedule() {
                                 </Button>
                             </div>
                         )}
-
-
-                        {/* OTP Verification */}
-                        {/* {otpSent && !otpVerified && (
-                            <div className="rounded-2xl border bg-white p-5 space-y-5">
-                                <div>
-                                    <h3 className="font-semibold text-lg">
-                                        Verify OTP
-                                    </h3>
-
-                                    <p className="text-sm text-muted-foreground">
-                                        Enter the 6 digit OTP sent to employee email
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    {otp.map((digit, index) => (
-                                        <Input
-                                            key={index}
-                                            id={`otp-${index}`}
-                                            value={digit}
-                                            maxLength={1}
-                                            className="w-12 h-12 text-center border-[#c5c5ce] font-semibold rounded-md text-sm text-[#1a1a2e] bg-[#fafafa] transition-all duration-200"
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/\D/g, "");
-
-                                                const newOtp = [...otp];
-                                                newOtp[index] = value;
-
-                                                setOtp(newOtp);
-
-                                                // move forward
-                                                if (value && index < 5) {
-                                                    const next = document.getElementById(
-                                                        `otp-${index + 1}`
-                                                    );
-
-                                                    (next as HTMLInputElement)?.focus();
-                                                }
-                                            }}
-                                            onKeyDown={(e) => {
-                                                // backspace handling
-                                                if (e.key === "Backspace") {
-
-                                                    // if current box has value -> clear it
-                                                    if (otp[index]) {
-                                                        const newOtp = [...otp];
-                                                        newOtp[index] = "";
-
-                                                        setOtp(newOtp);
-
-                                                        return;
-                                                    }
-
-                                                    // move to previous box
-                                                    if (index > 0) {
-                                                        const prev = document.getElementById(
-                                                            `otp-${index - 1}`
-                                                        ) as HTMLInputElement;
-
-                                                        prev?.focus();
-
-                                                        const newOtp = [...otp];
-                                                        newOtp[index - 1] = "";
-
-                                                        setOtp(newOtp);
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    ))}
-
-                                    <Button
-                                        type="button"
-                                        onClick={handleVerifyOtp}
-                                        disabled={
-                                            otp.join("").length !== 6 ||
-                                            verifyOtpLoading
-                                        }
-                                        className="bg-maroon hover:bg-maroon-dark"
-                                    >
-                                        {verifyOtpLoading
-                                            ? "Verifying..."
-                                            : "Verify OTP"}
-                                    </Button>
-                                </div>
-
-
-                                <div className="flex items-center gap-3">
-                                    <p className="text-sm text-muted-foreground">
-                                        Didn&apos;t receive OTP?
-                                    </p>
-
-                                    <Button
-                                        type="button"
-                                        variant="link"
-                                        onClick={handleResendOtp}
-                                        disabled={resendTimer > 0 || resendLoading}
-                                        className="p-0 h-auto text-[#8b1a30]"
-                                    >
-                                        {resendLoading
-                                            ? "Resending..."
-                                            : resendTimer > 0
-                                                ? `Resend in ${resendTimer}s`
-                                                : "Resend OTP"}
-                                    </Button>
-                                </div>
-
-                            </div>
-                        )} */}
 
                         {otpSent && !otpVerified && (
                             <div
@@ -601,7 +561,7 @@ export default function PreSchedule() {
 
                         )}
 
-                        {otpVerified && !googleConnected && !googleConnectionFailed && (
+                        {/* {otpVerified && (
                             <>
                                 {
                                     status === "success" && (
@@ -631,110 +591,90 @@ export default function PreSchedule() {
                                             meeting reminders and future visitor schedules.
                                         </p>
                                     </div>
-
-                                    <Button
-                                        type="button"
-                                        onClick={() => {
-                                            window.location.href =
-                                                //   `http://localhost:5000`;
-                                                `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
-                                        }}
-                                        disabled={status === 'success'}
-                                        className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
-                                    //   className="bg-[#4285F4] hover:bg-[#3367d6]"
-                                    >
-                                        Connect Google Calendar
-                                    </Button>
-
                                 </div>
 
                             </>
 
 
-                        )}
-
-                        {/* Footer */}
-                        {/* <div className="border-t p-4 flex justify-end">
-
-                            {!otpSent ? (
-                                <Button
-                                    type="button"
-                                    disabled={isScheduleDisabled}
-                                    onClick={handleSendOtp}
-                                    className="bg-maroon hover:bg-maroon-dark"
-                                >
-                                    {sendOtpLoading
-                                        ? "Sending OTP..."
-                                        : "Send OTP"}
-                                </Button>
-                            ) : !otpVerified ? (
-                                <Button
-                                    type="button"
-                                    disabled
-                                    className="bg-maroon hover:bg-maroon-dark"
-                                >
-                                    Verify OTP First
-                                </Button>
-                            ) : (
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="bg-maroon hover:bg-maroon-dark"
-                                >
-                                    {isSubmitting
-                                        ? "Submitting..."
-                                        : "Schedule Visit"}
-                                </Button>
-                            )}
-                        </div> */}
+                        )} */}
 
 
-                       {/* Footer */}
-<div className="border-t p-4 flex justify-end">
-    {!otpSent ? (
-        <Button
-            type="button"
-            disabled={isScheduleDisabled}
-            onClick={handleSendOtp}
-            className="bg-maroon hover:bg-maroon-dark"
-        >
-            {sendOtpLoading
-                ? "Sending OTP..."
-                : "Send OTP"}
-        </Button>
-    ) : !otpVerified ? (
-        <Button
-            type="button"
-            disabled
-            className="bg-maroon hover:bg-maroon-dark"
-        >
-            Verify OTP First
-        </Button>
-    ) : !googleConnected && !googleConnectionFailed ? (
-        // 👇 Google NOT connected and NOT failed - FORCE CONNECTION
-        <Button
-            type="button"
-            disabled
-            // onClick={() => {
-            //     window.location.href =
-            //         `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
-            // }}
-            // className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
-            className="bg-maroon hover:bg-maroon-dark"
-        >
-            Connect Google Calendar First
-        </Button>
-    ) : (
-        // 👇 Google connected OR connection failed - ALLOW SCHEDULING
-        <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-maroon hover:bg-maroon-dark"
-        >
-            {isSubmitting ? "Submitting..." : "Schedule Visit"}
-        </Button>
-    )}
-</div>
+                        <div className="border-t p-4 flex justify-end">
+
+                            {/* GOOGLE NOT CONNECTED */}
+                            {
+                                isValidEmail &&
+                                !googleStatusLoading &&
+                                debouncedEmail &&
+                                !isEmployeeNotFound &&
+                                !isGoogleConnected && (
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            window.location.href =
+                                                `http://localhost:5000/?email=${encodeURIComponent(empEmail)}&redirect=/employee`;
+                                        }}
+                                        className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
+                                    >
+                                        Connect Google Calendar
+                                    </Button>
+                                )
+                            }
+
+                            {/* GOOGLE CONNECTED -> SEND OTP */}
+                            {
+                                isValidEmail &&
+                                !isEmployeeNotFound &&
+                                isGoogleConnected &&
+                                !otpSent && (
+                                    <Button
+                                        type="button"
+                                        disabled={isScheduleDisabled}
+                                        onClick={handleSendOtp}
+                                        className="bg-maroon hover:bg-maroon-dark"
+                                    >
+                                        {
+                                            sendOtpLoading
+                                                ? "Sending OTP..."
+                                                : "Send OTP"
+                                        }
+                                    </Button>
+                                )
+                            }
+
+                            {/* OTP NOT VERIFIED */}
+                            {
+                                otpSent &&
+                                !otpVerified && (
+                                    <Button
+                                        type="button"
+                                        disabled
+                                        className="bg-maroon hover:bg-maroon-dark"
+                                    >
+                                        Verify OTP First
+                                    </Button>
+                                )
+                            }
+
+                            {/* FINAL SUBMIT */}
+                            {
+                                canSchedule && (
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="bg-maroon hover:bg-maroon-dark"
+                                    >
+                                        {
+                                            isSubmitting
+                                                ? "Submitting..."
+                                                : "Schedule Visit"
+                                        }
+                                    </Button>
+                                )
+                            }
+
+                        </div>
+
                     </div>
                 </form>
             </div>

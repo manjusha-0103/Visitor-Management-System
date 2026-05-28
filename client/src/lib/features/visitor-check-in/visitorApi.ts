@@ -1,4 +1,5 @@
 import { api } from "../api";
+import type { SendOtpResponse } from "../auth/authApi";
 
 export interface Department {
   id: string;
@@ -49,6 +50,7 @@ export interface PreSchedulePayload {
   employee_email: string | "";
   date_time: string;
   visitors: PreScheduleVisitor[];
+  login_user: string;
 }
 
 type SendOtpPayload = {
@@ -74,6 +76,10 @@ export interface ApiResponse<T = unknown> {
   message: string;
   data: T;
 }
+
+type SendOtpPayloadVisitor = {
+  email: string;
+};
 
 interface VerifyOtpResponse {
   otpVerified: boolean;
@@ -116,7 +122,7 @@ export const visitorApi = api.injectEndpoints({
       providesTags: ["Employees"],
     }),
 
-     preScheduleVisitor: builder.mutation<
+    preScheduleVisitor: builder.mutation<
       ApiResponse,
       PreSchedulePayload
     >({
@@ -143,7 +149,7 @@ export const visitorApi = api.injectEndpoints({
       invalidatesTags: ["Appointments", 'Visitor'],
     }),
 
-     // SEND OTP
+    // SEND OTP
     empoyeeSendOtp: builder.mutation<
       ApiResponse,
       SendOtpPayload
@@ -167,6 +173,31 @@ export const visitorApi = api.injectEndpoints({
       }),
     }),
 
+
+    visitorSendOtp: builder.mutation<
+      SendOtpResponse,
+      SendOtpPayloadVisitor
+    >({
+      query: (body) => ({
+        url: "/api/v1/auth/send-otp",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    visitorVerifyOtp: builder.mutation<
+      any,
+      VerifyOtpPayload
+    >({
+      query: (body) => ({
+        url: "/api/v1/auth/verify-otp",
+        method: "POST",
+        body,
+      }),
+
+      invalidatesTags: ['Auth']
+    }),
+
   }),
 });
 
@@ -176,5 +207,7 @@ export const {
   useVisitorCheckInMutation,
   usePreScheduleVisitorMutation,
   useEmpoyeeSendOtpMutation,
-  useEmpoyeeVerifyOtpMutation
+  useEmpoyeeVerifyOtpMutation,
+  useVisitorSendOtpMutation,
+  useVisitorVerifyOtpMutation
 } = visitorApi;

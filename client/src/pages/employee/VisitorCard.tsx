@@ -15,7 +15,7 @@ export default function VisitorCard({
     return (
         <div
             key={field.id}
-            className="rounded-2xl border p-4 space-y-4"
+            className="rounded-2xl bg-white border p-4 space-y-4"
         >
             <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">

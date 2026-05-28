@@ -1,15 +1,14 @@
-import { ArrowLeft, User, Lock } from "lucide-react"
+import { ArrowLeft, User, Lock, CalendarDays } from "lucide-react"
 import { Link } from "react-router-dom"
 import { useState } from "react"
 import Profile from "./Profile"
 import ChangePassword from "./ChangePassword"
+import GoogleCalendarSettings from "./GoogleCalendarSettings"
 
 const NAV_ITEMS = [
     { key: "profile", label: "Profile", icon: User },
     { key: "password", label: "Password", icon: Lock },
-    // { key: "notifications", label: "Notifications", icon: Bell },
-    // { key: "platform", label: "Platform settings", icon: Settings2 },
-    // { key: "danger", label: "Danger zone", icon: AlertTriangle },
+    { key: "calendar", label: "Google Calendar", icon: CalendarDays },
 ] as const ;
 
 type SectionKey = typeof NAV_ITEMS[number]["key"]
@@ -18,9 +17,7 @@ type SectionKey = typeof NAV_ITEMS[number]["key"]
 const SECTION_MAP: Record<SectionKey, React.ReactNode> = {
     profile: <Profile />,
     password: <ChangePassword />,
-    // notifications: <NotificationsSection />,
-    // platform: <PlatformSection />,
-    // danger: <DangerSection />,
+    calendar: <GoogleCalendarSettings/>
 }
 
 export default function Settings() {

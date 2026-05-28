@@ -2,27 +2,12 @@ import {google} from 'googleapis'
 import fs from 'fs'
 import sql from '../db/database.js';
 
-// const auth = new google.auth.GoogleAuth({
-//   credentials: {
-//     project_id: process.env.GOOGLE_PROJECT_ID,
-
-//     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-
-//     private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-//   },
-
-//   scopes: ['https://www.googleapis.com/auth/calendar'],
-// });
-
 
 export const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI
 );
-
-
-
 
 export const scheduleEvent = async ({summary,
       description,
@@ -32,12 +17,19 @@ export const scheduleEvent = async ({summary,
 
 
         const [employee] = await sql`
-  SELECT *
-  FROM "Employee"
-  WHERE id = ${employeeId}
-`;
+            SELECT
+            *
+            FROM "Users"
+            WHERE id = ${employeeId}
+        `;
 
-    // const tokens = JSON.parse(fs.readFileSync('tokens.json'));
+    if (!employee) {
+        throw new Error('Employee not found');
+    }
+
+  if (!employee.google_calendar_connected) {
+    throw new Error('Google Calendar not connected');
+  } 
 
     oauth2Client.setCredentials({
   access_token: employee.google_access_token,

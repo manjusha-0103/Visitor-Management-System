@@ -197,23 +197,34 @@ export const employeeApi = api.injectEndpoints({
 
 
     searchEmployees: builder.query<
-  SearchEmployeeResponse,
-  string
->({
-  query: (search = "") => ({
-    url: "/api/v1/super-admin/employee",
-    method: "GET",
-    params: {
-      search,
-    },
-  }),
+      SearchEmployeeResponse,
+      string
+    >({
+      query: (search = "") => ({
+        url: "/api/v1/super-admin/employee",
+        method: "GET",
+        params: {
+          search,
+        },
+      }),
 
-  extraOptions: {
-    skipToast: true,
-  },
+      extraOptions: {
+        skipToast: true,
+      },
 
-  providesTags: ["Employees"],
-}),
+      providesTags: ["Employees"],
+    }),
+
+
+    getGoogleCalendarStatus: builder.query({
+      query: (email) => ({
+        url: `/api/v1/employee/google-calendar-status?email=${email}`,
+        method: "GET",
+      }),
+      extraOptions: {
+        skipToast: true,
+      },
+    }),
   }),
 });
 
@@ -225,5 +236,6 @@ export const {
   useDeleteDepartmentMutation,
   useDeleteEmployeeMutation,
   useImportEmployeesMutation,
-  useSearchEmployeesQuery
+  useSearchEmployeesQuery,
+  useGetGoogleCalendarStatusQuery
 } = employeeApi;

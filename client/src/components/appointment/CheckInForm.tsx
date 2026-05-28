@@ -3,6 +3,7 @@ import type {
     UseFormRegister,
     Control,
     UseFormSetValue,
+    UseFormWatch,
 } from "react-hook-form";
 
 import z from "zod";
@@ -47,6 +48,7 @@ import {
 import { visitorSchema } from "@/schema/visitorSchema";
 import { useSearchEmployeesQuery, type SearchEmployee } from "@/lib/features/employee/employeeApi";
 import EmployeeSearchSelect from "../EmployeeSearchSelect";
+import OTPVerification from "../OTPVerification";
 
 type AppointmentFormValues = z.infer<
     typeof visitorSchema
@@ -76,29 +78,15 @@ type CheckInFormProps = {
     register: UseFormRegister<AppointmentFormValues>;
 
     setValue: UseFormSetValue<AppointmentFormValues>;
+
     selectedEmployee: SearchEmployee | null;
 
     setSelectedEmployee: React.Dispatch<
         React.SetStateAction<SearchEmployee | null>
     >;
 
-    // deptLoading: boolean;
-
-    // empLoading: boolean;
-
-    // selectedDepartment?: string;
-
     hasLaptop: boolean;
-
     hasVehicle: boolean;
-
-    // departmentOptions: Option[];
-
-    // employeeOptions: Option[];
-
-    // selectedDepartmentData?: Department;
-
-    // selectedEmployeeData?: Employee;
 
     showScheduleFields?: boolean;
 
@@ -115,34 +103,62 @@ type CheckInFormProps = {
     >;
 
     errorMsg?: string | null;
+
+    showVisitorEmailVerification?: boolean;
+
+    visitorOtpSent?: boolean;
+
+    visitorEmailVerified?: boolean;
+
+    handleSendVisitorOtp?: () => void;
+
+    sendVisitorOtpLoading?: boolean;
+
+    visitorOtp?: string[];
+
+    setVisitorOtp?: React.Dispatch<
+        React.SetStateAction<string[]>
+    >;
+
+    verifyVisitorOtpLoading?: boolean;
+
+    visitorResendLoading?: boolean;
+
+    visitorResendTimer?: number;
+
+    handleVerifyVisitorOtp?: () => void;
+
+    handleResendVisitorOtp?: () => void;
+    watch?: UseFormWatch<AppointmentFormValues>;
 };
 
 export default function CheckInForm({
     control,
     register,
-    // selectedDepartment,
     hasLaptop,
     hasVehicle,
     setValue,
-    // deptLoading,
-    // empLoading,
-
-    // departmentOptions,
-    // employeeOptions,
-
-    // selectedDepartmentData,
-    // selectedEmployeeData,
-
     showScheduleFields = false,
     selectedEmployee,
     setSelectedEmployee,
-
     date,
     setDate,
-
     time,
     setTime,
-    errorMsg
+    errorMsg,
+    showVisitorEmailVerification,
+    visitorOtpSent,
+    visitorEmailVerified,
+    handleSendVisitorOtp,
+    sendVisitorOtpLoading,
+    visitorOtp,
+    setVisitorOtp,
+    verifyVisitorOtpLoading,
+    visitorResendLoading,
+    visitorResendTimer,
+    handleVerifyVisitorOtp,
+    handleResendVisitorOtp,
+    watch
 }: CheckInFormProps) {
 
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -471,6 +487,70 @@ export default function CheckInForm({
                                 placeholder="rahul@gmail.com"
                                 control={control}
                             />
+
+
+                          {
+    !showScheduleFields &&
+    showVisitorEmailVerification && (
+        <div className="mt-3">
+            {
+                !visitorEmailVerified ? (
+                    <Button
+                        type="button"
+                        onClick={handleSendVisitorOtp}
+                        disabled={
+                            !watch("email") ||
+                            sendVisitorOtpLoading
+                        }
+                        className="bg-maroon hover:bg-maroon-dark"
+                    >
+                        {
+                            sendVisitorOtpLoading
+                                ? "Sending OTP..."
+                                : visitorOtpSent
+                                    ? "Resend OTP"
+                                    : "Verify Email"
+                        }
+                    </Button>
+                ) : (
+                    <div className="text-sm font-medium text-green-600">
+                        Email verified successfully
+                    </div>
+                )
+            }
+        </div>
+    )
+}
+
+{
+    !showScheduleFields &&
+    visitorOtpSent &&
+    !visitorEmailVerified && (
+        <div className="rounded-2xl border bg-white p-5 space-y-5 mt-2 max-w-xl">
+
+            <div>
+                <h3 className="font-semibold text-lg">
+                    Verify Email OTP
+                </h3>
+
+                <p className="text-sm text-muted-foreground">
+                    Enter the OTP sent to visitor email
+                </p>
+            </div>
+
+            <OTPVerification
+                otp={visitorOtp}
+                setOtp={setVisitorOtp}
+                verifyOtpLoading={verifyVisitorOtpLoading}
+                resendLoading={visitorResendLoading}
+                resendTimer={visitorResendTimer}
+                handleVerifyOtp={handleVerifyVisitorOtp}
+                handleResendOtp={handleResendVisitorOtp}
+            />
+
+        </div>
+    )
+}
                         </div>
 
                     </div>

@@ -3,7 +3,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 // import FaceCapture from "@/components/visitor/FaceCapture";
 const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 import CheckInForm from "@/components/appointment/CheckInForm";
-import {usePreScheduleVisitorMutation, useSendOtpMutation, useVerifyOtpMutation, useVisitorCheckInMutation } from "@/lib/features/visitor-check-in/visitorApi";
+import { useEmpoyeeSendOtpMutation, useEmpoyeeVerifyOtpMutation, usePreScheduleVisitorMutation, useVisitorCheckInMutation, useVisitorSendOtpMutation, useVisitorVerifyOtpMutation } from "@/lib/features/visitor-check-in/visitorApi";
 import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +24,7 @@ type AppointmentFormValues = z.infer<
 export default function CheckIn() {
     const user = useSelector(selectUser);
     const isSuperAdmin = user?.role === "super_admin";
-
+    const isGoogleCalendarConnected = user?.google_calendar_connected === true;
     const [activeTab, setActiveTab] = useState(isSuperAdmin ? "walkin" : "walkin");
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [capturedFile, setCapturedFile] = useState<File | null>(null);
@@ -32,17 +32,30 @@ export default function CheckIn() {
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [otpSent, setOtpSent] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
+    const [visitorOtp, setVisitorOtp] = useState(["", "", "", "", "", ""]);
+    const [visitorOtpSent, setVisitorOtpSent] = useState(false);
+    const [visitorEmailVerified, setVisitorEmailVerified] = useState(false);
+    const [visitorResendLoading, setVisitorResendLoading] = useState(false);
+    const [visitorResendTimer, setVisitorResendTimer] = useState(30);
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
     const [resendLoading, setResendLoading] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
     const [selectedEmployee, setSelectedEmployee] = useState<SearchEmployee | null>(null);
-
-    const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
-    const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
+    const [sendOtp, { isLoading: sendOtpLoading }] = useEmpoyeeSendOtpMutation();
+    const [verifyOtp, { isLoading: verifyOtpLoading }] = useEmpoyeeVerifyOtpMutation();
+    const [sendVisitorOtp, { isLoading: sendVisitorOtpLoading }] = useVisitorSendOtpMutation();
+    const [verifyVisitorOtp, { isLoading: verifyVisitorOtpLoading }] = useVisitorVerifyOtpMutation();
     const [createAppointment, { isLoading }] = useVisitorCheckInMutation();
     const [createPreschedule, { isLoading: isPreScheduling }] = usePreScheduleVisitorMutation();
 
+    const walkinSchema = visitorSchema.extend({
+        purpose: z.string().min(1, "Purpose is required"),
+    });
+
+    const prescheduleSchema = visitorSchema.omit({
+        purpose: true,
+    });
 
     const {
         register,
@@ -54,7 +67,9 @@ export default function CheckIn() {
         formState: { isValid, errors }
     } = useForm<AppointmentFormValues>({
         resolver: zodResolver(
-            visitorSchema
+            activeTab === "preschedule"
+                ? prescheduleSchema
+                : walkinSchema
         ),
 
         defaultValues: {
@@ -78,51 +93,13 @@ export default function CheckIn() {
 
     const hasLaptop = watch("is_laptop") ?? false;
     const hasVehicle = watch("is_vehicle") ?? false;
+    const visitorEmail = watch("email");
 
-
-    // const { data, isLoading: empSearchLoading } =
-    //         useSearchEmployeesQuery(debounced, {
-    //             skip: !debounced.trim()
-    //         });
-    
-        //   console.log(data);
-    
-        // const employees = data?.data || [];
-
-    // const {
-    //     data: departments = [],
-    //     isLoading: deptLoading,
-    // } = useGetDepartmentsQuery();
-
-    // const {
-    //     data: employees = [],
-    //     isLoading: empLoading,
-    // } = useGetEmployeesQuery(
-    //     selectedDepartment,
-    //     {
-    //         skip: !selectedDepartment,
-    //     }
-    // );
-
-    // const selectedDepartmentData = departments.find((d) => String(d.id) === selectedDepartment);
-    // const selectedEmployeeData = employees.find((e) => String(e.id) === watch("employee_id"));
-
-    // const departmentOptions = departments.map((d) => ({ label: d.name, value: String(d.id) }));
-    // const employeeOptions = employees.map((e) => ({
-    //     label: `${e.first_name} ${e.last_name}`,
-    //     value: String(e.id),
-    // }));
-
-
-    // useEffect(() => {
-    //         if (selectedEmployee) return;
-    
-    //         const timer = setTimeout(() => {
-    //             setDebounced(employeeSearch);
-    //         }, 300);
-    
-    //         return () => clearTimeout(timer);
-    //     }, [employeeSearch, selectedEmployee]);
+useEffect(() => {
+    setVisitorEmailVerified(false);
+    setVisitorOtpSent(false);
+    setVisitorOtp(["", "", "", "", "", ""]);
+}, [visitorEmail]);
 
     const resetForm = () => {
         reset({
@@ -175,7 +152,8 @@ export default function CheckIn() {
                 formData.append("last_name", data.last_name);
                 formData.append("email", data.email);
                 formData.append("phone", data.phone);
-                formData.append("purpose", data.purpose || "")
+                formData.append("purpose", data.purpose || "");
+
 
                 formData.append("company", data.company || "");
                 formData.append("position", data.position || "");
@@ -260,6 +238,7 @@ export default function CheckIn() {
                                 position: data.position,
                             },
                         ],
+                        login_user: user?.id ?? ""
                     };
 
                     await createPreschedule(payload).unwrap();
@@ -285,6 +264,58 @@ export default function CheckIn() {
 
         } catch (err) {
             console.error(err);
+        }
+    };
+
+    const handleSendVisitorOtp = async () => {
+        try {
+            const email = watch("email");
+
+            if (!email) return;
+
+            await sendVisitorOtp({
+                email,
+            }).unwrap();
+
+            setVisitorOtpSent(true);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleVerifyVisitorOtp = async () => {
+        try {
+            const enteredOtp = visitorOtp.join("");
+
+            await verifyVisitorOtp({
+                email: watch("email"),
+                otp: enteredOtp,
+            }).unwrap();
+
+            setVisitorEmailVerified(true);
+
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleResendVisitorOtp = async () => {
+        try {
+            setVisitorResendLoading(true);
+
+            await sendVisitorOtp({
+                email: watch("email"),
+            }).unwrap();
+
+            setVisitorOtp(["", "", "", "", "", ""]);
+
+            setVisitorResendTimer(30);
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setVisitorResendLoading(false);
         }
     };
 
@@ -356,6 +387,18 @@ export default function CheckIn() {
         return () => clearInterval(interval);
     }, [otpSent, resendTimer]);
 
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+
+        if (visitorOtpSent && visitorResendTimer > 0) {
+            interval = setInterval(() => {
+                setVisitorResendTimer((prev) => prev - 1);
+            }, 1000);
+        }
+
+        return () => clearInterval(interval);
+    }, [visitorOtpSent, visitorResendTimer]);
+
     return (
         <section className="mb-10">
             <AdminSubHeader
@@ -368,8 +411,8 @@ export default function CheckIn() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
                 <div
                     className={`grid gap-6 items-start ${isSuperAdmin
-                            ? "grid-cols-1 sm:grid-cols-[190px_1fr] md:grid-cols-[190px_1fr]"
-                            : "grid-cols-1"
+                        ? "grid-cols-1 sm:grid-cols-[190px_1fr] md:grid-cols-[190px_1fr]"
+                        : "grid-cols-1"
                         }`}
                 >
 
@@ -443,22 +486,31 @@ export default function CheckIn() {
                                                 )}
 
                                                 <CheckInForm
-                                                    control={control}
-                                                    register={register}
-                                                    setValue={setValue}
-                                                    // deptLoading={deptLoading}
-                                                    // empLoading={empLoading}
-                                                    // selectedDepartment={selectedDepartment}
-                                                    hasLaptop={hasLaptop}
-                                                    hasVehicle={hasVehicle}
-                                                    selectedEmployee={selectedEmployee}
+    control={control}
+    register={register}
+    setValue={setValue}
+    hasLaptop={hasLaptop}
+    hasVehicle={hasVehicle}
+    selectedEmployee={selectedEmployee}
     setSelectedEmployee={setSelectedEmployee}
     errorMsg={errors?.employee_id?.message ?? null}
-                                                    // departmentOptions={departmentOptions}
-                                                    // employeeOptions={employeeOptions}
-                                                    // selectedDepartmentData={selectedDepartmentData}
-                                                    // selectedEmployeeData={selectedEmployeeData}
-                                                />
+
+    showVisitorEmailVerification={true}
+    visitorOtpSent={visitorOtpSent}
+    visitorEmailVerified={visitorEmailVerified}
+    handleSendVisitorOtp={handleSendVisitorOtp}
+    sendVisitorOtpLoading={sendVisitorOtpLoading}
+
+    visitorOtp={visitorOtp}
+    setVisitorOtp={setVisitorOtp}
+    verifyVisitorOtpLoading={verifyVisitorOtpLoading}
+    visitorResendLoading={visitorResendLoading}
+    visitorResendTimer={visitorResendTimer}
+    handleVerifyVisitorOtp={handleVerifyVisitorOtp}
+    handleResendVisitorOtp={handleResendVisitorOtp}
+
+    watch={watch}
+/>
 
                                                 <Button
                                                     type="button"
@@ -485,19 +537,12 @@ export default function CheckIn() {
                                     <CheckInForm
                                         control={control}
                                         register={register}
-                                        // deptLoading={deptLoading}
                                         setValue={setValue}
-                                        // empLoading={empLoading}
-                                        // selectedDepartment={selectedDepartment}
                                         hasLaptop={hasLaptop}
                                         hasVehicle={hasVehicle}
                                         selectedEmployee={selectedEmployee}
-    setSelectedEmployee={setSelectedEmployee}
-    errorMsg={errors?.employee_id?.message ?? null}
-                                        // departmentOptions={departmentOptions}
-                                        // employeeOptions={employeeOptions}
-                                        // selectedDepartmentData={selectedDepartmentData}
-                                        // selectedEmployeeData={selectedEmployeeData}
+                                        setSelectedEmployee={setSelectedEmployee}
+                                        errorMsg={errors?.employee_id?.message ?? null}
                                         showScheduleFields={true}
                                         date={date}
                                         setDate={setDate}
@@ -618,74 +663,118 @@ export default function CheckIn() {
 
                             {/* Footer */}
                             {(activeTab === "preschedule" || walkinStep === "form") && (
-                            <div className={`border-t border-gray-200 max-w-xl mt-4 py-4 flex gap-2`}>
+                                <div className={`border-t border-gray-200 max-w-xl mt-4 py-4 flex gap-2`}>
 
-                                {/* PRESCHEDULE SEND OTP BUTTON */}
-                                {activeTab === "preschedule" &&
-                                    isSuperAdmin &&
-                                    !otpSent ? (
-                                    <Button
-                                        type="button"
-                                        onClick={handleSendOtp}
-                                        disabled={
-                                            sendOtpLoading ||
-                                            !watch("employee_id")
-                                        }
-                                        className=" bg-maroon hover:bg-maroon-dark"
-                                    >
-                                        {sendOtpLoading
-                                            ? "Sending OTP..."
-                                            : "Send OTP"}
-                                    </Button>
-                                ) : null}
+                                    {/* PRESCHEDULE SEND OTP BUTTON */}
+                                    {/* {activeTab === "preschedule" &&
+                                        isSuperAdmin &&
+                                        !otpSent ? (
+                                        <Button
+                                            type="button"
+                                            onClick={handleSendOtp}
+                                            disabled={
+                                                sendOtpLoading ||
+                                                !watch("employee_id")
+                                            }
+                                            className=" bg-maroon hover:bg-maroon-dark"
+                                        >
+                                            {sendOtpLoading
+                                                ? "Sending OTP..."
+                                                : "Send OTP"}
+                                        </Button>
+                                    ) : null} */}
 
-                                {/* WALKIN CREATE BUTTON */}
-                                {activeTab === "walkin" && (
-                                    <Button
-                                        type="submit"
-                                        className=" bg-maroon hover:bg-maroon-dark"
-                                        disabled={
-                                            isLoading
-                                            // ||
-                                            // !isWalkinReady
-                                        }
-                                    >
-                                        {isLoading
-                                            ? "Creating..."
-                                            : "Create Appointment"}
+                                    {activeTab === "preschedule" &&
+                                        isSuperAdmin &&
+                                        !otpSent && (
+                                            <>
+                                                {!isGoogleCalendarConnected ? (
+                                                    <div className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 max-w-xl">
+                                                        <p className="text-sm font-medium text-yellow-800">
+                                                            Your Google Calendar is not connected.
+                                                        </p>
 
-                                        <Plus />
-                                    </Button>
-                                )}
+                                                        <p className="text-sm text-yellow-700 mt-1">
+                                                            Please connect your Google Calendar first from
+                                                            Settings to enable appointment scheduling.
+                                                        </p>
 
-                                {/* PRESCHEDULE BUTTON */}
-                                {activeTab === "preschedule" &&
-                                    (!isSuperAdmin || otpSent) && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            className="mt-3"
+                                                            onClick={() => {
+                                                                window.location.href = "/admin/settings";
+                                                            }}
+                                                        >
+                                                            Go to Settings
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleSendOtp}
+                                                        disabled={
+                                                            sendOtpLoading ||
+                                                            !watch("employee_id")
+                                                        }
+                                                        className="bg-maroon hover:bg-maroon-dark"
+                                                    >
+                                                        {sendOtpLoading
+                                                            ? "Sending OTP..."
+                                                            : "Send OTP"}
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
+
+                                    {/* WALKIN CREATE BUTTON */}
+                                    {activeTab === "walkin" && (
                                         <Button
                                             type="submit"
                                             className=" bg-maroon hover:bg-maroon-dark"
                                             disabled={
-                                                isPreScheduling
+                                                isLoading
                                                 ||
-                                                !isPrescheduleReady
+                                                !visitorEmailVerified
                                             }
                                         >
-                                            {isPreScheduling
-                                                ? "Scheduling..."
-                                                : "Schedule Appointment"}
+                                            {isLoading
+                                                ? "Creating..."
+                                                : "Create Appointment"}
 
                                             <Plus />
                                         </Button>
                                     )}
 
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className=""
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
+                                    {/* PRESCHEDULE BUTTON */}
+                                    {activeTab === "preschedule" &&
+                                        (!isSuperAdmin || otpSent) && (
+                                            <Button
+                                                type="submit"
+                                                className=" bg-maroon hover:bg-maroon-dark"
+                                                disabled={
+                                                    isPreScheduling ||
+                                                    !isPrescheduleReady ||
+                                                    !isGoogleCalendarConnected
+                                                }
+                                            >
+                                                {isPreScheduling
+                                                    ? "Scheduling..."
+                                                    : "Schedule Appointment"}
+
+                                                <Plus />
+                                            </Button>
+                                        )}
+
+                                    {/* <Button
+                                        type="button"
+                                        variant="outline"
+                                        className=""
+                                    >
+                                        Cancel
+                                    </Button> */}
+                                </div>
                             )}
 
                         </div>

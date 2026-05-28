@@ -39,7 +39,7 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
   return { amp, visitor };
 };
 
-const preScheduleService = async ({ visitors, date_time, employee_email }) => {
+const preScheduleService = async ({ visitors, date_time, employee_email, login_user }) => {
   let amp = [];
   let vs = [];
 
@@ -197,8 +197,8 @@ const preScheduleService = async ({ visitors, date_time, employee_email }) => {
       ...visitors.map(visitor => visitor.email),
     ],
   };
-
-  const response = await scheduleEvent(event, employee.employee_id);
+  const credentialID = login_user ? login_user : employee.user_id
+  const response = await scheduleEvent(event, credentialID);
 
   return {
     amp,
@@ -229,6 +229,26 @@ const allSuperAdminService = async () => {
     `;
   return super_admin;
 };
+
+
+export const getGoogleCalendarStatusService = async (
+    email
+) => {
+    const [emp] = await sql`
+        SELECT
+            u.id,
+            u.email,
+            u.google_calendar_connected
+        FROM "Users" u
+        WHERE u.email = ${email}
+    `;
+    // console.log(emp);
+    
+
+    return emp;
+};
+
+
 export {
   chekIsApproveService,
   preScheduleService,

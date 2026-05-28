@@ -9,7 +9,8 @@ import {
     chekIsApproveService,
     preScheduleService,
     allSuperAdminService,
-    employeeEsistService
+    employeeEsistService,
+    getGoogleCalendarStatusService
 } from "../services/employeeServices.js";
 import { getIO } from "../config/socket.js";
 import { userExistbyemailService } from "../services/auth.service.js";
@@ -637,9 +638,46 @@ const preSchedule = asyncHandler(async (req, res) => {
 })
 
 
-// const calenderStatus = asyncHandler(async (req, res) => {
+export const getGoogleCalendarStatus = async (
+    req,res
+) => {
+    try {
+        const email = req.query.email
+        console.log(email);
+        
 
-// })
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Employee email is required",
+            });
+        }
+
+        const employee =
+            await getGoogleCalendarStatusService(email);
+
+            // console.log(employee);
+            
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: "Employee not found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: employee,
+        });
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+};
 
 export {
 
