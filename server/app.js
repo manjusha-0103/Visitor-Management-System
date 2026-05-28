@@ -16,6 +16,7 @@ import { oauth2Client } from "./config/googleCalender.js";
 import fs from 'fs'
 import sendResponse from "./utils/sendResponse.js";
 import sql from "./db/database.js";
+import { log } from "console";
 
 const app = express();
 const allowedOrigins = getAllowedOrigins();
@@ -30,6 +31,7 @@ app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
+app.set('trust proxy', true);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
@@ -48,6 +50,21 @@ app.use("/api/v1/receptionist", receptionistRoutes);
 app.use("/api/v1/super-admin", superAdminsRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
 
+
+app.get('/test', (req, res) => {
+console.log(req.ip);
+
+    // const ip =
+    //     req.headers['x-forwarded-for']?.split(',') 
+    const ip = req.ip
+
+    const userAgent = req.get('User-Agent') || 'Unknown';
+
+    res.json({
+        ip,
+        userAgent
+    });
+});
 
 app.get('/', (req, res) => {
   const { email, redirect } = req.query;

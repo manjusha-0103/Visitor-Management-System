@@ -10,6 +10,9 @@ import { processtBirthdayService } from "../services/notification.service.js";
 
 const processtBirthday = async () => {
 
+    console.log("process_birthday");
+    
+
     const birthdayUsers = await processtBirthdayService()
 
     return birthdayUsers

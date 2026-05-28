@@ -7,6 +7,7 @@ import asyncHandler from "../utils/asyncHandler.js"
 import ApiError from "../utils/ApiError.js";
 import crypto from 'crypto';
 // import redisClient from '../config/redis.js'
+import { auditService } from "../services/audit.service.js";
 
 import { userExistbyemailService,
     registerUserService,
@@ -16,6 +17,7 @@ import { userExistbyemailService,
     updateMeService
  } from "../services/auth.service.js";
 import { sendEmail } from "../utils/mailer.js";
+import { error } from "console";
 
 const getMe = asyncHandler(async (req, res) => {
     // const responseData = await buildUserResponse(req.user)
@@ -26,10 +28,40 @@ const getMe = asyncHandler(async (req, res) => {
 })
 
 const updateMe = asyncHandler(async (req, res) => {
-    const profile = await updateMeService(req.body, req.user.id, req.user.role)
+    const profile = await updateMeService(req.body, req.user, req.ip)
+    
     if(profile){
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'update_profile',
+            "audit_record" :{
+                "updated_by" : {
+                    "email" :req.user.email,
+                    "name" : `${req.user.first_name } ${req.user.last_name }`,
+                    "phone" : req.user.phone
+                },
+                ...profile,
+                "message" : "Data is updated successfully"
+            },
+        }
+
+        await auditService(audit_data)
         sendResponse(res, 200, profile, "Data is updated successfully")
     }else{
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'failed_update_profile',
+            "audit_record" :{
+                "updated_by" : {
+                    "email" :req.user.email,
+                    "name" : `${req.user.first_name } ${req.user.last_name }`,
+                    "phone" : req.user.phone
+                },
+                ...req.body,
+                "error": 'Bad request'
+            }
+        }
+        await auditService(audit_data)
         throw new  ApiError(400, 'Bad request')
     }
 })
@@ -63,6 +95,19 @@ const loginUser = asyncHandler(async (req, res) => {
     const [userExists] = await userExistbyemailService(email);
 
     if (!userExists) {
+
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'signin_failed',
+            "audit_record" :{
+                
+                ...req.body,
+                "error": "We couldn't find that account."
+            },
+        }
+
+        await auditService(audit_data)
+
         throw new ApiError(
             401,
             "We couldn't find that account."
@@ -73,6 +118,17 @@ const loginUser = asyncHandler(async (req, res) => {
     const user = await loginUserService(email, password);
 
     if (!user) {
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'signin_failed',
+            "audit_record" :{
+                
+                ...req.body,
+                "error": "Invalid credentials"
+            },
+        }
+
+        await auditService(audit_data)
         throw new ApiError(
             401,
             "Invalid credentials"
@@ -141,6 +197,23 @@ const loginUser = asyncHandler(async (req, res) => {
         `
     });
 
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'signin',
+        "audit_record" :{
+            "updated_by" : {
+                "email" :user.email,
+                "name" : `${user.first_name } ${user.last_name }`,
+                "phone" : user.phone,
+                "last_login": user.last_login
+            },
+            ...user,
+            
+        },
+    }
+
+    await auditService(audit_data)
+
     // RETURN OTP REQUIRED
     sendResponse(
         res,
@@ -161,19 +234,60 @@ const logoutUser = asyncHandler(async (req, res) => {
         path: "/",
     });
 
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'logout',
+        "audit_record" :{
+            "updated_by" : {
+                "email" :req.user.email,
+                "name" : `${req.user.first_name } ${req.user.last_name }`,
+                "phone" : req.user.phone
+            },
+            "message" : "User logged out successfully"
+        },
+    }
+
+    await auditService(audit_data)
+
     sendResponse(res, 200, {}, "User logged out successfully");
 });
 
 const changePassword = asyncHandler(async (req, res) => {
     const user = await changePasswordService(req.body, req.user.id)
     if(user){
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'change_password',
+            "audit_record" :{
+                "updated_by" : {
+                    "email" :req.user.email,
+                    "name" : `${req.user.first_name } ${req.user.last_name }`,
+                    "phone" : req.user.phone
+                },
+                ...user,
+                "message" : "Password Change"
+            },
+        }
+
+        await auditService(audit_data)
         sendResponse(res, 200, user, "Password Change")
     }else{
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'change_password_failed',
+            "audit_record" :{
+                "updated_by" : {
+                    "email" :req.user.email,
+                    "name" : `${req.user.first_name } ${req.user.last_name }`,
+                    "phone" : req.user.phone
+                },
+                ...user,
+                "message" : "Bad requests"
+            },
+        }
         throw new ApiError(400, "Bad request")
     }
 })
-
-
 
 
 const sendOtp = asyncHandler(async (req, res) => {

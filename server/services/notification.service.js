@@ -23,6 +23,17 @@ const processtBirthdayService = async () => {
             EXTRACT(MONTH FROM birth_date) = EXTRACT(MONTH FROM CURRENT_DATE)
         AND role='user'
     `;
+
+    for(const u of users){
+        let message = `
+            🎉Wish Happy Birthday ${u.name}! 🎉 \n
+            (${u.position} - ${u.department})
+        `;
+        await sql`
+            INSERT INTO "Notifications" ("user_id", "message")
+            VALUES (${u.id}, ${message})
+        `;
+    }
   return users;
 };
 

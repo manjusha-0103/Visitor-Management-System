@@ -17,7 +17,7 @@ const initSocket = (server) => {
 
   io.on("connection", (socket) => {
     // getAppointments(socket, io)
-
+    notifyBirthday(socket,io);
     socket.on("disconnect", (reason) => {
       // connection closed
     });
@@ -31,8 +31,11 @@ cron.schedule("0 9 * * *", async () => {
 
   // Running scheduled birthday cron
 
+  console.log("cron");
+  
+
   const users = await processtBirthday();
-  await notifyBirthday(io, users);
+  
 });
 
 export { initSocket, getIO };
