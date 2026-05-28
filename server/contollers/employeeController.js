@@ -600,9 +600,17 @@ const verifyOtp = asyncHandler(async (req, res) => {
         throw new ApiError( 401, "OTP is invalid or Expired")
         
     }
-    else{
-        sendResponse(res,200, result,"OTP is verified" )
-    }
+    const employee = await employeeEsistService(email);
+
+    return sendResponse(
+        res,
+        200,
+        {
+            otpVerified: true,
+            google_calendar_connected: employee.google_calendar_connected,
+        },
+        "OTP is verified"
+    );
 })
 
 

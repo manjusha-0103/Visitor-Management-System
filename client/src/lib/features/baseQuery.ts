@@ -41,6 +41,7 @@ export const baseQueryWithToast: BaseQueryFn<
   FetchBaseQueryError,
   CustomExtraOptions
 > = async (args, api, extraOptions) => {
+  console.log("ARGS =>", args);
   const result = await baseQuery(args, api, extraOptions);
   const skipToast = extraOptions?.skipToast;
 

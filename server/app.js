@@ -65,7 +65,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
-  let url = 'http://localhost:5173/employee';
+  let url = 'http://localhost:5173/employee', status = 'failed';
   // isSuccess = false;
   try {
     const code = req.query.code;
@@ -100,18 +100,18 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
     // console.log(tokens);
 
-    // isSuccess = true
+    status = 'success'
     // res.redirect(`http://localhost:5173/employee`)
 
     // sendResponse(res, 200, null, "token created.")
 
   } catch (err) {
     console.error(err);
-    // isSuccess = false
+    status = 'failed'
     // res.send('OAuth failed');
   }finally {
-    res.redirect(`${url}`)
-    // res.redirect(`${url}?isSuccess=${isSuccess}`)
+    // res.redirect(`${url}`)
+    res.redirect(`${url}?status=${status}`)
   }
 });
 

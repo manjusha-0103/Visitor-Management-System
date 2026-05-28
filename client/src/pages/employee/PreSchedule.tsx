@@ -3,10 +3,13 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
+    useEmpoyeeSendOtpMutation,
+    useEmpoyeeVerifyOtpMutation,
     usePreScheduleVisitorMutation,
-    useSendOtpMutation,
-    useVerifyOtpMutation,
+    // useSendOtpMutation,
+    // useVerifyOtpMutation,
 } from "@/lib/features/visitor-check-in/visitorApi";
+
 import z from "zod";
 import { useEffect, useState } from "react";
 
@@ -39,6 +42,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import VisitorCard from "./VisitorCard";
 import { visitorSchema } from "@/schema/visitorSchema";
+import OTPVerification from "@/components/OTPVerification";
 
 
 const singleVisitorSchema = visitorSchema.pick({
@@ -66,11 +70,13 @@ export default function PreSchedule() {
     // const [sendOtpLoading, setSendOtpLoading] = useState(false);
     // const [verifyOtpLoading, setVerifyOtpLoading] = useState(false);
     const [resendLoading, setResendLoading] = useState(false);
+    const [googleConnected, setGoogleConnected] = useState(false);
+    const [googleConnectionFailed, setGoogleConnectionFailed] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
     const [searchParams] = useSearchParams();
-    const isSuccess = searchParams.get("isSuccess");
-    const [sendOtp, { isLoading: sendOtpLoading }] = useSendOtpMutation();
-    const [verifyOtp, { isLoading: verifyOtpLoading }] = useVerifyOtpMutation();
+    const status = searchParams.get("status");
+    const [sendOtp, { isLoading: sendOtpLoading }] = useEmpoyeeSendOtpMutation();
+    const [verifyOtp, { isLoading: verifyOtpLoading }] = useEmpoyeeVerifyOtpMutation();
 
     const {
         control,
@@ -174,11 +180,16 @@ export default function PreSchedule() {
         try {
             const enteredOtp = otp.join("");
 
-            await verifyOtp({
+            const response = await verifyOtp({
                 email: empEmail,
                 otp: enteredOtp,
             }).unwrap();
             setOtpVerified(true);
+            setGoogleConnected(
+                response.data.google_calendar_connected
+            );
+             setGoogleConnectionFailed(false);
+
 
         } catch (error) {
             console.log(error);
@@ -196,6 +207,25 @@ export default function PreSchedule() {
 
         return () => clearInterval(interval);
     }, [otpSent, resendTimer]);
+
+
+    useEffect(() => {
+    // const status = searchParams.get("status");
+
+    if (status === "success") {
+        setGoogleConnected(true);
+        setGoogleConnectionFailed(false);
+    }
+
+    if (status === "failed") {
+        setGoogleConnected(false);
+        setGoogleConnectionFailed(true);
+    }
+}, [status]);
+
+// const canSchedule =
+//     otpVerified && (googleConnected || googleConnectionFailed);
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -416,7 +446,7 @@ export default function PreSchedule() {
 
 
                         {/* OTP Verification */}
-                        {otpSent && !otpVerified && (
+                        {/* {otpSent && !otpVerified && (
                             <div className="rounded-2xl border bg-white p-5 space-y-5">
                                 <div>
                                     <h3 className="font-semibold text-lg">
@@ -522,63 +552,109 @@ export default function PreSchedule() {
                                 </div>
 
                             </div>
-                        )}
+                        )} */}
 
+                        {otpSent && !otpVerified && (
+                            <div
+                                className={`
+                rounded-2xl
+                border
+                bg-white
+                p-5
+                space-y-5
+            `}
+                            >
 
-                        {otpVerified && (
-                            <>
-                                 {
-                            isSuccess === "true" && (
-                                <div className="rounded-md bg-green-100 text-green-700 p-3 text-sm">
-                                    Google Calendar connected successfully, now all future appointments will be directly available on your calender with reminders.
+                                <div>
+
+                                    <h3 className={`font-semibold text-lg`}>
+                                        Verify OTP
+                                    </h3>
+
+                                    <p className={`text-sm text-muted-foreground leading-5`}>
+                                        Enter the 6 digit OTP sent to employee email
+                                    </p>
+
                                 </div>
-                            )
-                        }
 
-                        {
-                            isSuccess === "false" && (
-                                <div className="rounded-md bg-red-100 text-red-700 p-3 text-sm">
-                                    Failed to connect Google Calendar, but you can still schedule appointment.
-                                </div>
-                            )
-                        }
+                                <OTPVerification
+                                    otp={otp}
+                                    setOtp={setOtp}
 
-                        <div className="rounded-2xl border bg-white p-5 space-y-4">
+                                    //                     title="Verify OTP"
 
-                            <div>
-                                <h3 className="font-semibold text-lg">
-                                    Connect Google Calendar
-                                </h3>
+                                    //                     description="
+                                    // Enter the 6 digit OTP sent to employee email
+                                    // "
 
-                                <p className="text-sm text-muted-foreground">
-                                    Connect your Google Calendar to automatically receive
-                                    meeting reminders and future visitor schedules.
-                                </p>
+                                    handleVerifyOtp={handleVerifyOtp}
+
+                                    handleResendOtp={handleResendOtp}
+
+                                    verifyOtpLoading={verifyOtpLoading}
+
+                                    resendLoading={resendLoading}
+
+                                    resendTimer={resendTimer}
+                                />
                             </div>
 
-                            <Button
-                                type="button"
-                                onClick={() => {
-                                    window.location.href =
-                                        //   `http://localhost:5000`;
-                                        `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
-                                }}
-                                disabled={isSuccess === 'true'}
-                                className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
-                            //   className="bg-[#4285F4] hover:bg-[#3367d6]"
-                            >
-                                Connect Google Calendar
-                            </Button>
+                        )}
 
-                        </div>
-                            
+                        {otpVerified && !googleConnected && !googleConnectionFailed && (
+                            <>
+                                {
+                                    status === "success" && (
+                                        <div className="rounded-md bg-green-100 text-green-700 p-3 text-sm">
+                                            Google Calendar connected successfully, now all future appointments will be directly available on your calender with reminders.
+                                        </div>
+                                    )
+                                }
+
+                                {
+                                    status === "failed" && (
+                                        <div className="rounded-md bg-red-100 text-red-700 p-3 text-sm">
+                                            Failed to connect Google Calendar, but you can still schedule appointment.
+                                        </div>
+                                    )
+                                }
+
+                                <div className="rounded-2xl border bg-white p-5 space-y-4">
+
+                                    <div>
+                                        <h3 className="font-semibold text-lg">
+                                            Connect Google Calendar
+                                        </h3>
+
+                                        <p className="text-sm text-muted-foreground">
+                                            Connect your Google Calendar to automatically receive
+                                            meeting reminders and future visitor schedules.
+                                        </p>
+                                    </div>
+
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            window.location.href =
+                                                //   `http://localhost:5000`;
+                                                `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
+                                        }}
+                                        disabled={status === 'success'}
+                                        className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
+                                    //   className="bg-[#4285F4] hover:bg-[#3367d6]"
+                                    >
+                                        Connect Google Calendar
+                                    </Button>
+
+                                </div>
+
                             </>
 
-                        
+
                         )}
 
                         {/* Footer */}
-                        <div className="border-t p-4 flex justify-end">
+                        {/* <div className="border-t p-4 flex justify-end">
 
                             {!otpSent ? (
                                 <Button
@@ -610,7 +686,55 @@ export default function PreSchedule() {
                                         : "Schedule Visit"}
                                 </Button>
                             )}
-                        </div>
+                        </div> */}
+
+
+                       {/* Footer */}
+<div className="border-t p-4 flex justify-end">
+    {!otpSent ? (
+        <Button
+            type="button"
+            disabled={isScheduleDisabled}
+            onClick={handleSendOtp}
+            className="bg-maroon hover:bg-maroon-dark"
+        >
+            {sendOtpLoading
+                ? "Sending OTP..."
+                : "Send OTP"}
+        </Button>
+    ) : !otpVerified ? (
+        <Button
+            type="button"
+            disabled
+            className="bg-maroon hover:bg-maroon-dark"
+        >
+            Verify OTP First
+        </Button>
+    ) : !googleConnected && !googleConnectionFailed ? (
+        // 👇 Google NOT connected and NOT failed - FORCE CONNECTION
+        <Button
+            type="button"
+            disabled
+            // onClick={() => {
+            //     window.location.href =
+            //         `http://localhost:5000/?email=${encodeURIComponent(empEmail)}`;
+            // }}
+            // className="bg-[#4285F4] hover:bg-[#3367d6] text-white"
+            className="bg-maroon hover:bg-maroon-dark"
+        >
+            Connect Google Calendar First
+        </Button>
+    ) : (
+        // 👇 Google connected OR connection failed - ALLOW SCHEDULING
+        <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-maroon hover:bg-maroon-dark"
+        >
+            {isSubmitting ? "Submitting..." : "Schedule Visit"}
+        </Button>
+    )}
+</div>
                     </div>
                 </form>
             </div>
