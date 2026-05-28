@@ -164,7 +164,7 @@ const changePasswordService = async ({ old_pass, new_pass }, id) => {
   return user_;
 };
 
-const updateMeService = async (data, id, role) => {
+const updateMeService = async (data,user, ip) => {
   const {
     first_name = null,
     last_name = null,
@@ -175,13 +175,30 @@ const updateMeService = async (data, id, role) => {
     department = null,
   } = data;
 
-  const user = await sql`
+  const user_ = await sql`
         SELECT id, role
         FROM "Users"
         WHERE id = ${id}
     `;
 
-  if (!user.length) {
+  if (!user_.length) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'update_profile',
+        "audit_record" :{
+            "updated_by" : {
+                "email" :user.email,
+                "name" : `${user.first_name } ${user.last_name }`,
+                "phone" : user.phone
+            },
+            ...data,
+
+            "error" : "User not found"
+
+        },
+    }
+
+    await auditService(audit_data)
     throw new ApiError(404, "User not found");
   }
 
@@ -192,17 +209,17 @@ const updateMeService = async (data, id, role) => {
             last_name = COALESCE(${last_name}, last_name),
             phone = COALESCE(${phone}, phone),
             birth_date = COALESCE(${birth_date}, birth_date)
-        WHERE id = ${id}
+        WHERE id = ${user.id}
     `;
-  if (role !== "super_admin") {
+  if (user.role !== "super_admin") {
     await sql`
-            UPDATE "Employee"
-            SET
-                position = COALESCE(${position}, position),
-                company = COALESCE(${company}, company),
-                department = COALESCE(${department}, department)
-            WHERE user_id = ${id}
-        `;
+        UPDATE "Employee"
+        SET
+            position = COALESCE(${position}, position),
+            company = COALESCE(${company}, company),
+            department = COALESCE(${department}, department)
+        WHERE user_id = ${user.id}
+    `;
   }
 
   const profile = await sql`
@@ -227,7 +244,7 @@ const updateMeService = async (data, id, role) => {
         LEFT JOIN "Departments" d
             ON d.id = e.department
 
-        WHERE u.id = ${id}
+        WHERE u.id = ${user.id}
     `;
 
   return profile[0];
