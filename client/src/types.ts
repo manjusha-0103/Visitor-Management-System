@@ -70,6 +70,7 @@ export interface User {
     department_id?: string;
     position?: string;
     birth_date?: string;
+    google_calendar_connected?: boolean
 }
 
 export interface AuthInitialState {

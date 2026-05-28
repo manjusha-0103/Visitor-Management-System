@@ -776,7 +776,7 @@ const [
                                         Verify OTP
                                     </h3>
 
-                                    <p className={`ttext-center ext-sm text-muted-foreground leading-5`}>
+                                    <p className={`text-center ext-sm text-muted-foreground leading-5`}>
                                         Enter the 6 digit OTP
                             sent to ${email}
                                     </p>

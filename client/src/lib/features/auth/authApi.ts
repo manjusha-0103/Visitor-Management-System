@@ -89,7 +89,7 @@ export const authApi = api.injectEndpoints({
 
         }),
 
-         verifyOtp: builder.mutation<
+        verifyOtp: builder.mutation<
             any,
             VerifyOtpPayload
         >({
@@ -129,15 +129,15 @@ export const authApi = api.injectEndpoints({
 
 
         sendOtp: builder.mutation<
-    SendOtpResponse,
-    SendOtpPayload
->({
-    query: (body) => ({
-        url: "/api/v1/auth/send-otp",
-        method: "POST",
-        body,
-    }),
-}),
+            SendOtpResponse,
+            SendOtpPayload
+        >({
+            query: (body) => ({
+                url: "/api/v1/auth/send-otp",
+                method: "POST",
+                body,
+            }),
+        }),
 
 
         // connectGoogleCalendar: builder.mutation<

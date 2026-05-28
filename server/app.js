@@ -50,68 +50,68 @@ app.use("/api/v1/analytics", analyticsRoutes);
 
 
 app.get('/', (req, res) => {
-  const {email} = req.query;
+  const { email, redirect } = req.query;
 
-  console.log("akjfdsf",email);
-  
+  console.log("akjfdsf", email);
+
+  const state = JSON.stringify({
+    email,
+    redirect,
+  });
+
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/calendar'],
     prompt: 'consent',
-    state: email
+    state
   });
 
   res.redirect(authUrl);
 });
 
 app.get('/api/auth/google/callback', async (req, res) => {
-  let url = 'http://localhost:5173/employee', status = 'failed';
-  // isSuccess = false;
+  let url = 'http://localhost:5173', status = 'failed';
+  let redirectPath = "";
   try {
     const code = req.query.code;
-    const email = req.query.state;
+    const parsedState = JSON.parse(req.query.state);
+
+const email = parsedState.email;
+redirectPath = parsedState.redirect;
 
     const { tokens } = await oauth2Client.getToken(code);
 
- const [employee] = await sql`
-      SELECT e.id
-      FROM "Employee" e
-      JOIN "Users" u ON u.id = e.user_id
-      WHERE u.email = ${email}
+    const [user] = await sql`
+      SELECT id
+      FROM "Users"
+      WHERE email = ${email}
     `;
 
-    if (!employee) {
-      throw new Error("Employee not found");
+    if (!user) {
+      throw new Error('User not found');
     }
 
-
     await sql`
-      UPDATE "Employee"
-      SET
-        google_access_token = ${tokens.access_token},
-        google_refresh_token = ${tokens.refresh_token},
-        google_token_expiry = ${tokens.expiry_date},
-        google_calendar_connected = ${true}
-      WHERE id = ${employee.id}
-    `;
-
-    // oauth2Client.setCredentials(tokens);
-    // fs.writeFileSync('tokens.json', JSON.stringify(tokens));
-
-    // console.log(tokens);
+  UPDATE "Users"
+  SET
+    google_access_token = ${tokens.access_token},
+    google_token_expiry = ${tokens.expiry_date},
+    google_calendar_connected = ${true},
+    google_refresh_token = COALESCE(
+      ${tokens.refresh_token},
+      google_refresh_token
+    )
+  WHERE id = ${user.id}
+`;
 
     status = 'success'
-    // res.redirect(`http://localhost:5173/employee`)
-
-    // sendResponse(res, 200, null, "token created.")
-
   } catch (err) {
     console.error(err);
     status = 'failed'
     // res.send('OAuth failed');
-  }finally {
+  } finally {
     // res.redirect(`${url}`)
-    res.redirect(`${url}?status=${status}`)
+    res.redirect(`${url}${redirectPath}?status=${status}`)
   }
 });
 

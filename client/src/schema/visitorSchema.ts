@@ -11,7 +11,7 @@ export const visitorSchema = z.object({
   position: z.string(),
   company: z.string().min(1, "Company is required"),
   is_laptop: z.boolean(),
-  purpose: z.string().min(1, "Purpose is required"),
+  purpose: z.string().optional(),
   make: z.string().optional(),
   model: z.string().optional(),
   serial_no: z.string().optional(),
