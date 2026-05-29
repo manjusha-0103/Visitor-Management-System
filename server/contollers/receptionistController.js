@@ -11,8 +11,7 @@ import { setPassIdService,
  } from "../services/receptionist.service.js";
 
 import { getIO } from "../config/socket.js";
-
-
+import { auditService } from "../services/audit.service.js";
 
 const setPassId = asyncHandler(async (req, res) => {
     const {appointment_id} = req.params

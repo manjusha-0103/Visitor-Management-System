@@ -16,6 +16,7 @@ import { getIO } from "../config/socket.js";
 import { userExistbyemailService } from "../services/auth.service.js";
 import { sendEmail } from "../utils/mailer.js";
 import escapeHtml from "../utils/escapeHtml.js";
+import { auditService } from "../services/audit.service.js";
 
 const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
     const super_admin = await allSuperAdminService()

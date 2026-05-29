@@ -61,7 +61,7 @@ export function CustomInputField<T extends FieldValues>({
                 placeholder={placeholder}
                 disabled={disabled}
                 className={`
-                  border
+                  border placeholder:text-xs
                   ${Icon ? "pl-10" : ""}
                   ${rightElement ? "pr-10" : ""}
                   ${fieldState.error ? "border-red-500" : "border-[#e8e8f0]"}

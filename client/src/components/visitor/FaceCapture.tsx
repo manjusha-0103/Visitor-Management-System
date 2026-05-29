@@ -229,7 +229,7 @@ export default function FaceCapture({
                         <div
                             className={`
                                 absolute left-1/2 top-1/2
-                                h-56 w-56 md:h-70 md:w-70
+                                h-80 md:h-70 w-70
                                 -translate-x-1/2 -translate-y-1/2
                                 rounded-[100px]
                                 border-2

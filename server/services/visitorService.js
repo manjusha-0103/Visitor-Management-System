@@ -6,6 +6,7 @@ import { userExistbyemailService } from "./auth.service.js";
 import { uploadFile } from "../config/uploadFile.js";
 import { getBackendUrl } from "../config/runtimeUrls.js";
 import escapeHtml from "../utils/escapeHtml.js";
+import { auditService } from "./audit.service.js";
 
 const checkInService = async (
   {

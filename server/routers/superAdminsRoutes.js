@@ -30,6 +30,6 @@ router.put('/update-user/:id', protect, authorize('super_admin'), updateUser)
 router.delete('/delete-dept/:id', protect,authorize('super_admin'),deleteDeparment)
 router.delete('/delete-emp/:id', deleteEmployee)
 router.get("/employee",getEmpbySearch)
-router.get("/audits",getAllAudits) //protect, authorize('super_admin')
+router.get("/audits",protect, authorize('super_admin'),getAllAudits) //
 
 export default router;
