@@ -20,3 +20,14 @@ export const visitorSchema = z.object({
   // department_id: z.string().min(1, "Department is required"),
   employee_id: z.string().min(1, "Employee is required"),
 });
+
+
+export const walkinSchema = visitorSchema.extend({
+    purpose: z.string().min(1, "Purpose is required"),
+});
+
+export type VisitorFormValues =
+    z.infer<typeof visitorSchema>;
+
+export type WalkinFormValues =
+    z.infer<typeof walkinSchema>;

@@ -12,6 +12,8 @@ import { checkInService,
     visitorInfoService
 } from "../services/visitorService.js";
 import { getIO } from "../config/socket.js";
+import { sendEmail } from "../utils/mailer.js";
+
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
