@@ -201,10 +201,30 @@ const addEmployeeService = async ({
   position,
   role,
   birth_date,
-}) => {
+}, user, ip) => {
   const userExist = await userExistbyemailService(email);
 
   if (userExist.length) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'add_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...user, 
+            },
+            first_name,
+            last_name,
+            email,
+            phone,
+            company,
+            department,
+            position,
+            role,
+            birth_date,
+            "message" : "Employee already exists"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(409, "Employee already exists");
   }
 
@@ -213,7 +233,7 @@ const addEmployeeService = async ({
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const [user] = await sql`
+  const [user_] = await sql`
         INSERT INTO "Users"
         ("first_name", "last_name", "email", "phone", "role", "password", "birth_date")
         VALUES
@@ -251,7 +271,7 @@ const addEmployeeService = async ({
   }
 
   return {
-    user,
+    user_,
     emp,
   };
 };
@@ -267,7 +287,7 @@ const addDepartmentService = async ({ name }) => {
 
 const updateEmployeeService = async (
   id,
-  { first_name, last_name, email, phone, company, department, position, role },
+  { first_name, last_name, email, phone, company, department, position, role }, user, ip
 ) => {
   // Check user exists
   const [existingUser] = await sql`
@@ -277,6 +297,19 @@ const updateEmployeeService = async (
     `;
 
   if (!existingUser) {
+    const audit_data = {
+        "ip": ip,
+        "action" : 'update_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...user, 
+            },
+            first_name, last_name, email, phone, company, department, position, role,
+            id,
+            "message" : "Employee not found"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(404, "Employee not found");
   }
 
@@ -415,6 +448,65 @@ const getEmpbySearchService = async(search) => {
 
   return users;
 }
+
+
+const getAllAuditService = async ({
+  page = 1,
+  limit = 10,
+  action,
+  search,
+}) => {
+  const offset = (page - 1) * limit;
+
+  const audits = await sql`
+    SELECT *
+    FROM "Audits"
+    WHERE
+      (
+        ${action || null}::text IS NULL
+        OR "action" = ${action || null}
+      )
+
+      AND (
+        ${search || null}::date IS NULL
+        OR DATE("created_at") = ${search || null}::date
+      )
+
+    ORDER BY "created_at" DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  `;
+
+  const [totalCountResult] = await sql`
+    SELECT COUNT(*) AS total
+    FROM "Audits"
+    WHERE
+      (
+        ${action || null}::text IS NULL
+        OR "action" = ${action || null}
+      )
+
+      AND (
+        ${search || null}::date IS NULL
+        OR DATE("created_at") = ${search || null}::date
+      )
+  `;
+
+  const total = Number(totalCountResult.total);
+
+  return {
+    data: audits,
+    pagination: {
+      total,
+      page,
+      limit,
+      total_pages: Math.ceil(total / limit),
+      has_next_page: page * limit < total,
+      has_prev_page: page > 1,
+    },
+  };
+};
+
 export {
   getALLEmployeesservice,
   getAllUserService,
@@ -424,5 +516,6 @@ export {
   updateUserService,
   deleteDeparmentService,
   deleteEmployeeService,
-  getEmpbySearchService
+  getEmpbySearchService,
+  getAllAuditService
 };

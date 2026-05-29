@@ -5,17 +5,46 @@ import { sendEmail } from "../utils/mailer.js";
 import { userExistbyemailService } from "./auth.service.js";
 import { scheduleEvent } from "../config/googleCalender.js";
 
-const chekIsApproveService = async (is_approve, appointment_id) => {
+const chekIsApproveService = async (is_approve, appointment_id, ip) => {
   const [amp] = await sql`
-        UPDATE "Appointments"
-        SET 
-            "is_approve" = ${is_approve},
-            "is_rejected" = ${!is_approve}
-        WHERE "id" = ${appointment_id}
-        RETURNING *
-    `;
+    WITH updated AS (
+      UPDATE "Appointments"
+      SET 
+        "is_approve" = ${is_approve},
+        "is_rejected" = ${!is_approve}
+      WHERE "id" = ${appointment_id}
+      RETURNING *
+    )
+
+    SELECT 
+      updated.*,
+
+      u."first_name" AS employee_first_name,
+      u."last_name" AS employee_last_name,
+      u."email" AS employee_email,
+      u."phone" AS employee_phone
+
+    FROM updated
+      LEFT JOIN "Employee" e 
+        ON e."id" = updated."employee_id"
+
+      LEFT JOIN "Users" u 
+        ON u."id" = e."user_id"
+  `;
 
   if (!amp) {
+    const audit_data = {
+        "ip": ip,
+        "action" : 'checkin_approval_failed',
+        "audit_record" :{
+            "updated_by" : "employee",
+            "approval_status" : is_approve,
+            "appointment_id" : appointment_id,
+            "message" : "Appointment not found"
+        },
+    }
+
+    await auditService(audit_data)
     throw new ApiError(404, "Appointment not found");
   }
 
@@ -33,18 +62,34 @@ const chekIsApproveService = async (is_approve, appointment_id) => {
     `;
 
   if (!visitor) {
+    const audit_data = {
+        "ip": ip,
+        "action" : 'checkin_approval_failed',
+        "audit_record" :{
+            "updated_by" : {
+              "email" :amp.employee_email,
+              "name" : `${amp.employee_first_name } ${amp.employee_email }`,
+              "phone" : amp.employee_phone
+            },
+            "approval_status" : is_approve,
+            ...amp,
+            "message" : "Visitor not found"
+        },
+    }
+
+    await auditService(audit_data)
     throw new ApiError(404, "Visitor not found");
   }
 
   return { amp, visitor };
 };
 
-const preScheduleService = async ({ visitors, date_time, employee_email, login_user }) => {
+const preScheduleService = async ({ visitors, date_time, employee_email, login_user }, ip) => {
   let amp = [];
   let vs = [];
 
   const [employee] = await sql`
-        SELECT
+        SELE
             e.id AS employee_id,
             e.user_id,
             e.department,
@@ -61,7 +106,24 @@ const preScheduleService = async ({ visitors, date_time, employee_email, login_u
         WHERE u.email = ${employee_email}
     `;
 
+  const preschedule_by = login_user? login_user: employee_email
   if (!employee) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'preschedule_failed',
+        "audit_record" :{
+            "updated_by" : {
+                "email" : preschedule_by,
+                
+            },
+            ...visitors,
+            date_time,
+            employee_email,
+            "message" : "Employee not found"
+        },
+    }
+
+    await auditService(audit_data)
     throw new ApiError(404, "Employee not found");
   }
 
