@@ -703,6 +703,7 @@ import type {
     Control,
     UseFormSetValue,
     UseFormWatch,
+    FieldErrors,
 } from "react-hook-form";
 
 import z from "zod";
@@ -762,6 +763,7 @@ type CheckInFormProps = {
     handleVerifyVisitorOtp?: () => void;
     handleResendVisitorOtp?: () => void;
     watch: UseFormWatch<WalkinFormValues>;
+    errors: FieldErrors<WalkinFormValues>;
 };
 
 export default function CheckInForm({
@@ -786,7 +788,8 @@ export default function CheckInForm({
     visitorResendTimer,
     handleVerifyVisitorOtp,
     handleResendVisitorOtp,
-    watch
+    watch,
+    errors
 }: CheckInFormProps) {
 
     const [employeeSearch, setEmployeeSearch] = useState("");
@@ -892,28 +895,29 @@ export default function CheckInForm({
 
                             {/* Email verification - WALK-IN ONLY */}
                             {isWalkIn && showVisitorEmailVerification && (
-    <div className="mt-3">
-        {!visitorEmailVerified && !visitorOtpSent ? (
-            <Button
-                type="button"
-                onClick={handleSendVisitorOtp}
-                disabled={
-                    !watch("email") ||
-                    sendVisitorOtpLoading
-                }
-                className="bg-maroon hover:bg-maroon-dark"
-            >
-                {sendVisitorOtpLoading
-                    ? "Sending OTP..."
-                    : "Verify Email"}
-            </Button>
-        ) : visitorEmailVerified ? (
-            <div className="text-sm font-medium text-green-600">
-                ✓ Email verified
-            </div>
-        ) : null}
-    </div>
-)}
+                                <div className="mt-3">
+                                    {!visitorEmailVerified && !visitorOtpSent ? (
+                                        <Button
+                                            type="button"
+                                            onClick={handleSendVisitorOtp}
+                                            disabled={
+                                                !watch("email") ||
+                                                !!errors.email ||
+                                                sendVisitorOtpLoading
+                                            }
+                                            className="bg-maroon hover:bg-maroon-dark"
+                                        >
+                                            {sendVisitorOtpLoading
+                                                ? "Sending OTP..."
+                                                : "Verify Email"}
+                                        </Button>
+                                    ) : visitorEmailVerified ? (
+                                        <div className="text-sm font-medium text-green-600">
+                                            ✓ Email verified
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -940,14 +944,14 @@ export default function CheckInForm({
                             /> */}
 
                             <OTPVerification
-    otp={visitorOtp!}
-    setOtp={setVisitorOtp!}
-    verifyOtpLoading={verifyVisitorOtpLoading}
-    resendLoading={visitorResendLoading}
-    resendTimer={visitorResendTimer}
-    handleVerifyOtp={handleVerifyVisitorOtp!}
-    handleResendOtp={handleResendVisitorOtp!}
-/>
+                                otp={visitorOtp!}
+                                setOtp={setVisitorOtp!}
+                                verifyOtpLoading={verifyVisitorOtpLoading}
+                                resendLoading={visitorResendLoading}
+                                resendTimer={visitorResendTimer}
+                                handleVerifyOtp={handleVerifyVisitorOtp!}
+                                handleResendOtp={handleResendVisitorOtp!}
+                            />
                         </div>
                     )}
 

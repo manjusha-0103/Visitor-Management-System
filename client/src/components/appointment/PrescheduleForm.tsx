@@ -54,14 +54,14 @@ export type FormValues = z.infer<typeof formSchema>;
 export default function PreScheduleForm() {
     const user = useSelector(selectUser)
     const isGoogleCalendarConnected = user?.google_calendar_connected === true;
-    
+
     // Schedule fields (Step 1)
     const [date, setDate] = useState<Date>();
     const [time, setTime] = useState("");
     const [selectedEmployee, setSelectedEmployee] = useState<SearchEmployee | null>(null);
 
     // Google Calendar connection (Step 2)
-    const [googleConnected, setGoogleConnected] = useState(isGoogleCalendarConnected);
+    // const [googleConnected, setGoogleConnected] = useState(isGoogleCalendarConnected);
 
     // OTP fields (Step 4)
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -75,8 +75,8 @@ export default function PreScheduleForm() {
     const [debounced, setDebounced] = useState("");
 
     // Get URL params for Google OAuth redirect
-    const queryParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    const status = queryParams.get("status");
+    // const queryParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    // const status = queryParams.get("status");
 
     const [sendOtp, { isLoading: sendOtpLoading }] = useEmpoyeeSendOtpMutation();
     const [verifyOtp, { isLoading: verifyOtpLoading }] = useEmpoyeeVerifyOtpMutation();
@@ -119,12 +119,6 @@ export default function PreScheduleForm() {
         return () => clearTimeout(timer);
     }, [employeeSearch, selectedEmployee]);
 
-    // Handle Google OAuth redirect
-    useEffect(() => {
-        if (status === "success") {
-            setGoogleConnected(true);
-        }
-    }, [status]);
 
     const { data: employeeData, isLoading: empSearchLoading } = useSearchEmployeesQuery(debounced, {
         skip: !debounced.trim(),
@@ -226,27 +220,54 @@ export default function PreScheduleForm() {
 
     const isStep1Complete = !!date && !!time;
 
-const isEmployeeSelected = !!selectedEmployee;
+    const isEmployeeSelected = !!selectedEmployee;
 
-const isStep2Complete =
-    isEmployeeSelected && googleConnected;
+    const isStep2Complete =
+        isEmployeeSelected && isGoogleCalendarConnected;
 
-const isStep3Complete = isValid;
+    const isStep3Complete = isValid;
 
-const canSendOtp =
-    isStep1Complete &&
-    isEmployeeSelected &&
-    isStep2Complete &&
-    isStep3Complete &&
-    !otpSent;   
+    const canSendOtp =
+        isStep1Complete &&
+        isEmployeeSelected &&
+        isStep2Complete &&
+        isStep3Complete &&
+        !otpSent;
+
+    
+    if (!isGoogleCalendarConnected) {
+    return (
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-4 max-w-xl">
+            <p className="text-sm font-medium text-yellow-800">
+                Your Google Calendar is not connected.
+            </p>
+
+            <p className="text-sm text-yellow-700 mt-1">
+                Please connect your Google Calendar first from
+                Settings to enable appointment scheduling.
+            </p>
+
+            <Button
+                type="button"
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                    window.location.href = "/admin/settings";
+                }}
+            >
+                Go to Settings
+            </Button>
+        </div>
+    );
+}
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl">
             {/* STEP 1: Schedule Details */}
-            
+
             <div className="rounded-2xl border bg-white p-4 space-y-4">
                 <div>
-                    <h2 className="text-lg font-semibold">Step 1: Schedule Visit</h2>
+                    {/* <h2 className="text-lg font-semibold">Step 1: Schedule Visit</h2> */}
                     <p className="text-sm text-muted-foreground">
                         Select date, time, and employee to meet
                     </p>
@@ -314,7 +335,7 @@ const canSendOtp =
                     </div>
                 </div>
             </div>
-        
+
 
             {/* STEP 1.5: Select Employee (shown after date & time) */}
             {isStep1Complete && (
@@ -329,7 +350,7 @@ const canSendOtp =
                     <EmployeeSearchSelect
                         employees={employees}
                         isLoading={empSearchLoading}
-                        setValue={() => {}}
+                        setValue={() => { }}
                         employeeSearch={employeeSearch}
                         setEmployeeSearch={setEmployeeSearch}
                         selectedEmployee={selectedEmployee}
@@ -342,47 +363,39 @@ const canSendOtp =
 
             {/* STEP 2: Connect Google Calendar (shown after employee selected) */}
             {/* {isStep1Complete && !googleConnected && ( */}
-                {isEmployeeSelected && !googleConnected && (
-                <div className="rounded-2xl border bg-white p-5 space-y-4">
-                    <div>
-                        <h2 className="text-lg font-semibold">Step 2: Connect Google Calendar</h2>
-                        <p className="text-sm text-muted-foreground">
-                            Connect your Google Calendar to automatically receive meeting reminders and future visitor schedules.
-                        </p>
-                    </div>
+            {/* {isEmployeeSelected && !isGoogleCalendarConnected && (
+                <div className="rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 max-w-xl">
+                    <p className="text-sm font-medium text-yellow-800">
+                        Your Google Calendar is not connected.
+                    </p>
+
+                    <p className="text-sm text-yellow-700 mt-1">
+                        Please connect your Google Calendar first from
+                        Settings to enable appointment scheduling.
+                    </p>
 
                     <Button
                         type="button"
+                        variant="outline"
+                        className="mt-3"
                         onClick={() => {
-                            window.location.href = `http://localhost:5000/?email=${encodeURIComponent(selectedEmployee?.email || "")}`;
+                            window.location.href = "/admin/settings";
                         }}
-                        className="w-full bg-[#4285F4] hover:bg-[#3367d6] text-white"
                     >
-                        Connect Google Calendar
+                        Go to Settings
                     </Button>
-
-                    {status === "success" && (
-                        <div className="rounded-md bg-green-100 text-green-700 p-3 text-sm">
-                            ✓ Google Calendar connected successfully!
-                        </div>
-                    )}
-                    {status === "failed" && (
-                        <div className="rounded-md bg-red-100 text-red-700 p-3 text-sm">
-                            ✗ Failed to connect. Click button to try again.
-                        </div>
-                    )}
                 </div>
-            )}
+            )} */}
 
             {/* STEP 3: Add Visitor Details (shown after Google connected) */}
-            {isStep2Complete  && (
+            {isStep2Complete && (
                 <div className="space-y-5">
-                    <div className="rounded-2xl border bg-white p-4">
+                    {/* <div className="rounded-2xl border bg-white p-4">
                         <h3 className="font-semibold text-lg">Step 3: Add Visitors</h3>
                         <p className="text-sm text-muted-foreground mt-1">
                             Add one or multiple visitors for this appointment
                         </p>
-                    </div>
+                    </div> */}
 
                     {fields.map((field, index) => (
                         <VisitorCard
@@ -422,7 +435,7 @@ const canSendOtp =
             {otpSent && !otpVerified && (
                 <div className="rounded-2xl border bg-white p-5 space-y-5">
                     <div>
-                        <h3 className="font-semibold text-lg">Step 4: Verify OTP</h3>
+                        {/* <h3 className="font-semibold text-lg">Step 4: Verify OTP</h3> */}
                         <p className="text-sm text-muted-foreground leading-5">
                             Enter the 6 digit OTP sent to {selectedEmployee?.email}
                         </p>
@@ -446,7 +459,7 @@ const canSendOtp =
                     <Button type="button" disabled className="bg-maroon hover:bg-maroon-dark">
                         {!isStep1Complete
                             ? "Fill Schedule & Select Employee First"
-                            : !googleConnected
+                            : !isGoogleCalendarConnected
                                 ? "Connect Google Calendar First"
                                 : !isStep3Complete
                                     ? "Add Visitor Details First"

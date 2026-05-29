@@ -5,6 +5,7 @@ import { sendEmail } from "../utils/mailer.js";
 import { userExistbyemailService } from "./auth.service.js";
 import { getPublicAppUrl } from "../config/runtimeUrls.js";
 import escapeHtml from "../utils/escapeHtml.js";
+import { auditService } from "./audit.service.js";
 
 const getALLEmployeesservice = async ({
   page = 1,

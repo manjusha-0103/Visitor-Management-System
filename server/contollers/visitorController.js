@@ -13,7 +13,7 @@ import { checkInService,
 } from "../services/visitorService.js";
 import { getIO } from "../config/socket.js";
 import { sendEmail } from "../utils/mailer.js";
-
+import { auditService } from "../services/audit.service.js";
 
 const generateOTP = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -124,7 +124,9 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
 const checkIn = asyncHandler(async (req, res) => {
     // file info logged in dev only previously; removed for production
-    const {loggedin_user} = req.body
+    const loggedin_user = req.body.loggedin_user
+  ? JSON.parse(req.body.loggedin_user)
+  : null;
     const appointment = await checkInService(req.body, req.file, req.ip)
     // appointment info removed from logs
 

@@ -4,9 +4,7 @@ import { ROLES } from "./contants";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import Settings from "./pages/settings/Settings";
-// import DummyAnalytics from "./pages/analytics/DummyAnalytics";
-// import CheckIn from "./pages/admin-check-in/CheckIn";
-// import ChangePassword from "./pages/settings/ChangePassword";
+import Audit from "./pages/audit/Audit";
 
 const Auth = lazy(() => import("@/pages/Auth"));
 const AuthLayout = lazy(() => import("@/layouts/AuthLayout"));
@@ -20,7 +18,6 @@ const ManageTeam = lazy(() => import("@/components/team/ManageTeam"))
 const ChangePassword = lazy(() => import("@/pages/settings/ChangePassword"))
 const Profile = lazy(() => import("@/pages/settings/Profile"))
 const CheckIn = lazy(() => import("@/pages/admin-check-in/CheckIn"))
-// const ManageUsers = lazy(() => import("@/pages/users/ManageUser"))
 
 const router = createBrowserRouter([
   //Auth Routes
@@ -59,6 +56,10 @@ const router = createBrowserRouter([
           {
             path: "team",
             element: <ManageTeam />,
+          },
+          {
+            path: "audit",
+            element: <Audit/>
           },
           {
               path: "settings",
