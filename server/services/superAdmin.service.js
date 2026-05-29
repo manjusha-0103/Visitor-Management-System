@@ -454,7 +454,7 @@ const getAllAuditService = async ({
   page = 1,
   limit = 10,
   action,
-  search,
+  date,
 }) => {
   const offset = (page - 1) * limit;
 
@@ -464,12 +464,12 @@ const getAllAuditService = async ({
     WHERE
       (
         ${action || null}::text IS NULL
-        OR "action" = ${action || null}
+        OR LOWER("action"::text) = LOWER(${action || null})
       )
 
       AND (
-        ${search || null}::date IS NULL
-        OR DATE("created_at") = ${search || null}::date
+        ${date || null}::text IS NULL
+        OR "created_at"::date = ${date || null}::date
       )
 
     ORDER BY "created_at" DESC
@@ -483,12 +483,12 @@ const getAllAuditService = async ({
     WHERE
       (
         ${action || null}::text IS NULL
-        OR "action" = ${action || null}
+        OR LOWER("action"::text) = LOWER(${action || null})
       )
 
       AND (
-        ${search || null}::date IS NULL
-        OR DATE("created_at") = ${search || null}::date
+        ${date || null}::text IS NULL
+        OR "created_at"::date = ${date || null}::date
       )
   `;
 
