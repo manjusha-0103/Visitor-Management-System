@@ -179,7 +179,7 @@ export const visitorApi = api.injectEndpoints({
       SendOtpPayloadVisitor
     >({
       query: (body) => ({
-        url: "/api/v1/auth/send-otp",
+        url: "/api/v1/visitors/send-otp",
         method: "POST",
         body,
       }),
@@ -190,12 +190,12 @@ export const visitorApi = api.injectEndpoints({
       VerifyOtpPayload
     >({
       query: (body) => ({
-        url: "/api/v1/auth/verify-otp",
+        url: "/api/v1/visitors/verify-otp",
         method: "POST",
         body,
       }),
 
-      invalidatesTags: ['Auth']
+      // invalidatesTags: ['Auth']
     }),
 
   }),

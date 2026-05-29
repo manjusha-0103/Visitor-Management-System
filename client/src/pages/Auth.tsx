@@ -778,7 +778,7 @@ const [
 
                                     <p className={`text-center ext-sm text-muted-foreground leading-5`}>
                                         Enter the 6 digit OTP
-                            sent to ${email}
+                            sent to {email}
                                     </p>
 
                                 </div>
