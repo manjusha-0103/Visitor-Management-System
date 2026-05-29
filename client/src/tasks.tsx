@@ -1,6 +1,7 @@
 import {
   CalendarClock,
   ChartNoAxesCombined,
+  Search,
   Settings,
   // Settings,
   UserRound,
@@ -38,6 +39,13 @@ export const SUPER_ADMIN_TASKS = [
     icon: ChartNoAxesCombined,
     bg: "bg-yellow-700 shadow-lg shadow-yellow-700/40",
     path: "/admin/analytics",
+  },
+  {
+    key: "audit",
+    label: "Audit",
+    icon: Search,
+    bg: "bg-violet-600 shadow-lg shadow-violet-600/40",
+    path: "/admin/audit",
   },
   {
     key: "settings",

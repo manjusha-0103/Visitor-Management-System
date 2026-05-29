@@ -61,8 +61,6 @@ export default function ManageTeam() {
 
     const { data: departments } = useGetDepartmentsQuery();
 
-
-
     const employees = useMemo(() => data?.data?.data || [], [data])
     const totalPages = useMemo(() => data?.data?.pagination?.totalPages || 1, [data])
     const currentPage = useMemo(() => data?.data?.pagination?.page || 1, [data])

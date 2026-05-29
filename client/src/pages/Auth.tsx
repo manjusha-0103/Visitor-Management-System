@@ -486,10 +486,9 @@ const [
                     bg-white
                     rounded-2xl
                     w-full
-                    max-w-105
+                    max-w-md
                     animate-fade-up
                     p-6
-                    lg:p-8
                 "
             >
 

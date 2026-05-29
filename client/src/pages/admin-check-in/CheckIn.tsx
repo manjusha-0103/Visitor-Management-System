@@ -796,14 +796,14 @@ import { lazy, Suspense, useEffect, useState } from "react";
 const FaceCapture = lazy(() => import("@/components/visitor/FaceCapture"))
 import CheckInForm from "@/components/appointment/CheckInForm";
 import { useVisitorCheckInMutation, useVisitorSendOtpMutation, useVisitorVerifyOtpMutation } from "@/lib/features/visitor-check-in/visitorApi";
-import z from "zod";
+// import z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectUser } from "@/lib/features/auth/authSlice";
-import { visitorSchema, walkinSchema } from "@/schema/visitorSchema";
+import { walkinSchema } from "@/schema/visitorSchema";
 import { type SearchEmployee } from "@/lib/features/employee/employeeApi";
 import PreScheduleForm from "@/components/appointment/PrescheduleForm";
 import type { WalkinFormValues } from "@/schema/visitorSchema";
@@ -851,7 +851,7 @@ export default function CheckIn() {
         control,
         setValue,
         watch,
-        formState: { isValid, errors }
+        formState: { errors }
     } = useForm<WalkinFormValues>({
         resolver: zodResolver(walkinSchema),
         defaultValues: {
@@ -870,6 +870,7 @@ export default function CheckIn() {
             vehicle_no: "",
             employee_id: "",
         },
+        mode: "onChange"
     });
 
     const hasLaptop = watch("is_laptop") ?? false;
@@ -910,6 +911,16 @@ export default function CheckIn() {
     // Walk-in form submission
     const onSubmit = async (data: WalkinFormValues) => {
         try {
+
+             const loggedin_user = user
+        ? {
+            first_name: user.first_name ?? "",
+            last_name: user.last_name ?? "",
+            email: user.email ?? "",
+            phone: user.phone ?? "",
+          }
+        : "";
+
             const hasValidLaptopDetails =
                 data.is_laptop &&
                 (data.make ?? "").trim() &&
@@ -930,7 +941,10 @@ export default function CheckIn() {
             formData.append("company", data.company || "");
             formData.append("position", data.position || "");
             formData.append("employee_id", data.employee_id);
-
+            formData.append(
+        "loggedin_user",
+        typeof loggedin_user === "string" ? "" : JSON.stringify(loggedin_user),
+      );
             formData.append("is_laptop", String(!!hasValidLaptopDetails));
             formData.append("is_vehicle", String(!!hasValidVehicleDetails));
 
@@ -1118,6 +1132,7 @@ export default function CheckIn() {
                                             handleVerifyVisitorOtp={handleVerifyVisitorOtp}
                                             handleResendVisitorOtp={handleResendVisitorOtp}
                                             watch={watch}
+                                            errors={errors}
                                         />
 
                                         <Button

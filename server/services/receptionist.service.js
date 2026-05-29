@@ -1,6 +1,7 @@
 import sql from "../db/database.js";
 import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { auditService } from "./audit.service.js";
 
 const setPassIdService = async (appointment_id, data) => {
   const { pass_id } = data;

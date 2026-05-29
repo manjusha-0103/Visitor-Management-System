@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.js";
 import { sendEmail } from "../utils/mailer.js";
 import { userExistbyemailService } from "./auth.service.js";
 import { scheduleEvent } from "../config/googleCalender.js";
+import { auditService } from "./audit.service.js";
 
 const chekIsApproveService = async (is_approve, appointment_id, ip) => {
   const [amp] = await sql`
@@ -300,9 +301,12 @@ export const getGoogleCalendarStatusService = async (
         SELECT
             u.id,
             u.email,
-            u.google_calendar_connected
+            u.google_calendar_connected,
+            u.role
         FROM "Users" u
-        WHERE u.email = ${email}
+        WHERE 
+          u.email = ${email}
+          AND u.role = 'employee'
     `;
     // console.log(emp);
     

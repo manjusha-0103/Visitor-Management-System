@@ -97,7 +97,7 @@ export default function EmployeeSearchSelect<
                     placeholder={placeholder}
                     className={`
                         h-10 w-full rounded-lg border border-gray-200
-                        bg-white px-4 text-sm outline-none
+                        bg-white px-4 text-sm outline-none placeholder:text-xs
                         transition-all
                         ${errorMsg ? "border-red-500" : "border-[#e8e8f0]"}
                         

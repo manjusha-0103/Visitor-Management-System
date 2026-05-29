@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import sql from "../db/database.js";
 import ApiError from "../utils/ApiError.js";
+import { auditService } from "./audit.service.js";
 
 const getMeService = async (id) => {
   const me = await sql`
