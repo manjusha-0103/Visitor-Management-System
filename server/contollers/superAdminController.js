@@ -466,23 +466,22 @@ const getEmpbySearch = asyncHandler(async (req, res) => {
 
 
 const getAllAudits = asyncHandler(async (req, res) => {
-
   const {
     page = 1,
     limit = 10,
     action,
-    search,
+    date,
   } = req.query;
 
   const audits = await getAllAuditService({
     page: Number(page),
     limit: Number(limit),
     action,
-    search,
+    date,
   });
-  sendResponse(res, 201, audits, "All Audits")
-  
-})
+
+  sendResponse(res, 200, audits, "All Audits");
+});
 
 export {
   addEmployee,
