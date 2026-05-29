@@ -29,7 +29,12 @@ const checkInService = async (
   
 ) => {
   // console.log("loggedin_user", loggedin_user);
-  const loggedInUserId = loggedin_user ?? null;
+  const loggedInUserId = loggedin_user.id ?? null;
+
+  const checkin_by = loggedin_user? loggedin_user :{first_name,
+    last_name,
+    email,
+    phone,}
   
   const [visitorexist] = await userExistbyemailService(email);
   const date_time = new Date();
@@ -52,6 +57,29 @@ const checkInService = async (
         WHERE e.id = ${employee_id}
     `;
   if (!employee) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'checkin',
+        "audit_record" :{
+            "updated_by" : checkin_by,
+            first_name,
+            last_name,
+            email,
+            phone,
+            position,
+            is_laptop,
+            company,
+            make,
+            model,
+            serial_no,
+            is_vehicle,
+            vehicle_no,
+            employee_id,
+            purpose,
+            "message" : "Employee not found"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(404, "Employee not found");
   }
   

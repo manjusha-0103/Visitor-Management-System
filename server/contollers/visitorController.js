@@ -124,10 +124,24 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
 const checkIn = asyncHandler(async (req, res) => {
     // file info logged in dev only previously; removed for production
-    const appointment = await checkInService(req.body, req.file)
+    const {loggedin_user} = req.body
+    const appointment = await checkInService(req.body, req.file, req.ip)
     // appointment info removed from logs
 
+    const updated_by = loggedin_user? loggedin_user : req.body
+
     if (appointment) {
+
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'checkin',
+            "audit_record" :{
+                "updated_by" : updated_by,
+                ...appointment,
+                "message" : "check-in successful"
+            },
+        }
+        await auditService(audit_data)
         const io = getIO();
 
          io.emit("appointment_updated", {
@@ -142,6 +156,16 @@ const checkIn = asyncHandler(async (req, res) => {
             "check-in successful"
         )
     } else {
+        const audit_data = {
+            "ip": req.ip,
+            "action" : 'checkin',
+            "audit_record" :{
+                "updated_by" : updated_by,
+                ...req.body,
+                "message" : "check-in failed"
+            },
+        }
+        await auditService(audit_data)
         throw new ApiError(
             400,
             null,

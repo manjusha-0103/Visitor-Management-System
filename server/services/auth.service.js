@@ -69,13 +69,26 @@ const registerUserService = async (userData) => {
   return newUser[0];
 };
 
-const loginUserService = async (email, password) => {
+const loginUserService = async (email, password, ip) => {
   const users = await sql`
         SELECT 
             *
         FROM "Users" WHERE "email" = ${email}
     `;
   if (!users || users.length === 0) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'signin_failed',
+        "audit_record" :{
+            
+            "email": email,
+            "password" : password,
+            "error": "Invalid credentials"
+        },
+        "message" : "Invalid credentials"
+    }
+
+    await auditService(audit_data)
     throw new ApiError(401, "Invalid credentials");
   }
 
@@ -84,6 +97,16 @@ const loginUserService = async (email, password) => {
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
+    const audit_data = {
+        "ip": ip,
+        "action" : 'signin_failed',
+        "audit_record" :{
+            
+            "email": email,
+            "password" : password,
+            "error": "Invalid credentials"
+        },
+    }
     throw new ApiError(401, "Invalid credentials");
   }
 
@@ -132,36 +155,84 @@ const userExistbyemailService = async (email) => {
   return userExists;
 };
 
-const changePasswordService = async ({ old_pass, new_pass }, id) => {
-  const user = await sql`
+const changePasswordService = async ({ old_pass, new_pass }, user, ip) => {
+  const user_ = await sql`
         SELECT password
         FROM "Users"
-        WHERE id = ${id}
+        WHERE id = ${user.id}
     `;
 
-  if (!user || user.length === 0) {
+  if (!user_ || user_.length === 0) {
+    const audit_data = {
+      "ip": ip,
+      "action" : 'change_password_failed',
+      "audit_record" :{
+          "updated_by" : {
+              "email" :user.email,
+              "name" : `${user.first_name } ${user.last_name }`,
+              "phone" : user.phone
+          },
+           "old_pass" : old_pass,
+          "new_pass" : new_pass,
+          
+          "message" : "User not found"
+      },
+    }
+    await auditService(audit_data)
     throw new ApiError(404, "User not found");
   }
 
-  const isPasswordCorrect = await bcrypt.compare(old_pass, user[0].password);
+  const isPasswordCorrect = await bcrypt.compare(old_pass, user_[0].password);
 
   if (!isPasswordCorrect) {
+    const audit_data = {
+      "ip": ip,
+      "action" : 'change_password_failed',
+      "audit_record" :{
+          "updated_by" : {
+              "email" :user.email,
+              "name" : `${user.first_name } ${user.last_name }`,
+              "phone" : user.phone
+          },
+          "old_pass" : old_pass,
+          "new_pass" : new_pass,
+          
+          "message" : "Old password is incorrect"
+      },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Old password is incorrect");
   }
 
   if (old_pass === new_pass) {
+    const audit_data = {
+      "ip": ip,
+      "action" : 'change_password_failed',
+      "audit_record" :{
+          "updated_by" : {
+              "email" :user.email,
+              "name" : `${user.first_name } ${user.last_name }`,
+              "phone" : user.phone
+          },
+          "old_pass" : old_pass,
+          "new_pass" : new_pass,
+          
+          "message" : "Old and new password should not be the same"
+      },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Old and new password should not be the same");
   }
 
   const hashedPassword = await bcrypt.hash(new_pass, 10);
 
-  const user_ = await sql`
+  const user__= await sql`
         UPDATE "Users"
         SET password = ${hashedPassword}
-        WHERE id = ${id}
+        WHERE id = ${user.id}
         RETURNING "first_name", "last_name", "email", "phone"
     `;
-  return user_;
+  return user__;
 };
 
 const updateMeService = async (data,user, ip) => {
@@ -178,7 +249,7 @@ const updateMeService = async (data,user, ip) => {
   const user_ = await sql`
         SELECT id, role
         FROM "Users"
-        WHERE id = ${id}
+        WHERE id = ${user.id}
     `;
 
   if (!user_.length) {

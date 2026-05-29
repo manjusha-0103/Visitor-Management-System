@@ -25,6 +25,7 @@ import { Readable } from "stream";
 import { sendEmail } from "../utils/mailer.js";
 import escapeHtml from "../utils/escapeHtml.js";
 import { getPublicAppUrl } from "../config/runtimeUrls.js";
+import { getAllAuditService } from "../services/superAdmin.service.js";
 
 const parseExcel = (buffer) => {
   const workbook = XLSX.read(buffer, {
@@ -53,17 +54,54 @@ const parseCSV = async (buffer) => {
 };
 
 const addEmployee = asyncHandler(async (req, res) => {
-  const employee = await addEmployeeService(req.body);
+  const employee = await addEmployeeService(req.body, req.user, req.ip);
 
   if (employee) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'add_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user,
+                
+            },
+            ...req.body,
+            "message" : "Added employee successfully"
+        },
+    }
+    await auditService(audit_data)
     sendResponse(res, 200, employee, "Added employee successfully");
   } else {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'add_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user,
+                
+            },
+            ...req.body,
+            "message" : "Bad request"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Bad request");
   }
 });
 
 const addEmployees = asyncHandler(async (req, res) => {
   if (!req.file) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'employee_bulk_import',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            "message" : "File is required"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "File is required");
   }
 
@@ -78,6 +116,17 @@ const addEmployees = asyncHandler(async (req, res) => {
   } else if (ext === "xlsx" || ext === "xls") {
     employees = parseExcel(fileBuffer);
   } else {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'employee_bulk_import',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            "message" : "Only CSV or Excel files are allowed"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Only CSV or Excel files are allowed");
   }
 
@@ -127,10 +176,10 @@ const addEmployees = asyncHandler(async (req, res) => {
       }
 
       const existingUser = await sql`
-                SELECT id
-                FROM "Users"
-                WHERE LOWER(email) = LOWER(${email})
-            `;
+          SELECT id
+          FROM "Users"
+          WHERE LOWER(email) = LOWER(${email})
+      `;
 
       if (existingUser.length > 0) {
         failed.push({
@@ -257,10 +306,24 @@ const addEmployees = asyncHandler(async (req, res) => {
     imported,
     failed,
   };
+
+  
   const message =
     failed.length === 0
       ? `All records imported successfully`
       : `${imported.length} records imported successfully, and ${failed.length} failed.`;
+  const audit_data = {
+      "ip": req.ip,
+      "action" : 'employee_bulk_import',
+      "audit_record" :{
+          "updated_by" : {
+              ...req.user, 
+          },
+          ...results,
+          "message" : message
+      },
+  }
+  await auditService(audit_data)
   sendResponse(res, 200, results, message);
 });
 
@@ -270,8 +333,32 @@ const deleteEmployee = asyncHandler(async (req, res) => {
 
   const employee = await deleteEmployeeService(id);
   if (employee) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'delete_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            ...employee,
+            "message" : "Employee deleted successfully"
+        },
+    }
+    await auditService(audit_data)
     sendResponse(res, 200, employee, "Employee deleted successfully");
   } else {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'delete_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            "employee" : id,
+            "message" : "Bad request"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Bad request");
   }
 });
@@ -321,11 +408,36 @@ const deleteDeparment = asyncHandler(async (req, res) => {
 const updateEmployee = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const updatedEmployee = await updateEmployeeService(id, req.body);
+  const updatedEmployee = await updateEmployeeService(id, req.body, req.user, req.ip);
 
   if (updatedEmployee) {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'update_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            ...updatedEmployee,
+            "message" : "Employee updated successfully"
+        },
+    }
+    await auditService(audit_data)
     sendResponse(res, 200, updatedEmployee, "Employee updated successfully");
   } else {
+    const audit_data = {
+        "ip": req.ip,
+        "action" : 'update_employee',
+        "audit_record" :{
+            "updated_by" : {
+                ...req.user, 
+            },
+            ...req.body,
+            "employee_id" : id,
+            "message" : "Failed to update employee"
+        },
+    }
+    await auditService(audit_data)
     throw new ApiError(400, "Failed to update employee");
   }
 });
@@ -352,6 +464,26 @@ const getEmpbySearch = asyncHandler(async (req, res) => {
     sendResponse(res, 200, users, 'Got the searched employee.')
 })
 
+
+const getAllAudits = asyncHandler(async (req, res) => {
+
+  const {
+    page = 1,
+    limit = 10,
+    action,
+    search,
+  } = req.query;
+
+  const audits = await getAllAuditService({
+    page: Number(page),
+    limit: Number(limit),
+    action,
+    search,
+  });
+  sendResponse(res, 201, audits, "All Audits")
+  
+})
+
 export {
   addEmployee,
   getALLEmployees,
@@ -362,5 +494,6 @@ export {
   deleteDeparment,
   deleteEmployee,
   addEmployees,
-  getEmpbySearch
+  getEmpbySearch,
+  getAllAudits
 };

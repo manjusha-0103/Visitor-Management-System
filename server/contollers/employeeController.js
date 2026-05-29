@@ -19,12 +19,12 @@ import escapeHtml from "../utils/escapeHtml.js";
 
 const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
     const super_admin = await allSuperAdminService()
-    for (let s of super_admin){
+    for (let s of super_admin) {
 
         await sendEmail({
             to: s.email,
             subject: "Appoiment Check-In Missed-use",
-            html:`
+            html: `
                 html
             <!DOCTYPE html>
             <html lang="en">
@@ -138,10 +138,10 @@ const sendEmailToSuperAdmin = asyncHandler(async (employee) => {
             </body>
             </html>
             `
-        
+
         })
     }
-    
+
 })
 
 const generateOTP = () => {
@@ -151,7 +151,23 @@ const generateOTP = () => {
 const chekIsApprove = asyncHandler(async (req, res) => {
     const is_approve = req.query.is_approve === "true"
     const { appointment_id } = req.params
-    const appoinment = await chekIsApproveService(is_approve, appointment_id)
+    const appoinment = await chekIsApproveService(is_approve, appointment_id, req.ip)
+
+    const audit_data = {
+        "ip": req.ip,
+        "action": 'checkin_approval',
+        "audit_record": {
+            "updated_by": {
+                "email": req.user.email,
+                "name": `${req.user.first_name} ${req.user.last_name}`,
+                "phone": req.user.phone
+            },
+            ...appoinment,
+            "message": "Data is updated successfully"
+        },
+    }
+
+    await auditService(audit_data)
     res.send(`'
         <!DOCTYPE html>
             <html lang="en">
@@ -243,7 +259,7 @@ const chekIsApprove = asyncHandler(async (req, res) => {
 
                 background: ${is_approve ? "#ecfdf3" : "#fef2f2"};
                 box-shadow: 0 0 0 12px ${is_approve ? "#dcfce766" : "#fee2e255"
-                    };
+        };
                 }
 
                 h1 {
@@ -383,7 +399,7 @@ const chekIsApprove = asyncHandler(async (req, res) => {
                 <div class="icon-wrap">
 
                 ${is_approve
-                        ? `
+            ? `
                     <svg width="44" height="44" fill="none" stroke="#16a34a"
                     stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round" viewBox="0 0 24 24">
@@ -393,7 +409,7 @@ const chekIsApprove = asyncHandler(async (req, res) => {
 
                     </svg>
                 `
-                        : `
+            : `
                     <svg width="44" height="44" fill="none" stroke="#dc2626"
                     stroke-width="2.5" stroke-linecap="round"
                     stroke-linejoin="round" viewBox="0 0 24 24">
@@ -404,7 +420,7 @@ const chekIsApprove = asyncHandler(async (req, res) => {
 
                     </svg>
                 `
-                    }
+        }
 
                 </div>
 
@@ -416,9 +432,9 @@ const chekIsApprove = asyncHandler(async (req, res) => {
                 <p class="subtitle">
                 Your response has been recorded successfully.
                 ${is_approve
-                        ? "The visitor has been notified about the approval."
-                        : "The visitor has been notified about the denial."
-                    }
+            ? "The visitor has been notified about the approval."
+            : "The visitor has been notified about the denial."
+        }
                 </p>
 
                 <div class="visitor-card">
@@ -470,7 +486,7 @@ const chekIsApprove = asyncHandler(async (req, res) => {
             </html>
         
     `)
-    
+
     const io = getIO();
 
     io.emit("appointment_updated", {
@@ -491,7 +507,7 @@ const sendOtp = asyncHandler(async (req, res) => {
     const userExist =
         await employeeEsistService(employee_email);
 
-    if(userExist){
+    if (userExist) {
 
         const otp = generateOTP();
 
@@ -560,7 +576,7 @@ const sendOtp = asyncHandler(async (req, res) => {
         );
 
     }
-    else{
+    else {
 
         await sendEmailToSuperAdmin(req.body);
 
@@ -576,7 +592,7 @@ const sendOtp = asyncHandler(async (req, res) => {
 
 
 const verifyOtp = asyncHandler(async (req, res) => {
-    const {otp, email} = req.body
+    const { otp, email } = req.body
 
     const result = await sql`
 
@@ -593,13 +609,15 @@ const verifyOtp = asyncHandler(async (req, res) => {
         LIMIT 1
     `;
 
-    if(result.length === 0){
+    if (result.length === 0) {
         const userExist = await employeeEsistService(email)
-        
-        await sendEmailToSuperAdmin({"full_name" : `${userExist.first_name} ${userExist.last_name}`,
-        "email": userExist.email, "phone" : userExist.phone, "company" : userExist.company, "position": userExist.position})
-        throw new ApiError( 401, "OTP is invalid or Expired")
-        
+
+        await sendEmailToSuperAdmin({
+            "full_name": `${userExist.first_name} ${userExist.last_name}`,
+            "email": userExist.email, "phone": userExist.phone, "company": userExist.company, "position": userExist.position
+        })
+        throw new ApiError(401, "OTP is invalid or Expired")
+
     }
     const employee = await employeeEsistService(email);
 
@@ -617,34 +635,63 @@ const verifyOtp = asyncHandler(async (req, res) => {
 
 const preSchedule = asyncHandler(async (req, res) => {
     const { employee_email } = req.body;
+    const {login_user} = req.body
     // removed debug log for employee_email
-    
-        const appoinment = await preScheduleService(req.body)
-        if (appoinment) {
-            const io = getIO();
+    const preschedule_by = login_user? login_user: employee_email
+    const appoinment = await preScheduleService(req.body, req.ip)
+    if (appoinment) {
+        const audit_data = {
+            "ip": req.ip,
+            "action": 'preschedule',
+            "audit_record": {
+                "updated_by": {
+                    "email": preschedule_by,
 
-            io.emit("appointment_updated", {
-                type: "preschedule_created",
-                data: appoinment
-            });
-            sendResponse(res, 200, appoinment, "Appointment schedule successfully")
+                },
+                ...req.body,
+                "message": "Appointment schedule successfully"
+            },
         }
-        
-        else {
-            throw new ApiError(400, "Failed to schedule")
+
+        await auditService(audit_data)
+        const io = getIO();
+
+        io.emit("appointment_updated", {
+            type: "preschedule_created",
+            data: appoinment
+        });
+        sendResponse(res, 200, appoinment, "Appointment schedule successfully")
+    }
+
+    else {
+        const audit_data = {
+            "ip": req.ip,
+            "action": 'preschedule_failed',
+            "audit_record": {
+                "updated_by": {
+                    "email": preschedule_by,
+
+                },
+                ...req.body,
+                "message": "Failed to schedule"
+            },
         }
-    
+
+        await auditService(audit_data)
+        throw new ApiError(400, "Failed to schedule")
+    }
+
 
 })
 
 
 export const getGoogleCalendarStatus = async (
-    req,res
+    req, res
 ) => {
     try {
         const email = req.query.email
         console.log(email);
-        
+
 
         if (!email) {
             return res.status(400).json({
@@ -656,8 +703,8 @@ export const getGoogleCalendarStatus = async (
         const employee =
             await getGoogleCalendarStatusService(email);
 
-            // console.log(employee);
-            
+        // console.log(employee);
+
         if (!employee) {
             return res.status(404).json({
                 success: false,

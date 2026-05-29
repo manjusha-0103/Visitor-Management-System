@@ -115,7 +115,7 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 
     // VALIDATE PASSWORD
-    const user = await loginUserService(email, password);
+    const user = await loginUserService(email, password, req.ip);
 
     if (!user) {
         const audit_data = {
@@ -209,6 +209,7 @@ const loginUser = asyncHandler(async (req, res) => {
             },
             ...user,
             
+            
         },
     }
 
@@ -253,7 +254,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const changePassword = asyncHandler(async (req, res) => {
-    const user = await changePasswordService(req.body, req.user.id)
+    const user = await changePasswordService(req.body, req.user, req.ip)
     if(user){
         const audit_data = {
             "ip": req.ip,
@@ -285,6 +286,7 @@ const changePassword = asyncHandler(async (req, res) => {
                 "message" : "Bad requests"
             },
         }
+        await auditService(audit_data)
         throw new ApiError(400, "Bad request")
     }
 })
