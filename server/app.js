@@ -32,6 +32,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 app.set('trust proxy', true);
+app.use('/uploads', express.static('uploads'));
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });

@@ -1,42 +1,37 @@
-import fs from "fs"
-import path from "path";
 import multer from "multer";
+import fs from "fs";
+import path from "path";
 
-const uploadPath = 'uploads/visitor_photos';
+// Memory storage (CSV/Excel imports)
+export const memoryUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 50 * 1024 * 1024,
+    },
+});
 
-// create folder if not exists
+// Disk storage (photos)
+const uploadPath = "uploads/visitor_photos";
+
 if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
 }
 
-// storage config
-const storage = multer.diskStorage({
-
-    destination: function (req, file, cb) {
+const diskStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
         cb(null, uploadPath);
     },
-
-    filename: function (req, file, cb) {
-
+    filename: (req, file, cb) => {
         const uniqueName =
-            Date.now() + '-' + Math.round(Math.random() * 1E9);
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
 
-        cb(
-            null,
-            uniqueName + path.extname(file.originalname)
-        );
-    }
+        cb(null, uniqueName + path.extname(file.originalname));
+    },
 });
 
-// multer config
-const upload = multer({
-
-    storage,
-
+export const diskUpload = multer({
+    storage: diskStorage,
     limits: {
-        fileSize: 50 * 1024 * 1024 // 50MB
-    }
-
+        fileSize: 50 * 1024 * 1024,
+    },
 });
-
-module.exports = upload;

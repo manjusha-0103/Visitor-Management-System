@@ -9,38 +9,47 @@ import escapeHtml from "../utils/escapeHtml.js";
 import { auditService } from "./audit.service.js";
 
 const checkInService = async (
-  {
-    first_name,
-    last_name,
-    email,
-    phone,
-    position,
-    is_laptop,
-    company,
-    make,
-    model,
-    serial_no,
-    is_vehicle,
-    vehicle_no,
-    employee_id,
-    purpose,
-    loggedin_user
-  },
-  file,
-  
-) => {
-  // console.log("loggedin_user", loggedin_user);
-  const loggedInUserId = loggedin_user.id ?? null;
+    {
+        first_name,
+        last_name,
+        email,
+        phone,
+        position,
+        is_laptop,
+        company,
+        make,
+        model,
+        serial_no,
+        is_vehicle,
+        vehicle_no,
+        employee_id,
+        purpose,
+        loggedin_user
+    },
+    file,
 
-  const checkin_by = loggedin_user? loggedin_user :{first_name,
-    last_name,
-    email,
-    phone,}
-  
-  const [visitorexist] = await userExistbyemailService(email);
-  const date_time = new Date();
-  const photo_url = await uploadFile(file, "visitor_photos");
-  const [employee] = await sql`
+) => {
+    // console.log("loggedin_user", loggedin_user);
+    const loggedInUserId = loggedin_user.id ?? null;
+
+    const checkin_by = loggedin_user ? loggedin_user : {
+        first_name,
+        last_name,
+        email,
+        phone,
+    }
+
+
+    let photo_url = null;
+    const [visitorexist] = await userExistbyemailService(email);
+    const date_time = new Date();
+    // const photo_url = await uploadFile(file, "visitor_photos");
+    if (file) {
+
+        photo_url =
+            `${BACKEND_DEV_URL}${file.path.replace(/\\/g, '/')}`;
+    }
+    const [employee] = await sql`
         SELECT
             e.id AS employee_id,
             e.user_id,
@@ -57,37 +66,37 @@ const checkInService = async (
             ON u.id = e.user_id
         WHERE e.id = ${employee_id}
     `;
-  if (!employee) {
-    const audit_data = {
-        "ip": req.ip,
-        "action" : 'checkin',
-        "audit_record" :{
-            "updated_by" : checkin_by,
-            first_name,
-            last_name,
-            email,
-            phone,
-            position,
-            is_laptop,
-            company,
-            make,
-            model,
-            serial_no,
-            is_vehicle,
-            vehicle_no,
-            employee_id,
-            purpose,
-            "message" : "Employee not found"
-        },
+    if (!employee) {
+        const audit_data = {
+            "ip": req.ip,
+            "action": 'checkin',
+            "audit_record": {
+                "updated_by": checkin_by,
+                first_name,
+                last_name,
+                email,
+                phone,
+                position,
+                is_laptop,
+                company,
+                make,
+                model,
+                serial_no,
+                is_vehicle,
+                vehicle_no,
+                employee_id,
+                purpose,
+                "message": "Employee not found"
+            },
+        }
+        await auditService(audit_data)
+        throw new ApiError(404, "Employee not found");
     }
-    await auditService(audit_data)
-    throw new ApiError(404, "Employee not found");
-  }
-  
-  let appointment, visitor;
-  
-  if (visitorexist) {
-    visitor = await sql`
+
+    let appointment, visitor;
+
+    if (visitorexist) {
+        visitor = await sql`
         UPDATE "Visitors"
         SET "is_laptop" = ${is_laptop},
             "laptop_make" = ${make},
@@ -102,21 +111,21 @@ const checkInService = async (
         RETURNING *
     `;
 
-    
-    
-    
-    appointment = await sql`
+
+
+
+        appointment = await sql`
             INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img", "purpose", "schedule_by")
             values(${employee_id}, ${visitor[0].id}, ${date_time}, ${date_time}, ${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url}, ${purpose}, ${loggedInUserId} )
             RETURNING *
         `;
 
-    const backendUrl = getBackendUrl();
+        const backendUrl = getBackendUrl();
 
-    await sendEmail({
-      to: employee.email,
-      subject: "Appoiment Check-In",
-      html: `
+        await sendEmail({
+            to: employee.email,
+            subject: "Appoiment Check-In",
+            html: `
                 <p>Hi ${escapeHtml(employee.first_name)} ${escapeHtml(employee.last_name)}</p>
                 <p>${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)}) wants to meet</p>
                 <p>Name: ${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)})</p>
@@ -156,48 +165,48 @@ const checkInService = async (
             </div>
                 
             `,
-    });
+        });
 
-    return { visitorexist, visitor, appointment, employee };
-  } else {
-    const user = await sql`
+        return { visitorexist, visitor, appointment, employee };
+    } else {
+        const user = await sql`
             INSERT INTO "Users" ("email", "first_name", "last_name", "role", "phone")
             VALUES (${email}, ${first_name}, ${last_name}, ${"visitor"}, ${phone})
             RETURNING "id", "first_name", "last_name", "email", "role", "phone"
         `;
-    // user logging removed
-    console.log(user);
-    
-    const backendUrl = getBackendUrl();
-    // if (!user || !user[0]) {
-    //   throw new ApiError(500, "Failed to create user");
-    // }
+        // user logging removed
+        console.log(user);
 
-    // if (!visitor || !visitor[0]) {
-    //   throw new ApiError(500, "Failed to create visitor");
-    // }
+        const backendUrl = getBackendUrl();
+        // if (!user || !user[0]) {
+        //   throw new ApiError(500, "Failed to create user");
+        // }
 
-    // if (!appointment || !appointment[0]) {
-    //   throw new ApiError(500, "Failed to create appointment");
-    // }
+        // if (!visitor || !visitor[0]) {
+        //   throw new ApiError(500, "Failed to create visitor");
+        // }
 
-    visitor = await sql`
+        // if (!appointment || !appointment[0]) {
+        //   throw new ApiError(500, "Failed to create appointment");
+        // }
+
+        visitor = await sql`
             INSERT INTO "Visitors" ("is_laptop", "laptop_make", "laptop_model", "laptop_serial_no", "is_vehicle", "vehicle_no", "position", "company","user_id", "photo")
             VALUES (${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${position}, ${company}, ${user[0].id}, ${photo_url})
             RETURNING *
         `;
-    // console.log(visitor)
-    appointment = await sql`
+        // console.log(visitor)
+        appointment = await sql`
             INSERT INTO "Appointments" ("employee_id", "visitor_id", "check_in", "date_time","is_laptop", "make", "model", "serial_no", "is_vehicle", "vehicle_no", "visitor_company", "visitor_position", "visitor_img", "schedule_by")
             values(${employee.employee_id}, ${visitor[0].id}, ${date_time}, ${date_time} ,${is_laptop}, ${make}, ${model}, ${serial_no}, ${is_vehicle}, ${vehicle_no}, ${company}, ${position}, ${photo_url}, ${loggedInUserId})
             RETURNING *
         `;
-    
 
-    await sendEmail({
-      to: employee.email,
-      subject: "Appoiment Check-In",
-      html: `
+
+        await sendEmail({
+            to: employee.email,
+            subject: "Appoiment Check-In",
+            html: `
                 <p>Hi ${escapeHtml(employee.first_name)} ${escapeHtml(employee.last_name)}</p>
                 <p>${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)}) wants to meet</p>
                 <p>Name: ${escapeHtml(first_name)} ${escapeHtml(last_name)}(${escapeHtml(company)})</p>
@@ -236,21 +245,21 @@ const checkInService = async (
             </div>
                 
             `,
-    });
+        });
 
-    return { user, visitor, appointment, employee };
-  }
+        return { user, visitor, appointment, employee };
+    }
 };
 
 const getAllDepartmentsService = async () => {
-  const dept = await sql`
+    const dept = await sql`
         SELECT * FROM "Departments"
     `;
-  return dept;
+    return dept;
 };
 
 const getEmployeesService = async (dept_id) => {
-  const emp = await sql`
+    const emp = await sql`
         SELECT
             e.id,
             e.position,
@@ -271,11 +280,11 @@ const getEmployeesService = async (dept_id) => {
         ORDER BY u.first_name ASC
     `;
 
-  return emp;
+    return emp;
 };
 
 const visitorInfoService = async (appointment_id) => {
-  const visitor = await sql`
+    const visitor = await sql`
         SELECT 
             a.id AS appointment_id,
             a.created_at AS appointment_created_at,
@@ -311,12 +320,12 @@ const visitorInfoService = async (appointment_id) => {
         WHERE a.id = ${appointment_id}
     `;
 
-  return visitor;
+    return visitor;
 };
 
 export {
-  checkInService,
-  getAllDepartmentsService,
-  getEmployeesService,
-  visitorInfoService,
+    checkInService,
+    getAllDepartmentsService,
+    getEmployeesService,
+    visitorInfoService,
 };

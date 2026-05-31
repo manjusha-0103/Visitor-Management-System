@@ -10,13 +10,21 @@ import { checkIn,
     sendOtp   
  } from "../contollers/visitorController.js";
 import { checkInValidations } from "../validations/visitorValidations.js";
-import upload from "../utils/upload.js";
+// import upload from "../utils/upload.js";
+import {diskUpload} from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
+// router.post(
+//         "/check-in",
+//         upload.single("visitor_photo"), 
+//         validate, 
+//         checkInValidations,
+//         checkIn
+//     )
 router.post(
         "/check-in",
-        upload.single("visitor_photo"), 
+        diskUpload.single("visitor_photo"), 
         validate, 
         checkInValidations,
         checkIn
